@@ -35,6 +35,7 @@ Normative terms use RFC 2119 meanings: MUST and MUST NOT are requirements; SHOUL
 15. [Testing, evaluation, and developer experience](chapters/14-testing-evaluation-dx.md)
 16. [Roadmap and research](chapters/15-roadmap-research.md)
 17. [Architecture audit](chapters/16-architecture-audit.md)
+18. [H1 synthetic physical-asset twin](chapters/17-synthetic-physical-asset-twin.md)
 
 ## Normative supporting artifacts
 
@@ -58,4 +59,3 @@ Normative terms use RFC 2119 meanings: MUST and MUST NOT are requirements; SHOUL
 ## Change control
 
 Changes to H1 or H2 behavior require an ADR, compatibility analysis, updated traceability, and successful validation. A later date does not automatically win. The accepted ADR and semantic version determine precedence.
-

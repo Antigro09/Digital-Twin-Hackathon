@@ -68,4 +68,34 @@ describe("DemoDigitalTwinApi safety invariants", () => {
     const result = await api.compensate(compensation.compensationId, "compensation-key-01");
     expect(result.status).toBe("compensated");
   });
+
+  it("keeps synthetic assets tenant-isolated and makes control replay-safe", async () => {
+    const [asset] = await api.getAssets();
+    expect(asset.assetId).toBe("pump-aster-01");
+    expect(asset.canControl).toBe(true);
+    const twin = await api.getAssetTwin(asset.assetId);
+    expect(twin.components.some((component) => component.kind === "bearing")).toBe(true);
+    const telemetry = await api.getAssetTelemetry(asset.assetId, 20);
+    expect(telemetry.points).toHaveLength(20);
+    expect(telemetry.points.at(-1)?.motorCurrentA).toBeGreaterThan(0);
+    expect(telemetry.signals.pressureBar.warningHigh).toBe(8);
+    expect(telemetry.signals.flowM3H.valueKind).toBe("derived");
+    expect((await api.getAssetTelemetry(asset.assetId, 1)).points).toHaveLength(1);
+
+    const preview = await api.previewAssetCommand(asset.assetId, { type: "set_speed_pct", value: 90 });
+    expect(preview.expectedAssetVersion).toBe(twin.control.state.version);
+    const first = await api.executeAssetCommand(asset.assetId, preview.previewId, preview.payloadHash, "asset-control-key-001");
+    const replay = await api.executeAssetCommand(asset.assetId, preview.previewId, preview.payloadHash, "asset-control-key-001");
+    expect(first.assetVersionAfter).toBe(first.assetVersionBefore + 1);
+    expect(replay.receiptId).toBe(first.receiptId);
+    expect(replay.replayed).toBe(true);
+
+    await api.selectMembership("mem_beacon_observer");
+    const [beaconAsset] = await api.getAssets();
+    expect(beaconAsset.assetId).toBe("pump-beacon-07");
+    expect(beaconAsset.canControl).toBe(false);
+    const beaconTwin = await api.getAssetTwin(beaconAsset.assetId);
+    expect(JSON.stringify(beaconTwin)).not.toContain("pump-aster-01");
+    await expect(api.previewAssetCommand(beaconAsset.assetId, { type: "set_speed_pct", value: 74 })).rejects.toMatchObject({ status: 403 });
+  });
 });

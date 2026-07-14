@@ -68,6 +68,7 @@
 <li><a href="chapters/14-testing-evaluation-dx.md">Testing, evaluation, and developer experience</a></li>
 <li><a href="chapters/15-roadmap-research.md">Roadmap and research</a></li>
 <li><a href="chapters/16-architecture-audit.md">Architecture audit</a></li>
+<li><a href="chapters/17-synthetic-physical-asset-twin.md">H1 synthetic physical-asset twin</a></li>
 </ol>
 <h4 id="normative-supporting-artifacts">Normative supporting artifacts<a class="headerlink" href="#normative-supporting-artifacts" title="Permanent link">&para;</a></h4>
 <ul>
@@ -556,7 +557,7 @@
 <p>Business impact such as avoided delay or reduced coordination cost is reported as an attributed case study with its assumptions. The platform MUST NOT present simulated savings as realized value.</p>
 <h4 id="8-product-tracks">8. Product tracks<a class="headerlink" href="#8-product-tracks" title="Permanent link">&para;</a></h4>
 <h5 id="81-production-shaped-demonstrator">8.1 Production-shaped demonstrator<a class="headerlink" href="#81-production-shaped-demonstrator" title="Permanent link">&para;</a></h5>
-<p>H1 proves the complete thin slice described in <code>CH-02</code>: synthetic GitHub and Jira observations, a permission-aware graph, cited launch-risk analysis, seeded schedule simulation, an exact Jira remediation preview, two-person approval, idempotent execution, and compensation. It favors depth and verifiability over connector or domain breadth.</p>
+<p>H1 proves the complete thin slice described in <code>CH-02</code>: synthetic GitHub and Jira observations, a permission-aware graph, cited launch-risk analysis, seeded schedule simulation, an exact Jira remediation preview, two-person approval, idempotent execution, and compensation. <code>CH-17</code> adds a separately bounded synthetic physical-asset demonstration with advancing telemetry, spatial inspection, deterministic analytics, lifecycle history, and simulator-only control. Neither track claims real customer integration or predictive validity. H1 favors depth and verifiability over connector or domain breadth.</p>
 <h5 id="82-enterprise-reference-architecture">8.2 Enterprise reference architecture<a class="headerlink" href="#82-enterprise-reference-architecture" title="Permanent link">&para;</a></h5>
 <p>H2 through H4 define an extensible architecture for additional tenants, connectors, domains, deployment profiles, and operational controls. A capability is labeled:</p>
 <ul>
@@ -633,6 +634,7 @@
 <h4 id="1-purpose">1. Purpose<a class="headerlink" href="#1-purpose" title="Permanent link">&para;</a></h4>
 <p>This chapter is the executable product contract for the H1 hackathon slice. It freezes the demonstration dataset, actor rights, question, scenario, external action, failure cases, and measurements. A visually convincing path that bypasses ingestion, authorization, provenance, simulation, approval, idempotency, audit, or rollback does not satisfy this contract.</p>
 <p>Under <code>REQ-VER-002</code>, the reference workload MUST run from checked-in, deterministic synthetic fixtures without access to a real employee, customer, repository, or Jira project. Under <code>REQ-TEN-001</code> through <code>REQ-TEN-004</code>, the same application build MUST serve both synthetic tenants; tenant isolation MUST NOT be implemented by tenant-specific application code. All dates, identities, text, code metadata, issue records, source permissions, and expected answers MUST be synthetic and marked as such in the interface.</p>
+<p><code>CH-17</code> defines an additional H1 synthetic physical-asset path in the same application. It does not change this chapter&rsquo;s frozen organization fixture, answer oracle, schedule simulation, or Jira action. Its telemetry originates only from an in-process deterministic simulator, and its control commands change only simulator state. Consequently, synthetic GitHub and Jira remain the only H1 external-source ingestion modes and the allowlisted Jira update remains the only external mutation.</p>
 <h4 id="2-frozen-workload-identity">2. Frozen workload identity<a class="headerlink" href="#2-frozen-workload-identity" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
@@ -5839,13 +5841,14 @@ Q(q) = (1 - g) * x[j] + g * x[min(j + 1, n - 1)]
 <p>Status: <strong>committed</strong> | Owners: product-design, frontend-engineering, accessibility-engineering | Last reviewed: 2026-07-13</p>
 <h3 id="user-experience-and-visualization-specification">User Experience and Visualization Specification<a class="headerlink" href="#user-experience-and-visualization-specification" title="Permanent link">&para;</a></h3>
 <h4 id="1-experience-goals">1. Experience goals<a class="headerlink" href="#1-experience-goals" title="Permanent link">&para;</a></h4>
-<p>The interface helps an authorized user move through five distinct cognitive tasks without collapsing them into a conversational black box:</p>
+<p>The interface helps an authorized user move through six distinct cognitive tasks without collapsing them into a conversational black box:</p>
 <ol>
 <li>Establish what data is available, current, and permitted.</li>
 <li>Ask a question and inspect evidence for each material claim.</li>
 <li>Explore relationships and time without implying completeness or causality.</li>
 <li>define and compare a reproducible scenario.</li>
 <li>Review, approve, execute, audit, and if necessary compensate an exact external action.</li>
+<li>Inspect a synthetic physical asset spatially, correlate its telemetry and lifecycle context, and safely exercise simulator-only controls.</li>
 </ol>
 <p><code>REQ-UX-001</code>: H1 MUST include cockpit, search, graph, evidence, timeline, scenario comparison, agent-run, approval, connector-health, and audit surfaces.</p>
 <p><code>REQ-UX-002</code>: Every screen MUST define loading, empty, error, denied, stale, partial, offline, destructive, and recovery states where applicable.</p>
@@ -6064,6 +6067,12 @@ Q(q) = (1 - g) * x[j] + g * x[min(j + 1, n - 1)]
 <td>Provisional H2</td>
 <td>Authorized domain users</td>
 <td>Team and reporting structures at approved granularity, effective dates, vacancies, and source quality. Individual activity metrics are excluded.</td>
+</tr>
+<tr>
+<td>Asset twin <code>/:tenant/assets/:assetId</code></td>
+<td>Committed H1</td>
+<td>Authorized operators</td>
+<td>Synthetic disclosure, live/pause state, interactive rotatable perspective SVG, synchronized component list, telemetry with units and age, deterministic anomaly/forecast model card, lifecycle history, exact simulator-command preview, execution receipt, and audit evidence. The route remains usable if the visual cannot render.</td>
 </tr>
 </tbody>
 </table>
@@ -6555,6 +6564,12 @@ Q(q) = (1 - g) * x[j] + g * x[min(j + 1, n - 1)]
 <td>Status table and small age bars; explicit timestamps and thresholds; no green-only health signal.</td>
 </tr>
 <tr>
+<td>Procedural 3D-style physical-asset view</td>
+<td>Committed H1 synthetic path</td>
+<td>Where on the demonstration asset is the selected condition measured?</td>
+<td>Rotatable perspective SVG with component hotspots tied to stable IDs and telemetry; rotate/reset buttons, pointer drag, arrow keys, keyboard component selection, reduced motion, rendering fallback, and an equivalent ordered component/status/measurement view. It is not a CAD model, contains no exclusive data, and is always labeled synthetic.</td>
+</tr>
+<tr>
 <td>Organization graph</td>
 <td>Provisional H2</td>
 <td>How are approved teams and reporting structures related at a selected time?</td>
@@ -6593,8 +6608,8 @@ Q(q) = (1 - g) * x[j] + g * x[min(j + 1, n - 1)]
 <tr>
 <td>3D organizational view</td>
 <td>Rejected H1-H3; Research H4</td>
-<td>No H1-H3 decision requires it</td>
-<td>Rejected for current delivery because of occlusion, navigation cost, performance, and accessibility burden. H4 research requires a validated decision task that cannot be served by 2D plus table.</td>
+<td>No H1-H3 organizational decision requires it</td>
+<td>Rejected for organizational delivery because of occlusion, navigation cost, performance, and accessibility burden. The separate H1 physical-asset scene does not change this decision. H4 organizational research requires a validated decision task that cannot be served by 2D plus table.</td>
 </tr>
 </tbody>
 </table>
@@ -6835,6 +6850,18 @@ Q(q) = (1 - g) * x[j] + g * x[min(j + 1, n - 1)]
 <td><code>Problem</code></td>
 <td>RFC 9457 problem details plus stable <code>code</code>, <code>request_id</code>, safe <code>errors[]</code>, and optional <code>retry_after</code>.</td>
 </tr>
+<tr>
+<td><code>AssetTwinSnapshot</code></td>
+<td>Tenant-authorized synthetic asset, spatial components, current/history telemetry, deterministic analytics and model card, lifecycle records, simulator control state, and data watermark.</td>
+</tr>
+<tr>
+<td><code>AssetControlPreview</code></td>
+<td>Short-lived exact simulated command, expected version, before/after state, safety checks, payload hash, ETag, expiry, and explicit no-external-write marker.</td>
+</tr>
+<tr>
+<td><code>AssetControlReceipt</code></td>
+<td>Idempotent simulator transition result, before/after versions, payload hash, audit evidence, and explicit simulation/no-external-write markers. Replay returns this same receipt.</td>
+</tr>
 </tbody>
 </table>
 <p>Canonical date-times are RFC 3339 UTC with millisecond precision; calendar dates are ISO <code>YYYY-MM-DD</code>. Monetary amounts use integer minor units plus ISO currency. Arbitrary precision identifiers and seeds are strings. JSON numbers MUST be finite; <code>NaN</code> and infinities are invalid.</p>
@@ -6942,6 +6969,26 @@ Q(q) = (1 - g) * x[j] + g * x[min(j + 1, n - 1)]
 <td>Produces guarded rollback preview. Execution follows a new approval/action flow.</td>
 </tr>
 <tr>
+<td><code>GET /v1/assets</code></td>
+<td>Lists tenant-authorized synthetic asset summaries; it does not discover or connect devices.</td>
+</tr>
+<tr>
+<td><code>GET /v1/assets/{assetId}/twin</code></td>
+<td>Returns the physical scene/component metadata, current and historical synthetic telemetry, deterministic analytics/model card, lifecycle, simulator control state, and watermark.</td>
+</tr>
+<tr>
+<td><code>GET /v1/assets/{assetId}/telemetry</code></td>
+<td>Advances exactly one deterministic five-second frame and returns the most recent 1-120 frames selected by <code>limit</code>. Polling this resource is not an industrial streaming or real-time guarantee.</td>
+</tr>
+<tr>
+<td><code>POST /v1/assets/{assetId}/control-previews</code></td>
+<td>Validates type, value, reason, expected version, transition, range, tenant policy, and idempotency; returns a short-lived exact simulator-only preview and ETag.</td>
+</tr>
+<tr>
+<td><code>POST /v1/assets/{assetId}/control-previews/{previewId}/execute</code></td>
+<td>Reauthorizes and executes the unchanged preview once against simulator state using <code>Idempotency-Key</code> and <code>If-Match</code>; performs no device or network write.</td>
+</tr>
+<tr>
 <td><code>GET /v1/audit-events</code></td>
 <td>Authorized keyset-paginated audit index with filters; detail access is separately controlled.</td>
 </tr>
@@ -6960,6 +7007,8 @@ Q(q) = (1 - g) * x[j] + g * x[min(j + 1, n - 1)]
 <p>Every public <code>POST</code>, <code>PUT</code>, <code>PATCH</code>, and state-changing <code>DELETE</code> declares whether <code>Idempotency-Key</code> is required. Ordinary command keys are 16 to 128 printable ASCII characters, scoped to tenant, actor, operation, and canonical request hash, and retained for 24 hours or the command retention period, whichever is longer. An approved external action instead uses the action-level key from CH-06, scoped to tenant, target, expected source version, action, and approved payload digest; actor identity is audited but is not part of a namespace that could let two actors execute the same grant twice.</p>
 <p>The first request atomically stores key, request hash, state, and eventual response reference. Same key plus same hash returns the original status/result. Same key plus a different hash returns <code>409 idempotency_key_reused</code>. In-progress replay returns the same run. A server timeout does not authorize a client to generate a new key for an external write; the client queries the original command.</p>
 <p>Mutable administrative resources use strong ETags. <code>PUT</code>, <code>PATCH</code>, confirmation, and policy-sensitive actions require <code>If-Match</code>; absent precondition returns <code>428</code>, stale version returns <code>412</code>. A scenario draft may transition once to a confirmed state, but its operation list and digest do not change. Snapshot content, confirmed scenario content, an approval&rsquo;s bound payload/digest, and action receipts are immutable; approval decisions and lifecycle transitions are append-only child records that update a derived state projection.</p>
+<p>Physical-asset control previews follow the same strong-precondition and replay rules but are not external actions and do not require the Jira action&rsquo;s two-person approval policy. A preview binds the tenant, actor, synthetic asset ID, expected simulator version, command, reason, safety-policy version, expiry, and payload hash. Execution rejects an altered or expired preview, stale version, unsupported transition, out-of-range value, policy failure, or reused key with a different hash. Every response carries <code>execution_mode: simulation</code>; every receipt carries <code>simulation: true</code> and <code>external_write: false</code>.</p>
+<p>Asset reads require <code>asset.read</code>, preview requires <code>asset.control.preview</code>, and execution requires <code>asset.control.execute</code>. These application capabilities are evaluated against the server-derived actor and tenant context on every call; a general login or graph-read grant is insufficient.</p>
 <h5 id="44-pagination-filtering-and-sorting">4.4 Pagination, filtering, and sorting<a class="headerlink" href="#44-pagination-filtering-and-sorting" title="Permanent link">&para;</a></h5>
 <p>Collections use keyset pagination with <code>page_size</code> from 1 to 100 and an opaque authenticated <code>page_cursor</code>. The cursor binds tenant, actor ID, authorization fingerprint/policy version, endpoint, normalized filters, sort, snapshot watermark, last sort key, and expiry. It is not a base64-encoded SQL fragment. Invalid, altered, expired, or differently scoped cursors return <code>400 invalid_cursor</code>.</p>
 <p>Responses contain <code>items</code>, <code>next_cursor</code>, <code>has_more</code>, and <code>data_watermark</code>. Sort fields and filter operators are endpoint allowlists. Default order is stable and ends in immutable ID. Offset pagination is not public. A policy change can invalidate a cursor and return <code>409 authorization_changed</code> rather than risk mixed visibility.</p>
@@ -7261,6 +7310,10 @@ X-EDT-Signature: v1=&lt;hex HMAC-SHA256(secret, timestamp + &quot;.&quot; + raw_
 <tr>
 <td>AC-ACT-002</td>
 <td>Ambiguous and concurrent execution requests remain queryable and create exactly one Jira effect and one receipt.</td>
+</tr>
+<tr>
+<td>AC-PHY-001</td>
+<td>Physical-twin contract tests reproduce seeded telemetry and analytics, conceal cross-tenant asset IDs, reject unsafe/stale/mutated/replayed-conflicting previews, produce one simulator transition for a valid command, and prove zero device egress.</td>
 </tr>
 <tr>
 <td>AC-SUP-001</td>
@@ -8468,9 +8521,9 @@ X-EDT-Signature: v1=&lt;hex HMAC-SHA256(secret, timestamp + &quot;.&quot; + raw_
 <tr>
 <td>H1 - Hackathon reference slice</td>
 <td>Committed</td>
-<td>Two synthetic tenants; GitHub metadata read-only; Jira read and one dual-approved remediation update; cited launch-risk answer; seeded launch simulation; rollback</td>
-<td>Up to 100 identities, 100,000 graph nodes and 1,000,000 edges per tenant; ten concurrent users; 15-minute freshness; p95 non-AI read under 2 seconds, simulation under 10 seconds, cited answer under 20 seconds</td>
-<td>Complete the frozen <code>CH-02</code> workload and all H1 security, quality, accessibility, and audit gates</td>
+<td>Two synthetic tenants; GitHub metadata read-only; Jira read and one dual-approved remediation update; cited launch-risk answer; seeded launch simulation; rollback; one synthetic physical-asset simulator with 3D-style spatial inspection, deterministic analytics, lifecycle history, and no device egress</td>
+<td>Up to 100 identities, 100,000 graph nodes and 1,000,000 edges per tenant; ten concurrent users; 15-minute source freshness; bounded synthetic telemetry polling; p95 non-AI read under 2 seconds, simulation under 10 seconds, cited answer under 20 seconds</td>
+<td>Complete <code>CH-02</code> and <code>CH-17</code> workloads and all H1 security, quality, accessibility, and audit gates</td>
 </tr>
 <tr>
 <td>H2 - Design-partner pilot</td>
@@ -8574,14 +8627,20 @@ X-EDT-Signature: v1=&lt;hex HMAC-SHA256(secret, timestamp + &quot;.&quot; + raw_
 </tr>
 <tr>
 <td style="text-align: right;">9</td>
-<td>Integrated product journey</td>
-<td>4-8</td>
-<td>Responsive and WCAG 2.2 AA journey across freshness, Ask, evidence, graph, scenario, comparison, approval, receipt, audit, and rollback</td>
+<td>Synthetic physical-asset path</td>
+<td>1-3</td>
+<td>Deterministic fixture telemetry; component-linked procedural perspective and structured views; reproducible anomaly/trend result; lifecycle history; simulator-only exact command preview, idempotent receipt, audit verification, and zero egress</td>
 </tr>
 <tr>
 <td style="text-align: right;">10</td>
+<td>Integrated product journey</td>
+<td>4-9</td>
+<td>Responsive and WCAG 2.2 AA journey across both the organizational and synthetic asset paths</td>
+</tr>
+<tr>
+<td style="text-align: right;">11</td>
 <td>Release evidence and independent review</td>
-<td>1-9</td>
+<td>1-10</td>
 <td>Clean-room run; performance/security/accessibility/evaluation reports; failure demonstrations; SBOM and provenance; no Critical/High findings</td>
 </tr>
 </tbody>
@@ -8590,6 +8649,7 @@ X-EDT-Signature: v1=&lt;hex HMAC-SHA256(secret, timestamp + &quot;.&quot; + raw_
 <p>H1 exits only when:</p>
 <ul>
 <li>The exact <code>edt-h1-github-jira-launch-risk</code> workload passes from an empty local environment.</li>
+<li>The <code>CH-17</code> physical-asset path reproduces telemetry and analytics, provides an equivalent non-3D view, executes only allowlisted simulator commands, verifies idempotency/audit evidence, and demonstrates zero device egress.</li>
 <li>All H1 requirements, controls, risks, contracts, and acceptance criteria are traceable to passing evidence.</li>
 <li>There are zero cross-tenant and unauthorized disclosures in automated, adversarial, and manual tests.</li>
 <li>Unsupported answers abstain, repeated simulations reproduce, invalid approvals write nothing, duplicate execution writes once, and rollback is verified.</li>
@@ -8834,6 +8894,7 @@ X-EDT-Signature: v1=&lt;hex HMAC-SHA256(secret, timestamp + &quot;.&quot; + raw_
 <h4 id="1-audit-opinion">1. Audit opinion<a class="headerlink" href="#1-audit-opinion" title="Permanent link">&para;</a></h4>
 <p>The <code>1.0.0-rc.1</code> architecture is suitable as the normative implementation blueprint for the bounded H1 reference workload and as a gated reference architecture for H2. It does not become final <code>1.0.0</code> until every convergence criterion in this chapter is evidenced. H3 and H4 remain Provisional where telemetry, benchmarks, customer constraints, or deployment evidence are required. H5 remains Research.</p>
 <p>No Critical or High architecture finding remains open in the design. Three Medium risks are explicitly accepted with owners, compensating controls, expiry dates, and revisit triggers. Other registered risks are mitigated but remain subject to implementation evidence. This opinion does not assert that the software has been built, that a control has operated effectively, that a compliance certification exists, or that synthetic simulation has external predictive validity.</p>
+<p>The <code>CH-17</code> synthetic physical-asset amendment was added after the review passes listed in section 2.3. Its scope is deliberately limited to an in-process simulator and reuses the established tenant, API, exact-payload, idempotency, audit, deterministic-model, and accessibility boundaries. This amendment does not claim a completed architecture review or release gate: <code>TST-PHY-001</code>, <code>AC-PHY-001</code>, contract validation, and independent review remain required before publication evidence can describe the amended H1 scope as passed.</p>
 <p>The architecture reached this opinion by narrowing unbounded claims, assigning authority and data ownership, converting ambiguous autonomy into bounded capability contracts, making projection and action failure semantics explicit, and defining a finite release gate. An independent build-readiness review and generated validation evidence remain mandatory release evidence under <code>AC-REV-001</code> and <code>AC-REV-002</code>; this self-audit does not substitute for them.</p>
 <h4 id="2-audit-scope-and-method">2. Audit scope and method<a class="headerlink" href="#2-audit-scope-and-method" title="Permanent link">&para;</a></h4>
 <h5 id="21-scope">2.1 Scope<a class="headerlink" href="#21-scope" title="Permanent link">&para;</a></h5>
@@ -9206,7 +9267,7 @@ X-EDT-Signature: v1=&lt;hex HMAC-SHA256(secret, timestamp + &quot;.&quot; + raw_
 <tr>
 <td><code>RSK-017</code></td>
 <td>Advanced visualization may exclude users or distract from evidence.</td>
-<td>Retain 3D as Rejected unless decision-value and accessibility gates pass; require 2D and structured alternatives for every visualization.</td>
+<td>Keep 3D organizational visualization Rejected; permit the bounded synthetic physical-asset scene only with a component-location decision task, keyboard/reduced-motion support, rendering fallback, and an equivalent structured view.</td>
 </tr>
 <tr>
 <td><code>RSK-018</code></td>
@@ -9218,8 +9279,9 @@ X-EDT-Signature: v1=&lt;hex HMAC-SHA256(secret, timestamp + &quot;.&quot; + raw_
 <h4 id="6-known-limitations-and-architecture-boundaries">6. Known limitations and architecture boundaries<a class="headerlink" href="#6-known-limitations-and-architecture-boundaries" title="Permanent link">&para;</a></h4>
 <p>These limitations are intentional and do not represent hidden implementation choices:</p>
 <ul>
-<li>H1 ingests metadata from synthetic GitHub and Jira only. It does not ingest source code, email, private chat, meeting audio, customer data, finance records, or individual activity telemetry.</li>
-<li>H1&rsquo;s Jira field update is the only external mutation. Every additional action class requires a separate schema, threat model, approver policy, idempotency definition, source concurrency rule, compensation behavior, evaluation, and opt-in.</li>
+<li>H1 ingests external-source metadata from synthetic GitHub and Jira only. The <code>CH-17</code> asset path generates synthetic telemetry inside the application; it has no IoT connector, historian, industrial protocol, physical-device read, or customer data. H1 does not ingest source code, email, private chat, meeting audio, finance records, or individual activity telemetry.</li>
+<li>H1&rsquo;s Jira field update is the only external mutation. Asset control modifies in-process simulator state and receipts state <code>external_write: false</code>. Every additional external action class requires a separate schema, threat model, approver policy, idempotency definition, source concurrency rule, compensation behavior, evaluation, and opt-in.</li>
+<li>H1 physical-asset anomalies and forecasts are deterministic demonstrations over synthetic history. They are not trained or validated predictive-maintenance models and cannot support maintenance, safety, or equipment-operation decisions.</li>
 <li>PERT/Monte Carlo output is conditional on fixture distributions and dependency structure. It is not a causal estimate and cannot validate a real launch forecast.</li>
 <li>Shared tenancy is the reference deployment. Dedicated, customer-managed, regional, air-gapped, and edge profiles remain separately gated.</li>
 <li>The online OpenAI runtime is an explicit dependency for H1. Air-gapped inference is unavailable until a local model profile passes the same workload-specific quality and safety gates.</li>
@@ -9259,6 +9321,123 @@ X-EDT-Signature: v1=&lt;hex HMAC-SHA256(secret, timestamp + &quot;.&quot; + raw_
 <h4 id="9-final-self-critique">9. Final self-critique<a class="headerlink" href="#9-final-self-critique" title="Permanent link">&para;</a></h4>
 <p>The strongest aspect of this architecture is that it turns an ambitious organizational-intelligence concept into a complete, testable chain from evidence to governed action while preserving a larger extensibility path. The most consequential remaining weakness is not an unmade architecture choice; it is the amount of disciplined implementation and operating evidence required to prove that tenant isolation, permission fidelity, model safety, deletion, recovery, and action idempotency work together under failure.</p>
 <p>The architecture deliberately accepts slower breadth expansion, a multi-runtime learning cost, and limited H1 external validity. Those tradeoffs are preferable to unsupported hyperscale claims, premature infrastructure, hidden workforce inference, or unsafe autonomy. If implementation evidence contradicts a design assumption, the appropriate response is to reopen the decision and narrow or redesign the capability, not to weaken the gate.</p>
+<h2 id="ch-17-h1-synthetic-physical-asset-twin">CH-17 - H1 Synthetic Physical-Asset Twin<a class="headerlink" href="#ch-17-h1-synthetic-physical-asset-twin" title="Permanent link">&para;</a></h2>
+<p>Status: <strong>committed</strong> | Owners: product-engineering, simulation-team, security-engineering | Last reviewed: 2026-07-14</p>
+<h3 id="h1-synthetic-physical-asset-twin">H1 Synthetic Physical-Asset Twin<a class="headerlink" href="#h1-synthetic-physical-asset-twin" title="Permanent link">&para;</a></h3>
+<h4 id="1-purpose-and-truth-boundary">1. Purpose and truth boundary<a class="headerlink" href="#1-purpose-and-truth-boundary" title="Permanent link">&para;</a></h4>
+<p>This chapter defines a second bounded H1 demonstration path for a synthetic industrial asset. It complements, but does not replace or alter, the frozen GitHub/Jira launch-risk workload in <code>CH-02</code>. The path demonstrates live-looking telemetry, spatial inspection, deterministic analytics, lifecycle history, and guarded control against an in-process simulator.</p>
+<p>Every asset, sensor sample, lifecycle event, analytic result, and command effect is synthetic. H1 has no IoT gateway, message broker, OPC UA, Modbus, MQTT, SCADA, PLC, historian, CMMS, or physical-device connection. It reads no customer telemetry and sends no command outside the application. The interface and API MUST label this boundary, and control receipts MUST state <code>simulation: true</code> and <code>external_write: false</code>.</p>
+<p>The Jira update defined in <code>CH-02</code> remains the only H1 external mutation. A simulated asset command changes only tenant-scoped demonstration state and is not evidence that the platform is safe or suitable for real operational-technology control.</p>
+<table>
+<thead>
+<tr>
+<th>Requirement</th>
+<th>H1 commitment</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>REQ-PHY-001</code></td>
+<td>Produce deterministic, timestamped synthetic temperature, pressure, vibration, flow, and operating-state samples with sequence and quality metadata.</td>
+</tr>
+<tr>
+<td><code>REQ-PHY-002</code></td>
+<td>Provide an interactive procedural 3D-style physical-asset view linked to components and telemetry, with a complete keyboard-operable structured alternative.</td>
+</tr>
+<tr>
+<td><code>REQ-PHY-003</code></td>
+<td>Detect and forecast synthetic degradation with versioned deterministic algorithms and explicit limitations, without claiming validated machine learning or real failure prediction.</td>
+</tr>
+<tr>
+<td><code>REQ-PHY-004</code></td>
+<td>Present design, manufacture, commissioning, service, maintenance, and planned decommissioning history as versioned synthetic lifecycle records.</td>
+</tr>
+<tr>
+<td><code>REQ-PHY-005</code></td>
+<td>Preview and execute only allowlisted simulated commands with tenant authorization, expected-version checks, limits, idempotency, audit evidence, and fail-closed safety checks.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="2-reference-asset-and-snapshot">2. Reference asset and snapshot<a class="headerlink" href="#2-reference-asset-and-snapshot" title="Permanent link">&para;</a></h4>
+<p>H1 contains one synthetic centrifugal pump and its component hierarchy. Stable tenant-qualified IDs identify the motor, coupling, drive-end bearing, pump casing, inlet, and outlet. The asset snapshot contains:</p>
+<ul>
+<li>identity, type, location, lifecycle stage, operating state, health summary, and version;</li>
+<li>a component list with spatial hotspot identifiers and associated sensor tags;</li>
+<li>current telemetry and a bounded recent history;</li>
+<li>deterministic anomalies, forecasts, model card, and per-signal contributions;</li>
+<li>lifecycle stages, dated events, maintenance records, and provenance labels;</li>
+<li>current simulator control state and an allowlist of available commands; and</li>
+<li>a data watermark showing the deterministic simulator sequence and observation time.</li>
+</ul>
+<p>The H1 asset record is a demonstration projection over checked-in fixture parameters. It does not promote the full <code>edt.pack.physical</code> enterprise domain pack or real IoT connector certification from H4 into H1.</p>
+<h4 id="3-synthetic-near-real-time-telemetry">3. Synthetic near-real-time telemetry<a class="headerlink" href="#3-synthetic-near-real-time-telemetry" title="Permanent link">&para;</a></h4>
+<p>The server runs a deterministic five-second simulator clock initialized from the fixture. A read materializes only frames due on that clock, so repeated or concurrent readers inside one interval observe the same current frame and cannot make simulated time run faster. Long inactive gaps are bounded to twelve catch-up frames and then rebase to the current server clock rather than replaying an unbounded backlog. The frozen-clock test profile advances exactly one frame per request for reproducible assertions. The <code>limit</code> query selects a rolling window of 1 to 120 recent frames; it does not itself select an advancement count. A sample has an asset ID, monotonically increasing sequence, sample timestamp, quality status, and typed values with units. Values vary within configured operating envelopes; a deterministic degradation term produces a reproducible bearing-vibration trend. The same fixture version, initial state, command history, and sequence MUST produce the same canonical samples.</p>
+<p>The web client polls the telemetry resource while the twin screen is active, pauses when the document is hidden, aborts outstanding requests on navigation, and stops after repeated errors until the user explicitly retries. The screen shows last update, connection state, data age, units, thresholds, and whether a value is observed from the simulator or derived. A user can pause live updates without losing the last safe snapshot.</p>
+<p>This polling loop is a bounded H1 substitute for a telemetry stream. It is not a claim of continuous ingestion, device clock synchronization, exactly-once delivery, industrial event rates, or production freshness. A real connector must separately define authentication, device identity, ordering, clock skew, buffering, backpressure, quality codes, calibration, retention, reconciliation, network segmentation, and safety behavior.</p>
+<h4 id="4-interactive-procedural-3d-style-inspection">4. Interactive procedural 3D-style inspection<a class="headerlink" href="#4-interactive-procedural-3d-style-inspection" title="Permanent link">&para;</a></h4>
+<p>The asset screen renders a purpose-built perspective SVG representation of physical equipment rather than a photorealistic CAD model. Users can rotate and reset the view, select a component hotspot, and correlate the selected component with current measurements, anomaly contributions, forecast, and lifecycle/maintenance context. Selection is state, not decoration: the component ID is shared by the procedural scene and its structured inspector.</p>
+<p>The procedural scene MUST NOT be the only way to locate or understand an issue. The same components, statuses, measurements, units, alerts, and actions are available as keyboard-operable controls and a table/list in logical order. Focus is visible, selection is announced, color is not the sole status encoding, pointer gestures have button equivalents, and reduced-motion mode disables continuous nonessential animation. An SVG or rendering failure leaves the structured view fully usable.</p>
+<p>This is distinct from the rejected H1-H3 3D organizational view in <code>CH-11</code>: the physical scene supports a concrete spatial maintenance question and has no exclusive information.</p>
+<h4 id="5-deterministic-anomaly-and-forecast-demonstration">5. Deterministic anomaly and forecast demonstration<a class="headerlink" href="#5-deterministic-anomaly-and-forecast-demonstration" title="Permanent link">&para;</a></h4>
+<p>H1 analytics are transparent numerical demonstrations, not an LLM decision and not a validated predictive-maintenance model. The service computes multivariate exponentially weighted moving statistics and normalized residual/z-score contributions over synthetic history, then uses a deterministic least-squares trend to estimate a threshold-crossing horizon or remaining-useful-life range when the data supports it.</p>
+<p>Every result identifies input watermark, algorithm and model version, generated time, affected component, signal contributions, severity, confidence expression, forecast horizon or failure mode, recommended maintenance, and missing-data/validity caveat. Identical inputs and model version MUST produce identical results. Insufficient history, non-finite values, or an ill-conditioned trend produces <code>no_failure_mode_indicated</code> with null horizon fields and an explicit limitation, not an invented forecast.</p>
+<p>The interface MUST use language such as <code>synthetic anomaly</code> and <code>conditional demonstration forecast</code>. It MUST NOT claim that a failure will occur, that the algorithm learned from real equipment, that a probability is calibrated on field outcomes, or that a recommended action is an engineering safety determination. Production use requires representative historical data, leakage review, backtesting, calibration, false-positive/negative analysis, drift monitoring, human-factors review, domain-engineer approval, and prospective validation.</p>
+<h4 id="6-lifecycle-history">6. Lifecycle history<a class="headerlink" href="#6-lifecycle-history" title="Permanent link">&para;</a></h4>
+<p>The twin presents a coherent synthetic history from design and manufacture through commissioning, service, maintenance, and planned decommissioning. Each lifecycle event has a stable ID, stage, status, effective date/time, title, description, and optional artifact reference. Completed history is append-only in H1; corrections create a superseding event rather than silently rewriting prior history.</p>
+<p>Lifecycle records provide context, not authority to perform maintenance or retire equipment. Planned work and decommissioning dates remain proposals. A future CMMS/PLM integration must define source precedence, reconciliation, permissions, retention, legal/quality records, version conflicts, and write governance before the platform can claim lifecycle synchronization.</p>
+<h4 id="7-guarded-simulated-control">7. Guarded simulated control<a class="headerlink" href="#7-guarded-simulated-control" title="Permanent link">&para;</a></h4>
+<p>H1 exposes <code>set_speed_pct</code>, <code>set_valve_pct</code>, <code>emergency_stop</code>, and <code>reset</code> only when the current synthetic asset state and actor capability allow them. Control is a two-step workflow:</p>
+<ol>
+<li>The server validates the requested command, reason, expected asset version, allowlisted type, numeric range, transition rule, and tenant context, then returns a short-lived exact-payload preview with before/after simulator state, safety checks, payload hash, and ETag.</li>
+<li>Execution requires the preview ID, <code>Idempotency-Key</code>, and matching <code>If-Match</code>. The server reauthorizes the actor, revalidates expiry and expected version, verifies the preview hash, and either applies one in-process state transition or rejects without an effect.</li>
+</ol>
+<p>The same idempotency key and payload returns the original receipt; reuse with different input fails. A stale asset version, expired preview, failed safety check, unsupported transition, out-of-range setpoint, or policy failure performs no state change. <code>emergency_stop</code> has no confirmation bypass in the demo; it remains a simulated command with the same authentication, validation, idempotency, and audit requirements. <code>reset</code> may clear a simulated trip only when its transition rule passes.</p>
+<p>Preview and receipt payloads disclose simulation mode, before/after state, asset versions, payload hash, actor-safe audit reference, and hash-chained audit evidence. They never imply a PLC acknowledgement or physical verification. Adding real device egress is a new external action class and blocks release until an accepted ADR, OT threat model, safety-hazard analysis, device identity and protocol contract, network-zone design, emergency/timeout semantics, independent interlocks, approval policy, post-command verification, rollback/compensation analysis, and representative hardware-in-the-loop evidence exist.</p>
+<h4 id="8-public-api-and-authorization">8. Public API and authorization<a class="headerlink" href="#8-public-api-and-authorization" title="Permanent link">&para;</a></h4>
+<p>The normative OpenAPI contract defines:</p>
+<table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>Semantics</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET /v1/assets</code></td>
+<td>List tenant-authorized synthetic asset summaries.</td>
+</tr>
+<tr>
+<td><code>GET /v1/assets/{assetId}/twin</code></td>
+<td>Return the component, visualization, telemetry, analytic, lifecycle, control, and watermark snapshot.</td>
+</tr>
+<tr>
+<td><code>GET /v1/assets/{assetId}/telemetry?limit=...</code></td>
+<td>Observe the simulator clock and return a bounded deterministic sample batch.</td>
+</tr>
+<tr>
+<td><code>POST /v1/assets/{assetId}/control-previews</code></td>
+<td>Validate and freeze an exact synthetic command preview.</td>
+</tr>
+<tr>
+<td><code>POST /v1/assets/{assetId}/control-previews/{previewId}/execute</code></td>
+<td>Revalidate and execute the preview once against simulator state.</td>
+</tr>
+</tbody>
+</table>
+<p>Tenant context derives from the authenticated membership; no asset route accepts a tenant selector. Reads require <code>asset.read</code>, preview requires <code>asset.control.preview</code>, and execution requires <code>asset.control.execute</code>. The Beacon analyst has read-only access to its tenant-scoped synthetic asset view and no control grant. Unauthorized and unknown asset IDs receive the same non-enumerating response. Command bodies reject unknown properties. Responses are <code>private, no-store</code>; simulator identifiers and payloads are tenant-scoped; every preview, execution, rejection, conflict, and replay is audited.</p>
+<h4 id="9-acceptance-and-limitations">9. Acceptance and limitations<a class="headerlink" href="#9-acceptance-and-limitations" title="Permanent link">&para;</a></h4>
+<p><code>AC-PHY-001</code> is satisfied only when <code>TST-PHY-001</code> demonstrates all of the following from a clean synthetic seed:</p>
+<ul>
+<li>telemetry visibly advances, pauses, recovers, and reproduces from the same frozen fixture, state, and sequence without network or device input;</li>
+<li>selecting a component in the 3D view and structured alternative exposes the same status and measurements, including under keyboard-only and reduced-motion operation;</li>
+<li>the anomaly/forecast result reproduces exactly and displays its model card and synthetic/no-real-world-validity warning;</li>
+<li>all lifecycle stages and event provenance remain inspectable without rewriting history;</li>
+<li>every invalid, stale, expired, unauthorized, cross-tenant, out-of-range, mutated, or duplicate-conflicting command produces zero state transitions;</li>
+<li>a valid command produces one simulator transition, an idempotent replay returns the same receipt, and the hash-linked audit trail verifies; and</li>
+<li>UI, API examples, logs, and generated editions never describe the simulator as a connected physical asset.</li>
+</ul>
+<p>This capability proves product interaction and guardrail behavior only. It does not establish industrial reliability, real-time determinism, functional safety, cybersecurity certification, model accuracy, asset fitness, maintenance efficacy, or authority to operate physical equipment.</p>
 <h1 id="part-iii-architecture-decision-records">Part III - Architecture Decision Records<a class="headerlink" href="#part-iii-architecture-decision-records" title="Permanent link">&para;</a></h1>
 <h2 id="adr-001-documentation-as-a-versioned-product">ADR-001 - Documentation as a Versioned Product<a class="headerlink" href="#adr-001-documentation-as-a-versioned-product" title="Permanent link">&para;</a></h2>
 <p>Status: <strong>accepted</strong> | Owners: enterprise-architecture</p>
@@ -9623,6 +9802,41 @@ X-EDT-Signature: v1=&lt;hex HMAC-SHA256(secret, timestamp + &quot;.&quot; + raw_
 <td>Cross-industry extensibility</td>
 <td>The core metamodel MUST support namespaced domain and customer ontology packages without changing core code.</td>
 <td>H2</td>
+<td>committed</td>
+</tr>
+<tr>
+<td>REQ-PHY-001</td>
+<td>Synthetic asset telemetry</td>
+<td>H1 MUST produce deterministic timestamped synthetic physical-asset telemetry with typed units sequence quality freshness and reproducible replay metadata.</td>
+<td>H1</td>
+<td>committed</td>
+</tr>
+<tr>
+<td>REQ-PHY-002</td>
+<td>Accessible physical 3D-style view</td>
+<td>H1 MUST provide an interactive component-linked procedural perspective asset view with keyboard reduced-motion and complete structured alternatives.</td>
+<td>H1</td>
+<td>committed</td>
+</tr>
+<tr>
+<td>REQ-PHY-003</td>
+<td>Honest deterministic asset analytics</td>
+<td>H1 anomaly and forecast output MUST be deterministic versioned explainable and labeled synthetic without validated machine-learning or real failure-prediction claims.</td>
+<td>H1</td>
+<td>committed</td>
+</tr>
+<tr>
+<td>REQ-PHY-004</td>
+<td>Synthetic asset lifecycle</td>
+<td>H1 MUST expose versioned synthetic design manufacture commissioning service maintenance and decommissioning history without claiming source-system synchronization.</td>
+<td>H1</td>
+<td>committed</td>
+</tr>
+<tr>
+<td>REQ-PHY-005</td>
+<td>Guarded simulator control</td>
+<td>H1 MUST restrict asset commands to tenant-authorized allowlisted simulator-only previews with expected-version range transition idempotency and audit checks and no device egress.</td>
+<td>H1</td>
 <td>committed</td>
 </tr>
 <tr>
@@ -10303,6 +10517,15 @@ X-EDT-Signature: v1=&lt;hex HMAC-SHA256(secret, timestamp + &quot;.&quot; + raw_
 <td>contracts/openapi/enterprise-digital-twin.openapi.yaml<br>contracts/schemas/scenario.schema.json</td>
 <td>CTRL-DAT-001<br>CTRL-IAM-003</td>
 <td>AC-PROD-001<br>AC-AI-001</td>
+</tr>
+<tr>
+<td>REQ-PHY-</td>
+<td>chapters/17-synthetic-physical-asset-twin.md<br>chapters/11-ux-visualizations.md<br>chapters/12-apis-developer-platform.md</td>
+<td>ADR-002<br>ADR-004<br>ADR-013</td>
+<td>CMP-WEB<br>CMP-API<br>CMP-POLICY<br>CMP-POSTGRES</td>
+<td>contracts/openapi/enterprise-digital-twin.openapi.yaml</td>
+<td>CTRL-IAM-003<br>CTRL-TEN-001<br>CTRL-AUD-001<br>CTRL-PHY-001</td>
+<td>AC-PHY-001</td>
 </tr>
 <tr>
 <td>REQ-ARCH-</td>
@@ -13067,6 +13290,15 @@ certification: Contract tests synthetic fixture permission tests replay tests fa
 <td></td>
 </tr>
 <tr>
+<td>UX-ASSET-TWIN</td>
+<td>Synthetic physical-asset twin</td>
+<td>H1</td>
+<td>Live synthetic telemetry spatial component inspection deterministic analytics lifecycle history and simulator-only control.</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
 <td>UX-ADMIN</td>
 <td>Tenant administration</td>
 <td>H2</td>
@@ -13211,6 +13443,12 @@ evidence: Source provenance time confidence classification and permission explan
 <td>3D organizational view</td>
 <td>Optional storytelling view with no exclusive information.</td>
 <td>H4</td>
+</tr>
+<tr>
+<td>VIS-PHYSICAL-3D</td>
+<td>Procedural 3D-style physical-asset view</td>
+<td>Spatially locate a synthetic component condition in a rotatable perspective SVG while preserving a complete keyboard-operable structured alternative.</td>
+<td>H1</td>
 </tr>
 </tbody>
 </table>
@@ -13519,6 +13757,12 @@ governance: State intended use prohibited use calibration evidence human confirm
 <td>actions</td>
 <td>Action compensation</td>
 <td>Before and after state receipts and idempotent compensation are retained and tested.</td>
+</tr>
+<tr>
+<td>CTRL-PHY-001</td>
+<td>physical-assets</td>
+<td>Synthetic device boundary</td>
+<td>H1 asset telemetry and controls remain inside the tenant-scoped simulator and every preview receipt and user-visible result discloses that no physical read or write occurred.</td>
 </tr>
 <tr>
 <td>CTRL-AUD-001</td>
@@ -13859,6 +14103,11 @@ governance: State intended use prohibited use calibration evidence human confirm
 <td>Cycles missing estimates impossible capacity disconnected work and contradictory interventions produce explicit validation outcomes.</td>
 </tr>
 <tr>
+<td>AC-PHY-001</td>
+<td>Synthetic physical-asset journey</td>
+<td>Deterministic fixture telemetry procedural perspective and structured component selection analytics lifecycle history and guarded simulator commands reproduce with zero device egress and explicit synthetic labels.</td>
+</tr>
+<tr>
 <td>AC-SEC-001</td>
 <td>Secrets containment</td>
 <td>Scans of logs traces prompts errors exports and artifacts contain no injected canary secrets.</td>
@@ -13970,6 +14219,17 @@ governance: State intended use prohibited use calibration evidence human confirm
 <td>The four H1 workloads deploy with only adopted dependencies; conditional technologies have measurable triggers and no undeclared authority.</td>
 <td>output/test-evidence/TST-ARCH-001.json</td>
 <td>REQ-ARCH-001<br>REQ-ARCH-002<br>REQ-ARCH-003<br>REQ-ARCH-004<br>REQ-ARCH-005<br>REQ-ARCH-006<br>REQ-ARCH-007</td>
+</tr>
+<tr>
+<td>TST-PHY-001</td>
+<td>Synthetic physical-asset twin conformance</td>
+<td>end_to_end_test</td>
+<td>H1</td>
+<td>product-engineering<br>simulation-team<br>security-engineering</td>
+<td>Replay frozen-fixture telemetry and component selection through procedural perspective and structured views verify deterministic anomaly and trend outputs inspect lifecycle history and exercise valid invalid stale replayed cross-tenant and out-of-range simulator commands.</td>
+<td>Identical fixture sequence state and model version reproduce canonical results every invalid command has zero effect a valid preview executes once replay returns its receipt audit hashes verify and no network or device write occurs.</td>
+<td>output/test-evidence/TST-PHY-001.json</td>
+<td>REQ-PHY-001<br>REQ-PHY-002<br>REQ-PHY-003<br>REQ-PHY-004<br>REQ-PHY-005</td>
 </tr>
 <tr>
 <td>TST-TEN-001</td>
@@ -14121,7 +14381,7 @@ governance: State intended use prohibited use calibration evidence human confirm
 <td>committed</td>
 <td>hackathon-delivery-lead</td>
 <td>output/test-evidence/H1-release.json</td>
-<td>REQ-GOV-001<br>REQ-GOV-002<br>REQ-GOV-003<br>REQ-GOV-004<br>REQ-PROD-002<br>REQ-PROD-003<br>REQ-PROD-004<br>REQ-ARCH-001<br>REQ-ARCH-002<br>REQ-ARCH-003<br>REQ-TEN-001<br>REQ-TEN-002<br>REQ-TEN-003<br>REQ-TEN-004<br>REQ-TEN-005<br>REQ-DATA-001<br>REQ-DATA-002<br>REQ-DATA-003<br>REQ-DATA-004<br>REQ-DATA-005<br>REQ-CON-001<br>REQ-CON-002<br>REQ-CON-003<br>REQ-CON-004<br>REQ-AI-001<br>REQ-AI-002<br>REQ-AI-003<br>REQ-AI-004<br>REQ-AI-005<br>REQ-AI-006<br>REQ-AI-007<br>REQ-AI-008<br>REQ-ACT-001<br>REQ-ACT-002<br>REQ-ACT-003<br>REQ-SIM-001<br>REQ-SIM-002<br>REQ-SIM-003<br>REQ-SIM-004<br>REQ-UX-001<br>REQ-UX-002<br>REQ-UX-003<br>REQ-UX-004<br>REQ-SEC-001<br>REQ-SEC-002<br>REQ-SEC-003<br>REQ-SEC-004<br>REQ-REL-001<br>REQ-REL-003<br>REQ-REL-004<br>REQ-REL-005<br>REQ-DEV-002<br>REQ-VER-001<br>REQ-VER-002<br>REQ-VER-003<br>REQ-VER-004<br>REQ-VER-005</td>
+<td>REQ-GOV-001<br>REQ-GOV-002<br>REQ-GOV-003<br>REQ-GOV-004<br>REQ-PROD-002<br>REQ-PROD-003<br>REQ-PROD-004<br>REQ-PHY-001<br>REQ-PHY-002<br>REQ-PHY-003<br>REQ-PHY-004<br>REQ-PHY-005<br>REQ-ARCH-001<br>REQ-ARCH-002<br>REQ-ARCH-003<br>REQ-TEN-001<br>REQ-TEN-002<br>REQ-TEN-003<br>REQ-TEN-004<br>REQ-TEN-005<br>REQ-DATA-001<br>REQ-DATA-002<br>REQ-DATA-003<br>REQ-DATA-004<br>REQ-DATA-005<br>REQ-CON-001<br>REQ-CON-002<br>REQ-CON-003<br>REQ-CON-004<br>REQ-AI-001<br>REQ-AI-002<br>REQ-AI-003<br>REQ-AI-004<br>REQ-AI-005<br>REQ-AI-006<br>REQ-AI-007<br>REQ-AI-008<br>REQ-ACT-001<br>REQ-ACT-002<br>REQ-ACT-003<br>REQ-SIM-001<br>REQ-SIM-002<br>REQ-SIM-003<br>REQ-SIM-004<br>REQ-UX-001<br>REQ-UX-002<br>REQ-UX-003<br>REQ-UX-004<br>REQ-SEC-001<br>REQ-SEC-002<br>REQ-SEC-003<br>REQ-SEC-004<br>REQ-REL-001<br>REQ-REL-003<br>REQ-REL-004<br>REQ-REL-005<br>REQ-DEV-002<br>REQ-VER-001<br>REQ-VER-002<br>REQ-VER-003<br>REQ-VER-004<br>REQ-VER-005</td>
 <td>QAR-SEC-001<br>QAR-SEC-002<br>QAR-SEC-003<br>QAR-PERF-001<br>QAR-PERF-002<br>QAR-PERF-003<br>QAR-SYNC-001<br>QAR-COR-001<br>QAR-AI-001<br>QAR-AI-002<br>QAR-SIM-001<br>QAR-OBS-001<br>QAR-ACC-001<br>QAR-COST-001</td>
 </tr>
 <tr>
@@ -14179,8 +14439,8 @@ governance: State intended use prohibited use calibration evidence human confirm
 <td>contracts/openapi/enterprise-digital-twin.openapi.yaml</td>
 <td>OpenAPI</td>
 <td>3.1.0</td>
-<td>40937</td>
-<td>60bffdb30ca96b81</td>
+<td>69499</td>
+<td>aca470034c123bbe</td>
 </tr>
 <tr>
 <td>contracts/asyncapi/events.asyncapi.yaml</td>
@@ -14425,7 +14685,7 @@ last_reviewed: 2026-07-13</p>
 <h4 id="oracle-use">Oracle use<a class="headerlink" href="#oracle-use" title="Permanent link">&para;</a></h4>
 <p>Tests execute ingestion and projection rather than copying final answers. The oracle is compared only after normalization, authorization, graph projection, cited retrieval, simulation, action execution, and compensation complete. Numeric simulation tolerances are those in CH-02; all authorization, action-count, identifier, digest, and citation membership checks are exact.</p>
 <h2 id="seed-manifest">Seed Manifest<a class="headerlink" href="#seed-manifest" title="Permanent link">&para;</a></h2>
-<p>Source: <code>docs/enterprise-digital-twin/fixtures/h1/seed-manifest.yaml</code> | SHA-256: <code>e94cd10f563321f3e58bed55d254961a0ce77dd58c5035883389cf77b173bfd4</code></p>
+<p>Source: <code>docs/enterprise-digital-twin/fixtures/h1/seed-manifest.yaml</code> | SHA-256: <code>2b58de8cb8d2816ff8ff56c67722b7da296fb0c91351ec9f8288c1a03e55af64</code></p>
 <pre><code class="language-yaml">schema_version: 1
 fixture:
   workload_id: edt-h1-github-jira-launch-risk
@@ -14448,7 +14708,7 @@ artifact_digests:
   algorithm: sha256-canonical-json
   source_fixtures: b3d8f648d7bd2d0ed62ab5d803fa25a6aff32a2e0f11ce0f3bddebafc869dd96
   identity_mappings: 61b3729a92713a066df550670f34988fc0817eec84523d0e5e2bfacac0458ab7
-  permission_matrix: ccbaf7af0874b49acea87963ab88dc88022ea10c3fd17255bb8f0bc42cf17935
+  permission_matrix: 9373ff3fc790dd955275a4e8f457e2b41bb6924e4e92c2918de5aac46e5d15a1
   oracle: eba5ed65cf411a137964943d1403144013160e1c53aeb7f2ac72d5fae5fb1a71
 tenants:
   - tenant_alias: tnt_aster
@@ -14667,7 +14927,7 @@ reversibility_case:
   expected_preservation: [both_source_aliases, all_evidence, version_history, unrelated_edges]
 </code></pre>
 <h2 id="permission-matrix">Permission Matrix<a class="headerlink" href="#permission-matrix" title="Permanent link">&para;</a></h2>
-<p>Source: <code>docs/enterprise-digital-twin/fixtures/h1/permission-matrix.yaml</code> | SHA-256: <code>be1a99c3fca7e92536a2893f7123f48db5caee117b9b04f67a041460deb0d169</code></p>
+<p>Source: <code>docs/enterprise-digital-twin/fixtures/h1/permission-matrix.yaml</code> | SHA-256: <code>17d6a84b038f29bbce0b34c8b399d48e4646ede61f2de901adccbde7dbf71584</code></p>
 <pre><code class="language-yaml">schema_version: 1
 acl_classes:
   aster-orion-full:
@@ -14681,7 +14941,7 @@ acl_classes:
     denied_actors: [usr_aster_analyst, usr_aster_limited, usr_aster_ops_approver, usr_aster_security_approver, usr_aster_admin, usr_platform_operator]
 roles:
   usr_aster_analyst:
-    grants: [evidence.read.aster_orion, scenario.create, simulation.run, jira_remediation.preview]
+    grants: [evidence.read.aster_orion, scenario.create, simulation.run, jira_remediation.preview, asset.read, asset.control.preview, asset.control.execute]
     denials: [action.approve, action.execute, connector.admin]
   usr_aster_limited:
     grants: [evidence.read.aster_public]
@@ -14696,7 +14956,7 @@ roles:
     grants: [connector.admin, policy.admin, fixture.reset]
     denials: [action.approve.unless_separately_granted]
   usr_beacon_analyst:
-    grants: [evidence.read.beacon, scenario.create, simulation.run]
+    grants: [evidence.read.beacon, scenario.create, simulation.run, asset.read]
     denials: [tenant.aster.any, action.execute]
   usr_platform_operator:
     grants: [service_health.read, telemetry.redacted.read]
@@ -15685,7 +15945,7 @@ tenant_isolation:
 <h4 id="residual-risk">Residual risk<a class="headerlink" href="#residual-risk" title="Permanent link">&para;</a></h4>
 <p>Pooled graph isolation remains weaker than PostgreSQL RLS. H1 accepts this only with bounded server-owned query templates, tenant-qualified projection assertions, two-tenant tests, and no arbitrary Cypher. Failure of any control blocks release and triggers isolated graph deployment analysis.</p>
 <h1 id="build-provenance">Build Provenance<a class="headerlink" href="#build-provenance" title="Permanent link">&para;</a></h1>
-<p>Manifest SHA-256: <code>c17e229ab796c0c142a9d6ecfe7960930855e1e3217c79fefe6df885268ce887</code></p>
+<p>Manifest SHA-256: <code>dfadd51ad2d5f328b5f8a5753f97620a521d11a15f8126993639097a402d799d</code></p>
 <p>Generated by <code>scripts/build_blueprint.py</code>; generated editions are not edited directly.</p>
 </body>
 </html>

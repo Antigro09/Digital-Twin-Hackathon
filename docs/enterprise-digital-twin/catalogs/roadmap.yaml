@@ -14,6 +14,11 @@ horizons:
       - REQ-PROD-002
       - REQ-PROD-003
       - REQ-PROD-004
+      - REQ-PHY-001
+      - REQ-PHY-002
+      - REQ-PHY-003
+      - REQ-PHY-004
+      - REQ-PHY-005
       - REQ-ARCH-001
       - REQ-ARCH-002
       - REQ-ARCH-003

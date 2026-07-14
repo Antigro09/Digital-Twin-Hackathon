@@ -7,7 +7,7 @@
     "version": "1.0.0-rc.1"
   },
   "summary": {
-    "complete": 96,
+    "complete": 101,
     "coverage_percent": 100.0,
     "quality_attribute": {
       "complete": 18,
@@ -25,10 +25,10 @@
       "roadmap"
     ],
     "requirement": {
-      "complete": 78,
-      "total": 78
+      "complete": 83,
+      "total": 83
     },
-    "total": 96
+    "total": 101
   },
   "traces": [
     {
@@ -1842,6 +1842,216 @@
         "TST-GOV-001"
       ],
       "title": "Explicit decision status"
+    },
+    {
+      "acceptance": [
+        "AC-PHY-001"
+      ],
+      "artifacts": [
+        "chapters/17-synthetic-physical-asset-twin.md",
+        "chapters/11-ux-visualizations.md",
+        "chapters/12-apis-developer-platform.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-WEB",
+        "CMP-API",
+        "CMP-POLICY",
+        "CMP-POSTGRES"
+      ],
+      "contracts": [
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml"
+      ],
+      "controls": [
+        "CTRL-IAM-003",
+        "CTRL-TEN-001",
+        "CTRL-AUD-001",
+        "CTRL-PHY-001"
+      ],
+      "decisions": [
+        "ADR-002",
+        "ADR-004",
+        "ADR-013"
+      ],
+      "horizon": "H1",
+      "id": "REQ-PHY-001",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-PHY-001"
+      ],
+      "title": "Synthetic asset telemetry"
+    },
+    {
+      "acceptance": [
+        "AC-PHY-001"
+      ],
+      "artifacts": [
+        "chapters/17-synthetic-physical-asset-twin.md",
+        "chapters/11-ux-visualizations.md",
+        "chapters/12-apis-developer-platform.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-WEB",
+        "CMP-API",
+        "CMP-POLICY",
+        "CMP-POSTGRES"
+      ],
+      "contracts": [
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml"
+      ],
+      "controls": [
+        "CTRL-IAM-003",
+        "CTRL-TEN-001",
+        "CTRL-AUD-001",
+        "CTRL-PHY-001"
+      ],
+      "decisions": [
+        "ADR-002",
+        "ADR-004",
+        "ADR-013"
+      ],
+      "horizon": "H1",
+      "id": "REQ-PHY-002",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-PHY-001"
+      ],
+      "title": "Accessible physical 3D-style view"
+    },
+    {
+      "acceptance": [
+        "AC-PHY-001"
+      ],
+      "artifacts": [
+        "chapters/17-synthetic-physical-asset-twin.md",
+        "chapters/11-ux-visualizations.md",
+        "chapters/12-apis-developer-platform.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-WEB",
+        "CMP-API",
+        "CMP-POLICY",
+        "CMP-POSTGRES"
+      ],
+      "contracts": [
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml"
+      ],
+      "controls": [
+        "CTRL-IAM-003",
+        "CTRL-TEN-001",
+        "CTRL-AUD-001",
+        "CTRL-PHY-001"
+      ],
+      "decisions": [
+        "ADR-002",
+        "ADR-004",
+        "ADR-013"
+      ],
+      "horizon": "H1",
+      "id": "REQ-PHY-003",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-PHY-001"
+      ],
+      "title": "Honest deterministic asset analytics"
+    },
+    {
+      "acceptance": [
+        "AC-PHY-001"
+      ],
+      "artifacts": [
+        "chapters/17-synthetic-physical-asset-twin.md",
+        "chapters/11-ux-visualizations.md",
+        "chapters/12-apis-developer-platform.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-WEB",
+        "CMP-API",
+        "CMP-POLICY",
+        "CMP-POSTGRES"
+      ],
+      "contracts": [
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml"
+      ],
+      "controls": [
+        "CTRL-IAM-003",
+        "CTRL-TEN-001",
+        "CTRL-AUD-001",
+        "CTRL-PHY-001"
+      ],
+      "decisions": [
+        "ADR-002",
+        "ADR-004",
+        "ADR-013"
+      ],
+      "horizon": "H1",
+      "id": "REQ-PHY-004",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-PHY-001"
+      ],
+      "title": "Synthetic asset lifecycle"
+    },
+    {
+      "acceptance": [
+        "AC-PHY-001"
+      ],
+      "artifacts": [
+        "chapters/17-synthetic-physical-asset-twin.md",
+        "chapters/11-ux-visualizations.md",
+        "chapters/12-apis-developer-platform.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-WEB",
+        "CMP-API",
+        "CMP-POLICY",
+        "CMP-POSTGRES"
+      ],
+      "contracts": [
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml"
+      ],
+      "controls": [
+        "CTRL-IAM-003",
+        "CTRL-TEN-001",
+        "CTRL-AUD-001",
+        "CTRL-PHY-001"
+      ],
+      "decisions": [
+        "ADR-002",
+        "ADR-004",
+        "ADR-013"
+      ],
+      "horizon": "H1",
+      "id": "REQ-PHY-005",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-PHY-001"
+      ],
+      "title": "Guarded simulator control"
     },
     {
       "acceptance": [

@@ -17,6 +17,8 @@ This chapter is the executable product contract for the H1 hackathon slice. It f
 
 Under `REQ-VER-002`, the reference workload MUST run from checked-in, deterministic synthetic fixtures without access to a real employee, customer, repository, or Jira project. Under `REQ-TEN-001` through `REQ-TEN-004`, the same application build MUST serve both synthetic tenants; tenant isolation MUST NOT be implemented by tenant-specific application code. All dates, identities, text, code metadata, issue records, source permissions, and expected answers MUST be synthetic and marked as such in the interface.
 
+`CH-17` defines an additional H1 synthetic physical-asset path in the same application. It does not change this chapter's frozen organization fixture, answer oracle, schedule simulation, or Jira action. Its telemetry originates only from an in-process deterministic simulator, and its control commands change only simulator state. Consequently, synthetic GitHub and Jira remain the only H1 external-source ingestion modes and the allowlisted Jira update remains the only external mutation.
+
 ## 2. Frozen workload identity
 
 | Field | Value |

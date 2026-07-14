@@ -23,6 +23,7 @@ controls:
   - {id: CTRL-ACT-001, domain: actions, title: Exact-payload approval, requirement: Approval binds the canonical payload tenant actors credential target expiry policy and idempotency key.}
   - {id: CTRL-ACT-002, domain: actions, title: Dual authorization, requirement: Two distinct authenticated people approve the H1 external mutation and requester cannot self-complete control.}
   - {id: CTRL-ACT-003, domain: actions, title: Action compensation, requirement: Before and after state receipts and idempotent compensation are retained and tested.}
+  - {id: CTRL-PHY-001, domain: physical-assets, title: Synthetic device boundary, requirement: H1 asset telemetry and controls remain inside the tenant-scoped simulator and every preview receipt and user-visible result discloses that no physical read or write occurred.}
   - {id: CTRL-AUD-001, domain: audit, title: Tamper-evident audit, requirement: Sensitive operations append hash-linked audit envelopes to restricted immutable storage.}
   - {id: CTRL-PRV-001, domain: privacy, title: Purpose and minimization, requirement: Data collection and derived inference require documented purpose field minimization and retention.}
   - {id: CTRL-PRV-002, domain: privacy, title: Sensitive workforce prohibition, requirement: Individual employment health emotion productivity and misconduct inference is disabled through H3.}
@@ -30,4 +31,3 @@ controls:
   - {id: CTRL-OPS-002, domain: operations, title: Observable health, requirement: Every workload publishes liveness readiness dependency health SLO and redacted telemetry.}
   - {id: CTRL-SUP-001, domain: supply-chain, title: Build provenance, requirement: Dependencies are pinned scanned and inventoried and release artifacts are signed with verifiable provenance.}
   - {id: CTRL-INC-001, domain: incident-response, title: Incident lifecycle, requirement: Detection containment eradication recovery notification evidence and postmortem procedures have named owners.}
-

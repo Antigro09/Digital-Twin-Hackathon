@@ -18,6 +18,8 @@ The `1.0.0-rc.1` architecture is suitable as the normative implementation bluepr
 
 No Critical or High architecture finding remains open in the design. Three Medium risks are explicitly accepted with owners, compensating controls, expiry dates, and revisit triggers. Other registered risks are mitigated but remain subject to implementation evidence. This opinion does not assert that the software has been built, that a control has operated effectively, that a compliance certification exists, or that synthetic simulation has external predictive validity.
 
+The `CH-17` synthetic physical-asset amendment was added after the review passes listed in section 2.3. Its scope is deliberately limited to an in-process simulator and reuses the established tenant, API, exact-payload, idempotency, audit, deterministic-model, and accessibility boundaries. This amendment does not claim a completed architecture review or release gate: `TST-PHY-001`, `AC-PHY-001`, contract validation, and independent review remain required before publication evidence can describe the amended H1 scope as passed.
+
 The architecture reached this opinion by narrowing unbounded claims, assigning authority and data ownership, converting ambiguous autonomy into bounded capability contracts, making projection and action failure semantics explicit, and defining a finite release gate. An independent build-readiness review and generated validation evidence remain mandatory release evidence under `AC-REV-001` and `AC-REV-002`; this self-audit does not substitute for them.
 
 ## 2. Audit scope and method
@@ -131,15 +133,16 @@ These acceptances cannot override a Critical/High result, law, contract, tenant 
 | `RSK-011` | Users may still over-trust a well-designed distribution or sensitivity chart. | Comprehension testing, claim-language review, calibration/validity documentation, and prohibition of guaranteed-date copy. |
 | `RSK-012` | Provider outage, snapshot retirement, or regression may exceed fallback coverage. | Snapshot registry, failover exercises, capacity/budget alerts, fallback evaluation, and explicit unavailable behavior. |
 | `RSK-014`, `RSK-015` | Logs, audit, backups, and derived stores may retain sensitive or deleted content. | Data inventory, content canaries, retention/deletion scan, backup-expiry evidence, redaction tests, and restricted audit access review. |
-| `RSK-017` | Advanced visualization may exclude users or distract from evidence. | Retain 3D as Rejected unless decision-value and accessibility gates pass; require 2D and structured alternatives for every visualization. |
+| `RSK-017` | Advanced visualization may exclude users or distract from evidence. | Keep 3D organizational visualization Rejected; permit the bounded synthetic physical-asset scene only with a component-location decision task, keyboard/reduced-motion support, rendering fallback, and an equivalent structured view. |
 | `RSK-018` | Sustained backlog may make a graph or answer materially stale. | Lag SLOs, backpressure, priority, reconciliation, stale-result UX, capacity tests, and fail-closed actions. |
 
 ## 6. Known limitations and architecture boundaries
 
 These limitations are intentional and do not represent hidden implementation choices:
 
-- H1 ingests metadata from synthetic GitHub and Jira only. It does not ingest source code, email, private chat, meeting audio, customer data, finance records, or individual activity telemetry.
-- H1's Jira field update is the only external mutation. Every additional action class requires a separate schema, threat model, approver policy, idempotency definition, source concurrency rule, compensation behavior, evaluation, and opt-in.
+- H1 ingests external-source metadata from synthetic GitHub and Jira only. The `CH-17` asset path generates synthetic telemetry inside the application; it has no IoT connector, historian, industrial protocol, physical-device read, or customer data. H1 does not ingest source code, email, private chat, meeting audio, finance records, or individual activity telemetry.
+- H1's Jira field update is the only external mutation. Asset control modifies in-process simulator state and receipts state `external_write: false`. Every additional external action class requires a separate schema, threat model, approver policy, idempotency definition, source concurrency rule, compensation behavior, evaluation, and opt-in.
+- H1 physical-asset anomalies and forecasts are deterministic demonstrations over synthetic history. They are not trained or validated predictive-maintenance models and cannot support maintenance, safety, or equipment-operation decisions.
 - PERT/Monte Carlo output is conditional on fixture distributions and dependency structure. It is not a causal estimate and cannot validate a real launch forecast.
 - Shared tenancy is the reference deployment. Dedicated, customer-managed, regional, air-gapped, and edge profiles remain separately gated.
 - The online OpenAI runtime is an explicit dependency for H1. Air-gapped inference is unavailable until a local model profile passes the same workload-specific quality and safety gates.

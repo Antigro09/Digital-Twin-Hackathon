@@ -2,7 +2,7 @@
 
 Specification: `1.0.0-rc.1`
 
-Coverage: **100.00%** (96 of 96)
+Coverage: **100.00%** (101 of 101)
 
 | ID | Kind | Horizon | Artifact | ADR | Component | Contract | Control | Acceptance | Test/Eval | Roadmap | Complete |
 |---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|:---:|
@@ -46,6 +46,11 @@ Coverage: **100.00%** (96 of 96)
 | REQ-GOV-002 | requirement | H1 | 4 | 2 | 1 | 3 | 1 | 4 | 1 | 1 | yes |
 | REQ-GOV-003 | requirement | H1 | 4 | 2 | 1 | 3 | 1 | 4 | 1 | 1 | yes |
 | REQ-GOV-004 | requirement | H1 | 4 | 2 | 1 | 3 | 1 | 4 | 1 | 1 | yes |
+| REQ-PHY-001 | requirement | H1 | 3 | 3 | 4 | 1 | 4 | 1 | 1 | 1 | yes |
+| REQ-PHY-002 | requirement | H1 | 3 | 3 | 4 | 1 | 4 | 1 | 1 | 1 | yes |
+| REQ-PHY-003 | requirement | H1 | 3 | 3 | 4 | 1 | 4 | 1 | 1 | 1 | yes |
+| REQ-PHY-004 | requirement | H1 | 3 | 3 | 4 | 1 | 4 | 1 | 1 | 1 | yes |
+| REQ-PHY-005 | requirement | H1 | 3 | 3 | 4 | 1 | 4 | 1 | 1 | 1 | yes |
 | REQ-PROD-001 | requirement | H2 | 3 | 1 | 2 | 2 | 2 | 2 | 1 | 1 | yes |
 | REQ-PROD-002 | requirement | H1 | 3 | 1 | 2 | 2 | 2 | 2 | 1 | 1 | yes |
 | REQ-PROD-003 | requirement | H1 | 3 | 1 | 2 | 2 | 2 | 2 | 1 | 1 | yes |

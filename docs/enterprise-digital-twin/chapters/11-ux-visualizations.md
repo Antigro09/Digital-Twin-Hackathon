@@ -14,13 +14,14 @@ last_reviewed: 2026-07-13
 
 ## 1. Experience goals
 
-The interface helps an authorized user move through five distinct cognitive tasks without collapsing them into a conversational black box:
+The interface helps an authorized user move through six distinct cognitive tasks without collapsing them into a conversational black box:
 
 1. Establish what data is available, current, and permitted.
 2. Ask a question and inspect evidence for each material claim.
 3. Explore relationships and time without implying completeness or causality.
 4. define and compare a reproducible scenario.
 5. Review, approve, execute, audit, and if necessary compensate an exact external action.
+6. Inspect a synthetic physical asset spatially, correlate its telemetry and lifecycle context, and safely exercise simulator-only controls.
 
 `REQ-UX-001`: H1 MUST include cockpit, search, graph, evidence, timeline, scenario comparison, agent-run, approval, connector-health, and audit surfaces.
 
@@ -107,6 +108,7 @@ Status values follow the architecture-wide `Committed`, `Provisional`, `Research
 | Timeline `/:tenant/timeline` | Committed H1 | Analysts and domain users | Time-ordered source events, claims, decisions, simulation snapshots, actions, and corrections. Users can switch among source time, validity time, and ingestion time. |
 | Dependency view `/:tenant/dependencies/:rootId` | Committed H1 | Program and engineering users | Directed acyclic scheduling view, cycle warnings, blockers, milestones, critical-path occupancy, assumptions, and accessible path list. It cannot imply causality beyond the typed relationship. |
 | Organization view `/:tenant/organization` | Provisional H2 | Authorized domain users | Team and reporting structures at approved granularity, effective dates, vacancies, and source quality. Individual activity metrics are excluded. |
+| Asset twin `/:tenant/assets/:assetId` | Committed H1 | Authorized operators | Synthetic disclosure, live/pause state, interactive rotatable perspective SVG, synchronized component list, telemetry with units and age, deterministic anomaly/forecast model card, lifecycle history, exact simulator-command preview, execution receipt, and audit evidence. The route remains usable if the visual cannot render. |
 
 ### 3.4 Scenarios and simulations
 
@@ -257,13 +259,14 @@ Every visualization includes a title, decision question, source/checkpoint time,
 | Evidence lineage | Committed H1 | How did a source observation become a displayed claim? | Left-to-right transformation stages, versions, digests, policy checks, and a linear text trace. |
 | Audit sequence | Committed H1 | Which actors and controls led from question to action and rollback? | Chronological event list with correlation groups; optional swimlanes by actor/service; canonical table remains authoritative. |
 | Connector freshness | Committed H1 | Which source or projection may limit a conclusion? | Status table and small age bars; explicit timestamps and thresholds; no green-only health signal. |
+| Procedural 3D-style physical-asset view | Committed H1 synthetic path | Where on the demonstration asset is the selected condition measured? | Rotatable perspective SVG with component hotspots tied to stable IDs and telemetry; rotate/reset buttons, pointer drag, arrow keys, keyboard component selection, reduced motion, rendering fallback, and an equivalent ordered component/status/measurement view. It is not a CAD model, contains no exclusive data, and is always labeled synthetic. |
 | Organization graph | Provisional H2 | How are approved teams and reporting structures related at a selected time? | Effective-dated hierarchy with vacancy and source-quality states; no individual performance overlays. |
 | Calendar | Provisional H2 | How do modeled milestones and constraints align over working calendars? | Accessible agenda/table first, timezone and working-day rules, scenario overlay, no automatic source mutation. |
 | Aggregate communication flow | Provisional H2 | Where do approved team-level handoffs appear under a documented purpose? | Minimum group size, aggregate edges, privacy review, no message sentiment or individual centrality. Direct individual communication graph is Rejected through H3. |
 | Financial flow | Provisional H3 | How do approved budgets or cost allocations connect to programs? | Separate authorization domain, currency and period semantics, reconciliation status, lineage, and finance-owner approval. |
 | Geographic view | Provisional H4 | Which approved regions, facilities, or assets are affected? | Coarse location by default, residency-aware data, accessible region table, and no precise person location. |
 | Simulation playback | Provisional H2 | Does temporal playback add insight beyond comparison and distributions? | Aggregated states, pause/step, reduced-motion mode, transcript, and a measured user-value gate. |
-| 3D organizational view | Rejected H1-H3; Research H4 | No H1-H3 decision requires it | Rejected for current delivery because of occlusion, navigation cost, performance, and accessibility burden. H4 research requires a validated decision task that cannot be served by 2D plus table. |
+| 3D organizational view | Rejected H1-H3; Research H4 | No H1-H3 organizational decision requires it | Rejected for organizational delivery because of occlusion, navigation cost, performance, and accessibility burden. The separate H1 physical-asset scene does not change this decision. H4 organizational research requires a validated decision task that cannot be served by 2D plus table. |
 
 ### 6.3 Knowledge graph behavior
 

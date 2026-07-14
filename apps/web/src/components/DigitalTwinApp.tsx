@@ -21,15 +21,17 @@ import type {
 import { ApiProblem } from "@/lib/api/types";
 import { formatDateTime } from "@/lib/format";
 import { ActionWorkspace } from "./ActionWorkspace";
+import { AssetTwin } from "./AssetTwin";
 import { CopilotPanel } from "./CopilotPanel";
 import { GraphExplorer } from "./GraphExplorer";
 import { Overview } from "./Overview";
 import { ScenarioWorkspace } from "./ScenarioWorkspace";
 import { Button, Skeleton, StatePanel, StatusPill } from "./ui";
 
-type View = "overview" | "graph" | "copilot" | "scenario" | "action";
+type View = "overview" | "asset" | "graph" | "copilot" | "scenario" | "action";
 
 const navigation: Array<{ id: View; label: string; eyebrow: string; glyph: string }> = [
+  { id: "asset", label: "Asset twin", eyebrow: "Physical operations", glyph: "◉" },
   { id: "overview", label: "Control room", eyebrow: "Launch posture", glyph: "⌂" },
   { id: "graph", label: "Evidence graph", eyebrow: "Bounded traversal", glyph: "⌘" },
   { id: "copilot", label: "Cited analysis", eyebrow: "Grounded Q&A", glyph: "✦" },
@@ -38,6 +40,7 @@ const navigation: Array<{ id: View; label: string; eyebrow: string; glyph: strin
 ];
 
 const viewTitles: Record<View, string> = {
+  asset: "Interactive physical asset twin",
   overview: "Orion launch control room",
   graph: "Evidence-backed graph",
   copilot: "Cited organizational analysis",
@@ -101,6 +104,9 @@ export function DigitalTwinApp() {
   );
   const canSimulate = activeMembership?.capabilities.includes("scenario:write") ?? false;
   const canPropose = activeMembership?.capabilities.includes("action:propose") ?? false;
+  const isAsterContext = activeMembership?.tenantAlias === "tnt_aster";
+  const workspaceLabel = isAsterContext ? "Orion launch" : "Beacon workspace";
+  const currentViewTitle = view === "overview" && !isAsterContext ? "Beacon operations control room" : viewTitles[view];
 
   async function withBusy<T>(key: string, work: (api: DigitalTwinApi) => Promise<T>, apply: (result: T) => void) {
     const api = apiRef.current;
@@ -178,21 +184,21 @@ export function DigitalTwinApp() {
       <aside className="sidebar">
         <div className="brand-lockup"><span className="brand-mark" aria-hidden="true">DT</span><div><strong>Digital Twin</strong><span>Enterprise control plane</span></div></div>
         <nav aria-label="Primary navigation">
-          <p className="nav-label">Orion launch</p>
+          <p className="nav-label">{workspaceLabel}</p>
           {navigation.map((item) => (
             <button key={item.id} className={view === item.id ? "nav-item nav-item-active" : "nav-item"} onClick={() => navigate(item.id)} aria-current={view === item.id ? "page" : undefined}>
               <span className="nav-glyph" aria-hidden="true">{item.glyph}</span><span><strong>{item.label}</strong><small>{item.eyebrow}</small></span>
             </button>
           ))}
         </nav>
-        <div className="sidebar-boundary"><span aria-hidden="true">◇</span><div><strong>Synthetic H1</strong><p>External writes limited to allowlisted AST-142.</p></div></div>
+        <div className="sidebar-boundary"><span aria-hidden="true">◇</span><div><strong>Synthetic H1</strong><p>{isAsterContext ? "External writes limited to allowlisted AST-142 and the asset simulator." : "Read-only tenant context; no external or simulated control writes."}</p></div></div>
         <div className="sidebar-footer"><span className="actor-avatar">{actor.actor.initials}</span><div><strong>{actor.actor.displayName}</strong><span>{activeMembership?.role}</span></div><span className="online-dot" title="Authenticated" /></div>
       </aside>
 
       <div className="app-body">
         <header className="topbar">
           <div className="mobile-brand"><span className="brand-mark" aria-hidden="true">DT</span><strong>Digital Twin</strong></div>
-          <div className="breadcrumb"><span>Aster H1</span><i aria-hidden="true">/</i><strong>{viewTitles[view]}</strong></div>
+          <div className="breadcrumb"><span>{activeMembership?.tenantName ?? "Tenant"}</span><i aria-hidden="true">/</i><strong>{currentViewTitle}</strong></div>
           <div className="topbar-actions">
             {demoEnabled ? (
               <label className="state-lab"><span>Preview state</span><select aria-label="Preview interface state" value={demoState} onChange={(event) => setDemoState(event.target.value as DemoState)}><option value="live">Live</option><option value="loading">Loading</option><option value="empty">Empty</option><option value="error">Error</option><option value="stale">Stale</option><option value="revoked">Revoked</option></select></label>
@@ -219,6 +225,7 @@ export function DigitalTwinApp() {
           ) : demoState === "revoked" ? (
             <StatePanel type="revoked" title="Authorization intersection is empty" description="The active source grant was revoked. No cached content, citation locator, embedding, or graph edge is disclosed." action={<Button variant="secondary" onClick={() => setDemoState("live")}>Exit state preview</Button>} />
           ) : renderView({
+            api: apiRef.current!,
             view,
             graph,
             answer,
@@ -253,6 +260,7 @@ export function DigitalTwinApp() {
 }
 
 type RenderViewProps = {
+  api: DigitalTwinApi;
   view: View;
   graph: GraphResult;
   answer: CitedAnswer;
@@ -284,6 +292,7 @@ type RenderViewProps = {
 function renderView(props: RenderViewProps) {
   switch (props.view) {
     case "overview": return <Overview graph={props.graph} answer={props.answer} connectors={props.connectors} onNavigate={props.navigate} />;
+    case "asset": return <AssetTwin api={props.api} />;
     case "graph": return <GraphExplorer graph={props.graph} />;
     case "copilot": return <CopilotPanel answer={props.answer} busy={props.busy === "question"} onAsk={props.onAsk} />;
     case "scenario": return props.canSimulate ? <ScenarioWorkspace scenario={props.scenario} simulation={props.simulation} busy={props.busy} onCompile={props.onCompile} onConfirm={props.onConfirm} onSimulate={props.onSimulate} /> : <StatePanel type="denied" title="Scenario capability is not delegated" description="The active Beacon Works membership is read-only. Tenant switching never expands authority." />;
@@ -294,7 +303,7 @@ function renderView(props: RenderViewProps) {
 function InitialLoading() {
   return (
     <div className="initial-loading" aria-busy="true" aria-label="Loading Digital Twin">
-      <aside><div className="brand-lockup"><span className="brand-mark">DT</span><div><strong>Digital Twin</strong><span>Enterprise control plane</span></div></div>{Array.from({ length: 5 }, (_, index) => <span className="loading-nav" key={index} />)}</aside>
+      <aside><div className="brand-lockup"><span className="brand-mark">DT</span><div><strong>Digital Twin</strong><span>Enterprise control plane</span></div></div>{Array.from({ length: 6 }, (_, index) => <span className="loading-nav" key={index} />)}</aside>
       <main><Skeleton lines={2} /><div className="loading-grid"><Skeleton lines={4} /><Skeleton lines={4} /></div><Skeleton lines={5} /></main>
     </div>
   );

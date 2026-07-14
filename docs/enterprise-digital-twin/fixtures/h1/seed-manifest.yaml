@@ -20,7 +20,7 @@ artifact_digests:
   algorithm: sha256-canonical-json
   source_fixtures: b3d8f648d7bd2d0ed62ab5d803fa25a6aff32a2e0f11ce0f3bddebafc869dd96
   identity_mappings: 61b3729a92713a066df550670f34988fc0817eec84523d0e5e2bfacac0458ab7
-  permission_matrix: ccbaf7af0874b49acea87963ab88dc88022ea10c3fd17255bb8f0bc42cf17935
+  permission_matrix: 9373ff3fc790dd955275a4e8f457e2b41bb6924e4e92c2918de5aac46e5d15a1
   oracle: eba5ed65cf411a137964943d1403144013160e1c53aeb7f2ac72d5fae5fb1a71
 tenants:
   - tenant_alias: tnt_aster

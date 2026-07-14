@@ -11,7 +11,7 @@ acl_classes:
     denied_actors: [usr_aster_analyst, usr_aster_limited, usr_aster_ops_approver, usr_aster_security_approver, usr_aster_admin, usr_platform_operator]
 roles:
   usr_aster_analyst:
-    grants: [evidence.read.aster_orion, scenario.create, simulation.run, jira_remediation.preview]
+    grants: [evidence.read.aster_orion, scenario.create, simulation.run, jira_remediation.preview, asset.read, asset.control.preview, asset.control.execute]
     denials: [action.approve, action.execute, connector.admin]
   usr_aster_limited:
     grants: [evidence.read.aster_public]
@@ -26,7 +26,7 @@ roles:
     grants: [connector.admin, policy.admin, fixture.reset]
     denials: [action.approve.unless_separately_granted]
   usr_beacon_analyst:
-    grants: [evidence.read.beacon, scenario.create, simulation.run]
+    grants: [evidence.read.beacon, scenario.create, simulation.run, asset.read]
     denials: [tenant.aster.any, action.execute]
   usr_platform_operator:
     grants: [service_health.read, telemetry.redacted.read]

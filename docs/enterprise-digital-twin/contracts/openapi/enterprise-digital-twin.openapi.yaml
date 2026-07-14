@@ -2,7 +2,7 @@ openapi: 3.1.0
 info:
   title: Enterprise Digital Twin API
   version: 1.0.0
-  summary: Permission-aware graph simulation and governed-action API.
+  summary: Permission-aware graph, simulation, governed-action, and synthetic physical-asset API.
   description: Tenant context is always derived from the authenticated principal and a server-issued context handle. Tenant identifiers supplied in payloads are consistency assertions and never select authorization scope. Raw X-Tenant-ID is rejected.
 x-edt-context-selection:
   sdk_cli: X-EDT-Context carries an opaque audience-bound short-lived server-issued membership context handle.
@@ -22,6 +22,7 @@ tags:
   - {name: Actions}
   - {name: Connectors}
   - {name: Audit}
+  - {name: Physical Assets}
   - {name: Administration}
 paths:
   /v1/me:
@@ -508,6 +509,84 @@ paths:
       responses:
         '202': {description: Quarantined schema, policy, migration, resource, malicious-fixture, and compatibility validation accepted.}
         default: {$ref: '#/components/responses/Problem'}
+  /v1/assets:
+    get:
+      tags: [Physical Assets]
+      operationId: listSyntheticPhysicalAssets
+      description: Lists tenant-authorized H1 synthetic asset summaries. This operation performs no device discovery and reads no physical or customer equipment.
+      security: [{oidc: [asset.read], contextHeader: []}, {oidc: [asset.read], contextCookie: []}]
+      responses:
+        '200':
+          description: Authorized synthetic asset list. Responses are private and not cacheable.
+          headers: {Cache-Control: {schema: {type: string, const: 'private, no-store'}}}
+          content: {application/json: {schema: {$ref: '#/components/schemas/PhysicalAssetList'}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/assets/{assetId}/twin:
+    get:
+      tags: [Physical Assets]
+      operationId: getSyntheticPhysicalAssetTwin
+      description: Returns one tenant-authorized synthetic asset snapshot including procedural-3D metadata, components, current/history telemetry, deterministic analytics, lifecycle records, simulator control state, and watermark. It contains no physical-device observation.
+      security: [{oidc: [asset.read], contextHeader: []}, {oidc: [asset.read], contextCookie: []}]
+      parameters: [{$ref: '#/components/parameters/AssetId'}]
+      responses:
+        '200':
+          description: Synthetic twin snapshot.
+          headers: {Cache-Control: {schema: {type: string, const: 'private, no-store'}}}
+          content: {application/json: {schema: {$ref: '#/components/schemas/AssetTwinSnapshot'}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/assets/{assetId}/telemetry:
+    get:
+      tags: [Physical Assets]
+      operationId: getSyntheticPhysicalAssetTelemetry
+      description: Observes the deterministic five-second H1 simulator clock and returns a rolling window ending at its current frame. Concurrent reads inside one interval do not accelerate simulated time; the frozen test profile advances one frame per request. This polling resource is synthetic and no industrial real-time, delivery, clock, or device-ingestion guarantee is made.
+      security: [{oidc: [asset.read], contextHeader: []}, {oidc: [asset.read], contextCookie: []}]
+      parameters:
+        - {$ref: '#/components/parameters/AssetId'}
+        - {name: limit, in: query, description: Number of most recent frames returned after advancing one frame., schema: {type: integer, minimum: 1, maximum: 120, default: 1}}
+      responses:
+        '200':
+          description: Synthetic telemetry batch ordered by increasing sequence.
+          headers: {Cache-Control: {schema: {type: string, const: 'private, no-store'}}}
+          content: {application/json: {schema: {$ref: '#/components/schemas/TelemetryBatch'}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/assets/{assetId}/control-previews:
+    post:
+      tags: [Physical Assets]
+      operationId: previewSyntheticPhysicalAssetControl
+      description: Validates and freezes an exact simulator-only command. It neither writes to a physical device nor creates any external network effect.
+      security: [{oidc: [asset.control.preview], contextHeader: []}, {oidc: [asset.control.preview], contextCookie: []}]
+      parameters:
+        - {$ref: '#/components/parameters/AssetId'}
+        - {$ref: '#/components/parameters/IdempotencyKey'}
+      requestBody: {required: true, content: {application/json: {schema: {$ref: '#/components/schemas/AssetControlPreviewRequest'}}}}
+      responses:
+        '201':
+          description: Exact short-lived synthetic command preview. No command has executed.
+          headers:
+            Cache-Control: {schema: {type: string, const: 'private, no-store'}}
+            ETag: {description: Strong preview hash required by execution., schema: {type: string}}
+          content: {application/json: {schema: {$ref: '#/components/schemas/AssetControlPreview'}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/assets/{assetId}/control-previews/{previewId}/execute:
+    post:
+      tags: [Physical Assets]
+      operationId: executeSyntheticPhysicalAssetControl
+      description: Reauthorizes and applies one unchanged preview to tenant-scoped simulator state. Receipts always declare simulation true and external_write false.
+      security: [{oidc: [asset.control.execute], contextHeader: []}, {oidc: [asset.control.execute], contextCookie: []}]
+      parameters:
+        - {$ref: '#/components/parameters/AssetId'}
+        - {$ref: '#/components/parameters/AssetControlPreviewId'}
+        - {$ref: '#/components/parameters/IdempotencyKey'}
+        - {$ref: '#/components/parameters/IfMatch'}
+      responses:
+        '200':
+          description: One simulator transition was recorded or an idempotent replay returned the original receipt; no external write occurred.
+          headers: {Cache-Control: {schema: {type: string, const: 'private, no-store'}}}
+          content: {application/json: {schema: {$ref: '#/components/schemas/AssetControlReceipt'}}}
+        '409': {$ref: '#/components/responses/Problem'}
+        '412': {$ref: '#/components/responses/Problem'}
+        '428': {$ref: '#/components/responses/Problem'}
+        default: {$ref: '#/components/responses/Problem'}
 components:
   securitySchemes:
     oidc:
@@ -532,6 +611,8 @@ components:
     RunId: {name: run_id, in: path, required: true, schema: {type: string, format: uuid}}
     SimulationId: {name: simulation_id, in: path, required: true, schema: {type: string, format: uuid}}
     ApprovalId: {name: approval_id, in: path, required: true, schema: {type: string, format: uuid}}
+    AssetId: {name: assetId, in: path, required: true, schema: {type: string, pattern: '^[a-z0-9][a-z0-9_-]{2,127}$'}}
+    AssetControlPreviewId: {name: previewId, in: path, required: true, schema: {type: string, format: uuid}}
   responses:
     Problem:
       description: RFC 9457-compatible error with no unauthorized resource existence disclosure.
@@ -752,3 +833,453 @@ components:
         scopes: {type: array, items: {type: string}}
         last_reconciled_at: {type: string, format: date-time}
         freshness_seconds: {type: integer, minimum: 0}
+    PhysicalAsset:
+      type: object
+      additionalProperties: false
+      required: [asset_id, display_name, asset_type, manufacturer, model, serial_number, commissioned_at, location, specifications, operational_status, health_score, current_alerts, last_telemetry_at, synthetic, can_control]
+      properties:
+        asset_id: {type: string, pattern: '^[a-z0-9][a-z0-9_-]{2,127}$'}
+        display_name: {type: string, minLength: 1, maxLength: 200}
+        asset_type: {const: centrifugal_pump}
+        manufacturer: {type: string, minLength: 1, maxLength: 200}
+        model: {type: string, minLength: 1, maxLength: 200}
+        serial_number: {type: string, minLength: 1, maxLength: 200}
+        commissioned_at: {type: string, format: date-time}
+        location:
+          type: object
+          additionalProperties: false
+          required: [site, area, line, coordinates]
+          properties:
+            site: {type: string}
+            area: {type: string}
+            line: {type: string}
+            coordinates:
+              type: object
+              additionalProperties: false
+              required: [x, y, z]
+              properties: {x: {type: number}, y: {type: number}, z: {type: number}}
+        specifications:
+          type: object
+          additionalProperties: false
+          required: [design_flow_m3h, design_head_m, rated_speed_rpm, max_operating_pressure_bar]
+          properties:
+            design_flow_m3h: {type: number, exclusiveMinimum: 0}
+            design_head_m: {type: number, exclusiveMinimum: 0}
+            rated_speed_rpm: {type: number, exclusiveMinimum: 0}
+            max_operating_pressure_bar: {type: number, exclusiveMinimum: 0}
+        operational_status: {enum: [running, stopped, emergency_stopped]}
+        health_score: {type: number, minimum: 0, maximum: 100}
+        current_alerts: {type: integer, minimum: 0}
+        last_telemetry_at: {type: string, format: date-time}
+        synthetic: {const: true}
+        can_control: {type: boolean, description: Present on list items and derived from current policy; it is never accepted as authority.}
+    PhysicalAssetList:
+      type: object
+      additionalProperties: false
+      required: [items, next_cursor, has_more]
+      properties:
+        items:
+          type: array
+          items:
+            allOf:
+              - {$ref: '#/components/schemas/PhysicalAsset'}
+              - {required: [can_control]}
+        next_cursor: {type: 'null'}
+        has_more: {const: false}
+    AssetComponent:
+      type: object
+      additionalProperties: false
+      required: [component_id, name, component_type, description, status, installed_at, expected_life_hours, operating_hours, sensor_ids, spatial_anchor]
+      properties:
+        component_id: {type: string, minLength: 1, maxLength: 128}
+        name: {type: string, minLength: 1, maxLength: 200}
+        component_type: {enum: [motor, shaft, bearing, impeller, casing, seal, valve]}
+        description: {type: string, minLength: 1, maxLength: 2000}
+        status: {enum: [healthy, watch, service_due]}
+        installed_at: {type: string, format: date-time}
+        expected_life_hours: {type: number, exclusiveMinimum: 0}
+        operating_hours: {type: number, minimum: 0}
+        sensor_ids: {type: array, uniqueItems: true, items: {type: string, minLength: 1}}
+        spatial_anchor:
+          type: object
+          additionalProperties: false
+          required: [x, y, z]
+          properties: {x: {type: number}, y: {type: number}, z: {type: number}}
+    TelemetryThresholds:
+      type: object
+      additionalProperties: false
+      properties:
+        warning_low: {type: number}
+        critical_low: {type: number}
+        warning_high: {type: number}
+        critical_high: {type: number}
+    TelemetryReading:
+      type: object
+      additionalProperties: false
+      required: [sensor_id, metric, label, value, unit, status, quality, thresholds]
+      properties:
+        sensor_id: {type: string, minLength: 1, maxLength: 128}
+        metric: {enum: [temperature_c, discharge_pressure_bar, vibration_mm_s, flow_l_min, motor_current_a, speed_rpm]}
+        label: {type: string, minLength: 1, maxLength: 200}
+        value: {type: number}
+        unit: {type: string, minLength: 1, maxLength: 40}
+        status: {enum: [normal, warning, critical]}
+        quality: {const: good}
+        thresholds: {$ref: '#/components/schemas/TelemetryThresholds'}
+    TelemetryFrame:
+      type: object
+      additionalProperties: false
+      required: [sequence, observed_at, source, synthetic, readings]
+      properties:
+        sequence: {type: integer, minimum: 0}
+        observed_at: {type: string, format: date-time}
+        source: {const: synthetic_iot_gateway, description: Simulator label only; no gateway or device is connected.}
+        synthetic: {const: true}
+        readings: {type: array, minItems: 1, items: {$ref: '#/components/schemas/TelemetryReading'}}
+    AssetControlState:
+      type: object
+      additionalProperties: false
+      required: [version, speed_pct, speed_rpm, valve_pct, emergency_stopped, operating_mode, updated_at]
+      properties:
+        version: {type: integer, minimum: 1}
+        speed_pct: {type: number, minimum: 0, maximum: 100}
+        speed_rpm: {type: number, minimum: 0}
+        valve_pct: {type: number, minimum: 0, maximum: 100}
+        emergency_stopped: {type: boolean}
+        operating_mode: {enum: [automatic, manual, stopped, emergency_stopped]}
+        updated_at: {type: string, format: date-time}
+    TelemetryBatch:
+      type: object
+      additionalProperties: false
+      required: [asset_id, stream_status, samples, current_telemetry, control_state, health, synthetic]
+      properties:
+        asset_id: {type: string, pattern: '^[a-z0-9][a-z0-9_-]{2,127}$'}
+        stream_status: {const: live_simulation}
+        samples: {type: array, minItems: 1, maxItems: 120, items: {$ref: '#/components/schemas/TelemetryFrame'}}
+        current_telemetry: {$ref: '#/components/schemas/TelemetryFrame'}
+        control_state: {$ref: '#/components/schemas/AssetControlState'}
+        health:
+          type: object
+          additionalProperties: false
+          required: [score, status]
+          properties:
+            score: {type: number, minimum: 0, maximum: 100}
+            status: {enum: [healthy, watch, warning, critical]}
+        synthetic: {const: true}
+    AnalyticsContribution:
+      type: object
+      additionalProperties: false
+      required: [signal, current_value, baseline_mean, ewma_value, z_score, contribution, direction]
+      properties:
+        signal: {enum: [temperature_c, discharge_pressure_bar, vibration_mm_s, flow_l_min, motor_current_a, speed_rpm]}
+        current_value: {type: number}
+        baseline_mean: {type: number}
+        ewma_value: {type: number}
+        z_score: {type: number}
+        contribution: {type: number, minimum: 0}
+        direction: {enum: [above_baseline, below_baseline]}
+    AssetAnomaly:
+      type: object
+      additionalProperties: false
+      required: [anomaly_id, detected_at, severity, anomaly_score, model_version, method, summary, contributions]
+      properties:
+        anomaly_id: {type: string, format: uuid}
+        detected_at: {type: string, format: date-time}
+        severity: {enum: [none, watch, warning, critical]}
+        anomaly_score: {type: number, minimum: 0}
+        model_version: {type: string, minLength: 1}
+        method: {const: multivariate_ewma_z_score}
+        summary: {type: string, minLength: 1, maxLength: 2000}
+        contributions: {type: array, items: {$ref: '#/components/schemas/AnalyticsContribution'}}
+    AssetPrediction:
+      type: object
+      additionalProperties: false
+      required: [prediction_id, generated_at, predicted_failure_mode, target_signal, model_version, method, slope_per_day, failure_threshold, predicted_threshold_at, horizon_days, estimated_remaining_useful_life_days, confidence, recommended_maintenance, contributions, caveat]
+      properties:
+        prediction_id: {type: string, format: uuid}
+        generated_at: {type: string, format: date-time}
+        predicted_failure_mode: {enum: [drive_end_bearing_degradation, no_failure_mode_indicated]}
+        target_signal: {const: vibration_mm_s}
+        model_version: {type: string, minLength: 1}
+        method: {const: ordinary_least_squares_trend_to_threshold}
+        slope_per_day: {type: number}
+        failure_threshold: {type: number}
+        predicted_threshold_at: {type: [string, 'null'], format: date-time}
+        horizon_days: {type: [number, 'null'], minimum: 0}
+        estimated_remaining_useful_life_days: {type: [number, 'null'], minimum: 0}
+        confidence:
+          type: object
+          additionalProperties: false
+          required: [score, basis]
+          properties:
+            score: {type: number, minimum: 0, maximum: 1}
+            basis: {type: string, minLength: 1, maxLength: 1000}
+        recommended_maintenance: {type: string, minLength: 1, maxLength: 2000}
+        contributions: {type: array, items: {$ref: '#/components/schemas/AnalyticsContribution'}}
+        caveat: {type: string, minLength: 1, maxLength: 2000, description: Must state that the output is synthetic and has no real-world predictive validity.}
+    AnalyticsModelCard:
+      type: object
+      additionalProperties: false
+      required: [model_version, anomaly_detection, prediction, evaluated_on, intended_use, limitations]
+      properties:
+        model_version: {type: string, minLength: 1}
+        anomaly_detection:
+          type: object
+          additionalProperties: false
+          required: [algorithm, ewma_alpha, baseline_samples, warning_z_score, critical_z_score]
+          properties:
+            algorithm: {const: multivariate_ewma_z_score}
+            ewma_alpha: {type: number, exclusiveMinimum: 0, maximum: 1}
+            baseline_samples: {type: integer, minimum: 2}
+            warning_z_score: {type: number, exclusiveMinimum: 0}
+            critical_z_score: {type: number, exclusiveMinimum: 0}
+        prediction:
+          type: object
+          additionalProperties: false
+          required: [algorithm, target_signal, failure_threshold]
+          properties:
+            algorithm: {const: ordinary_least_squares_trend_to_threshold}
+            target_signal: {const: vibration_mm_s}
+            failure_threshold: {type: number}
+        evaluated_on: {const: deterministic_synthetic_fixture_only}
+        intended_use: {type: string, minLength: 1, maxLength: 2000}
+        limitations: {type: array, minItems: 1, items: {type: string, minLength: 1, maxLength: 2000}}
+    LifecycleStage:
+      type: object
+      additionalProperties: false
+      required: [stage, status, started_at, completed_at, evidence_ref]
+      properties:
+        stage: {enum: [design, manufacture, commissioning, operation, service, decommissioning]}
+        status: {enum: [completed, current, planned]}
+        started_at: {type: string, format: date-time}
+        completed_at: {type: [string, 'null'], format: date-time}
+        evidence_ref: {type: string, minLength: 1, maxLength: 500}
+    AssetLifecycleEvent:
+      type: object
+      additionalProperties: false
+      required: [event_id, event_type, occurred_at, title, description, work_order_ref]
+      properties:
+        event_id: {type: string, format: uuid}
+        event_type: {enum: [design_approved, manufactured, installed, inspection, maintenance, component_replaced, decommission_planned]}
+        occurred_at: {type: string, format: date-time}
+        title: {type: string, minLength: 1, maxLength: 200}
+        description: {type: string, minLength: 1, maxLength: 2000}
+        work_order_ref: {type: [string, 'null'], maxLength: 200}
+    MaintenanceItem:
+      type: object
+      additionalProperties: false
+      required: [maintenance_id, kind, status, title, due_at, component_id, rationale]
+      properties:
+        maintenance_id: {type: string, format: uuid}
+        kind: {enum: [inspection, preventive, condition_based]}
+        status: {enum: [completed, scheduled, recommended]}
+        title: {type: string, minLength: 1, maxLength: 200}
+        due_at: {type: string, format: date-time}
+        component_id: {type: string, minLength: 1, maxLength: 128}
+        rationale: {type: string, minLength: 1, maxLength: 2000}
+    AssetControlCommand:
+      oneOf:
+        - type: object
+          additionalProperties: false
+          required: [type, value]
+          properties: {type: {const: set_speed_pct}, value: {type: number, minimum: 30, maximum: 100}}
+        - type: object
+          additionalProperties: false
+          required: [type, value]
+          properties: {type: {const: set_valve_pct}, value: {type: number, minimum: 5, maximum: 100}}
+        - type: object
+          additionalProperties: false
+          required: [type]
+          properties: {type: {const: emergency_stop}}
+        - type: object
+          additionalProperties: false
+          required: [type]
+          properties: {type: {const: reset}}
+    AssetAuditEvidence:
+      type: object
+      additionalProperties: false
+      required: [event_id, tenant_sequence, action, actor_id, resource_type, resource_id, occurred_at, request_id, trace_id, details_hash, previous_hash, event_hash]
+      properties:
+        event_id: {type: string, format: uuid}
+        tenant_sequence: {type: integer, minimum: 1}
+        action: {type: string, minLength: 1, maxLength: 200}
+        actor_id: {type: string, format: uuid}
+        resource_type: {enum: [physical_asset, asset_control_preview, asset_control_receipt]}
+        resource_id: {type: string, minLength: 1, maxLength: 200}
+        occurred_at: {type: string, format: date-time}
+        request_id: {type: string, format: uuid}
+        trace_id: {type: string, minLength: 1, maxLength: 200}
+        details_hash: {type: string, pattern: '^[a-f0-9]{64}$'}
+        previous_hash: {type: string, pattern: '^[a-f0-9]{64}$'}
+        event_hash: {type: string, pattern: '^[a-f0-9]{64}$'}
+    AssetControlPreviewRequest:
+      type: object
+      additionalProperties: false
+      required: [command, expected_version, reason]
+      properties:
+        command: {$ref: '#/components/schemas/AssetControlCommand'}
+        expected_version: {type: integer, minimum: 1}
+        reason: {type: string, minLength: 8, maxLength: 500}
+      description: Tenant and actor are server-derived. Every command applies only to the H1 synthetic simulator.
+    AssetControlPreview:
+      type: object
+      additionalProperties: false
+      required: [preview_id, tenant_id, asset_id, requester_id, command, expected_version, reason, before_state, after_state, safety, payload_hash, preview_hash, created_at, expires_at, status, execution_mode, external_write, audit_evidence, etag]
+      properties:
+        preview_id: {type: string, format: uuid}
+        tenant_id: {type: string, format: uuid, description: Server-derived consistency assertion.}
+        asset_id: {type: string, pattern: '^[a-z0-9][a-z0-9_-]{2,127}$'}
+        requester_id: {type: string, format: uuid}
+        command: {$ref: '#/components/schemas/AssetControlCommand'}
+        expected_version: {type: integer, minimum: 1}
+        reason: {type: string, minLength: 8, maxLength: 500}
+        before_state: {$ref: '#/components/schemas/AssetControlState'}
+        after_state: {$ref: '#/components/schemas/AssetControlState'}
+        safety:
+          type: object
+          additionalProperties: false
+          required: [accepted, policy_version, checks]
+          properties:
+            accepted: {const: true}
+            policy_version: {type: string, minLength: 1}
+            checks:
+              type: array
+              minItems: 1
+              items:
+                type: object
+                additionalProperties: false
+                required: [check, passed, detail]
+                properties:
+                  check: {type: string, minLength: 1}
+                  passed: {const: true}
+                  detail: {type: string, minLength: 1, maxLength: 1000}
+        payload_hash: {type: string, pattern: '^[a-f0-9]{64}$'}
+        preview_hash: {type: string, pattern: '^[a-f0-9]{64}$'}
+        created_at: {type: string, format: date-time}
+        expires_at: {type: string, format: date-time}
+        status: {enum: [ready, executed]}
+        execution_mode: {const: simulation}
+        external_write: {const: false}
+        audit_evidence: {$ref: '#/components/schemas/AssetAuditEvidence'}
+        etag: {type: string, pattern: '^"sha256:[a-f0-9]{64}"$', description: Same strong value emitted in the ETag response header.}
+    AssetControlReceipt:
+      type: object
+      additionalProperties: false
+      required: [receipt_id, tenant_id, asset_id, preview_id, requester_id, command, before_state, after_state, payload_hash, idempotency_key, provider, provider_request_id, status, simulation, external_write, recorded_at, audit_evidence]
+      properties:
+        receipt_id: {type: string, format: uuid}
+        tenant_id: {type: string, format: uuid, description: Server-derived consistency assertion.}
+        asset_id: {type: string, pattern: '^[a-z0-9][a-z0-9_-]{2,127}$'}
+        preview_id: {type: string, format: uuid}
+        requester_id: {type: string, format: uuid}
+        command: {$ref: '#/components/schemas/AssetControlCommand'}
+        before_state: {$ref: '#/components/schemas/AssetControlState'}
+        after_state: {$ref: '#/components/schemas/AssetControlState'}
+        payload_hash: {type: string, pattern: '^[a-f0-9]{64}$'}
+        idempotency_key: {type: string, minLength: 16, maxLength: 128}
+        provider: {const: synthetic_asset_simulator}
+        provider_request_id: {type: string, pattern: '^simulated-control-[0-9a-f-]{36}$'}
+        status: {const: succeeded}
+        simulation: {const: true}
+        external_write: {const: false}
+        recorded_at: {type: string, format: date-time}
+        audit_evidence: {$ref: '#/components/schemas/AssetAuditEvidence'}
+    AssetTwinSnapshot:
+      type: object
+      additionalProperties: false
+      required: [asset, visualization, components, current_telemetry, telemetry_history, analytics, lifecycle, control, data_watermark]
+      properties:
+        asset: {$ref: '#/components/schemas/PhysicalAsset'}
+        visualization:
+          type: object
+          additionalProperties: false
+          required: [kind, model_url, coordinate_system, dimensions_m, component_anchors, camera]
+          properties:
+            kind: {const: procedural_3d}
+            model_url: {type: 'null', description: H1 draws checked-in procedural geometry and fetches no external model.}
+            coordinate_system: {const: right_handed_y_up}
+            dimensions_m:
+              type: object
+              additionalProperties: false
+              required: [length, width, height]
+              properties: {length: {type: number, exclusiveMinimum: 0}, width: {type: number, exclusiveMinimum: 0}, height: {type: number, exclusiveMinimum: 0}}
+            component_anchors:
+              type: array
+              items:
+                type: object
+                additionalProperties: false
+                required: [component_id, x, y, z]
+                properties: {component_id: {type: string}, x: {type: number}, y: {type: number}, z: {type: number}}
+            camera:
+              type: object
+              additionalProperties: false
+              required: [position, target]
+              properties:
+                position: {type: array, prefixItems: [{type: number}, {type: number}, {type: number}], items: false, minItems: 3, maxItems: 3}
+                target: {type: array, prefixItems: [{type: number}, {type: number}, {type: number}], items: false, minItems: 3, maxItems: 3}
+        components: {type: array, minItems: 1, items: {$ref: '#/components/schemas/AssetComponent'}}
+        current_telemetry: {$ref: '#/components/schemas/TelemetryFrame'}
+        telemetry_history: {type: array, minItems: 1, items: {$ref: '#/components/schemas/TelemetryFrame'}}
+        analytics:
+          type: object
+          additionalProperties: false
+          required: [anomalies, predictions, model_card]
+          properties:
+            anomalies: {type: array, items: {$ref: '#/components/schemas/AssetAnomaly'}}
+            predictions: {type: array, items: {$ref: '#/components/schemas/AssetPrediction'}}
+            model_card: {$ref: '#/components/schemas/AnalyticsModelCard'}
+        lifecycle:
+          type: object
+          additionalProperties: false
+          required: [current_stage, stages, events, maintenance]
+          properties:
+            current_stage: {const: operation}
+            stages: {type: array, minItems: 1, items: {$ref: '#/components/schemas/LifecycleStage'}}
+            events: {type: array, items: {$ref: '#/components/schemas/AssetLifecycleEvent'}}
+            maintenance: {type: array, items: {$ref: '#/components/schemas/MaintenanceItem'}}
+        control:
+          type: object
+          additionalProperties: false
+          required: [state, limits, available_commands, simulation_only]
+          properties:
+            state: {$ref: '#/components/schemas/AssetControlState'}
+            limits:
+              type: object
+              additionalProperties: false
+              required: [speed_pct, valve_pct]
+              properties:
+                speed_pct: {$ref: '#/components/schemas/PercentRange'}
+                valve_pct: {$ref: '#/components/schemas/PercentRange'}
+            available_commands:
+              type: array
+              items:
+                type: object
+                additionalProperties: false
+                required: [type, value_required, safe_range, description]
+                properties:
+                  type: {enum: [set_speed_pct, set_valve_pct, emergency_stop, reset]}
+                  value_required: {type: boolean}
+                  safe_range:
+                    oneOf:
+                      - type: object
+                        additionalProperties: false
+                        required: [min, max, unit]
+                        properties: {min: {type: number}, max: {type: number}, unit: {const: percent}}
+                      - {type: 'null'}
+                  description: {type: string, minLength: 1, maxLength: 1000}
+            simulation_only: {const: true}
+        data_watermark:
+          type: object
+          additionalProperties: false
+          required: [telemetry_sequence, observed_at, model_version]
+          properties:
+            telemetry_sequence: {type: integer, minimum: 0}
+            observed_at: {type: string, format: date-time}
+            model_version: {type: string, minLength: 1}
+    PercentRange:
+      type: object
+      additionalProperties: false
+      required: [min, max]
+      properties:
+        min: {type: number, minimum: 0, maximum: 100}
+        max: {type: number, minimum: 0, maximum: 100}

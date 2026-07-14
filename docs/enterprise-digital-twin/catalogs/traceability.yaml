@@ -19,6 +19,15 @@ rules:
     acceptance: [AC-PROD-001, AC-AI-001]
     tests_evaluations: [TST-PROD-001]
     roadmap: [H1, H2]
+  - requirement_prefix: REQ-PHY-
+    artifacts: [chapters/17-synthetic-physical-asset-twin.md, chapters/11-ux-visualizations.md, chapters/12-apis-developer-platform.md]
+    decisions: [ADR-002, ADR-004, ADR-013]
+    components: [CMP-WEB, CMP-API, CMP-POLICY, CMP-POSTGRES]
+    contracts: [contracts/openapi/enterprise-digital-twin.openapi.yaml]
+    controls: [CTRL-IAM-003, CTRL-TEN-001, CTRL-AUD-001, CTRL-PHY-001]
+    acceptance: [AC-PHY-001]
+    tests_evaluations: [TST-PHY-001]
+    roadmap: [H1]
   - requirement_prefix: REQ-ARCH-
     artifacts: [chapters/03-system-architecture.md, chapters/04-technology-stack.md, chapters/13-deployment-operations.md]
     decisions: [ADR-003, ADR-004, ADR-005, ADR-015]

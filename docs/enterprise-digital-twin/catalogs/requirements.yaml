@@ -9,6 +9,11 @@ requirements:
   - {id: REQ-PROD-003, title: Graph simulation wedge, statement: H1 MUST explain launch risk and compare a user-confirmed staffing scope or dependency scenario., horizon: H1, status: committed}
   - {id: REQ-PROD-004, title: Governed action wedge, statement: H1 MUST preview dual-authorize execute audit and compensate one allowlisted Jira remediation mutation., horizon: H1, status: committed}
   - {id: REQ-PROD-005, title: Cross-industry extensibility, statement: The core metamodel MUST support namespaced domain and customer ontology packages without changing core code., horizon: H2, status: committed}
+  - {id: REQ-PHY-001, title: Synthetic asset telemetry, statement: H1 MUST produce deterministic timestamped synthetic physical-asset telemetry with typed units sequence quality freshness and reproducible replay metadata., horizon: H1, status: committed}
+  - {id: REQ-PHY-002, title: Accessible physical 3D-style view, statement: H1 MUST provide an interactive component-linked procedural perspective asset view with keyboard reduced-motion and complete structured alternatives., horizon: H1, status: committed}
+  - {id: REQ-PHY-003, title: Honest deterministic asset analytics, statement: H1 anomaly and forecast output MUST be deterministic versioned explainable and labeled synthetic without validated machine-learning or real failure-prediction claims., horizon: H1, status: committed}
+  - {id: REQ-PHY-004, title: Synthetic asset lifecycle, statement: H1 MUST expose versioned synthetic design manufacture commissioning service maintenance and decommissioning history without claiming source-system synchronization., horizon: H1, status: committed}
+  - {id: REQ-PHY-005, title: Guarded simulator control, statement: H1 MUST restrict asset commands to tenant-authorized allowlisted simulator-only previews with expected-version range transition idempotency and audit checks and no device egress., horizon: H1, status: committed}
   - {id: REQ-ARCH-001, title: Modular deployables, statement: H1 MUST use bounded web API connector-worker and AI-simulation workloads in a modular monorepo., horizon: H1, status: committed}
   - {id: REQ-ARCH-002, title: Durable workflows, statement: Long-running sync agent approval and simulation operations MUST use durable workflow semantics., horizon: H1, status: committed}
   - {id: REQ-ARCH-003, title: Transactional events, statement: Domain events MUST be emitted through a transactional outbox before any external event backbone is introduced., horizon: H1, status: committed}
@@ -78,4 +83,3 @@ requirements:
   - {id: REQ-VER-003, title: Continuous AI evaluation, statement: AI changes MUST run task-specific golden adversarial tool-selection argument-accuracy citation abstention and policy evaluations., horizon: H1, status: committed}
   - {id: REQ-VER-004, title: Independent build readiness, statement: An independent engineer MUST confirm H1 can be built without a major unstated product data security topology or interface decision., horizon: H1, status: committed}
   - {id: REQ-VER-005, title: Zero blocking findings, statement: Specification release MUST have no open Critical or High risks and two consecutive clear cross-domain reviews., horizon: H1, status: committed}
-

@@ -57,6 +57,7 @@ Normative terms use RFC 2119 meanings: MUST and MUST NOT are requirements; SHOUL
 15. [Testing, evaluation, and developer experience](chapters/14-testing-evaluation-dx.md)
 16. [Roadmap and research](chapters/15-roadmap-research.md)
 17. [Architecture audit](chapters/16-architecture-audit.md)
+18. [H1 synthetic physical-asset twin](chapters/17-synthetic-physical-asset-twin.md)
 
 #### Normative supporting artifacts
 
@@ -315,7 +316,7 @@ Business impact such as avoided delay or reduced coordination cost is reported a
 
 ##### 8.1 Production-shaped demonstrator
 
-H1 proves the complete thin slice described in `CH-02`: synthetic GitHub and Jira observations, a permission-aware graph, cited launch-risk analysis, seeded schedule simulation, an exact Jira remediation preview, two-person approval, idempotent execution, and compensation. It favors depth and verifiability over connector or domain breadth.
+H1 proves the complete thin slice described in `CH-02`: synthetic GitHub and Jira observations, a permission-aware graph, cited launch-risk analysis, seeded schedule simulation, an exact Jira remediation preview, two-person approval, idempotent execution, and compensation. `CH-17` adds a separately bounded synthetic physical-asset demonstration with advancing telemetry, spatial inspection, deterministic analytics, lifecycle history, and simulator-only control. Neither track claims real customer integration or predictive validity. H1 favors depth and verifiability over connector or domain breadth.
 
 ##### 8.2 Enterprise reference architecture
 
@@ -383,6 +384,8 @@ Status: **committed** | Owners: product-engineering, quality-engineering | Last 
 This chapter is the executable product contract for the H1 hackathon slice. It freezes the demonstration dataset, actor rights, question, scenario, external action, failure cases, and measurements. A visually convincing path that bypasses ingestion, authorization, provenance, simulation, approval, idempotency, audit, or rollback does not satisfy this contract.
 
 Under `REQ-VER-002`, the reference workload MUST run from checked-in, deterministic synthetic fixtures without access to a real employee, customer, repository, or Jira project. Under `REQ-TEN-001` through `REQ-TEN-004`, the same application build MUST serve both synthetic tenants; tenant isolation MUST NOT be implemented by tenant-specific application code. All dates, identities, text, code metadata, issue records, source permissions, and expected answers MUST be synthetic and marked as such in the interface.
+
+`CH-17` defines an additional H1 synthetic physical-asset path in the same application. It does not change this chapter's frozen organization fixture, answer oracle, schedule simulation, or Jira action. Its telemetry originates only from an in-process deterministic simulator, and its control commands change only simulator state. Consequently, synthetic GitHub and Jira remain the only H1 external-source ingestion modes and the allowlisted Jira update remains the only external mutation.
 
 #### 2. Frozen workload identity
 
@@ -2959,13 +2962,14 @@ Status: **committed** | Owners: product-design, frontend-engineering, accessibil
 
 #### 1. Experience goals
 
-The interface helps an authorized user move through five distinct cognitive tasks without collapsing them into a conversational black box:
+The interface helps an authorized user move through six distinct cognitive tasks without collapsing them into a conversational black box:
 
 1. Establish what data is available, current, and permitted.
 2. Ask a question and inspect evidence for each material claim.
 3. Explore relationships and time without implying completeness or causality.
 4. define and compare a reproducible scenario.
 5. Review, approve, execute, audit, and if necessary compensate an exact external action.
+6. Inspect a synthetic physical asset spatially, correlate its telemetry and lifecycle context, and safely exercise simulator-only controls.
 
 `REQ-UX-001`: H1 MUST include cockpit, search, graph, evidence, timeline, scenario comparison, agent-run, approval, connector-health, and audit surfaces.
 
@@ -3052,6 +3056,7 @@ Status values follow the architecture-wide `Committed`, `Provisional`, `Research
 | Timeline `/:tenant/timeline` | Committed H1 | Analysts and domain users | Time-ordered source events, claims, decisions, simulation snapshots, actions, and corrections. Users can switch among source time, validity time, and ingestion time. |
 | Dependency view `/:tenant/dependencies/:rootId` | Committed H1 | Program and engineering users | Directed acyclic scheduling view, cycle warnings, blockers, milestones, critical-path occupancy, assumptions, and accessible path list. It cannot imply causality beyond the typed relationship. |
 | Organization view `/:tenant/organization` | Provisional H2 | Authorized domain users | Team and reporting structures at approved granularity, effective dates, vacancies, and source quality. Individual activity metrics are excluded. |
+| Asset twin `/:tenant/assets/:assetId` | Committed H1 | Authorized operators | Synthetic disclosure, live/pause state, interactive rotatable perspective SVG, synchronized component list, telemetry with units and age, deterministic anomaly/forecast model card, lifecycle history, exact simulator-command preview, execution receipt, and audit evidence. The route remains usable if the visual cannot render. |
 
 ##### 3.4 Scenarios and simulations
 
@@ -3202,13 +3207,14 @@ Every visualization includes a title, decision question, source/checkpoint time,
 | Evidence lineage | Committed H1 | How did a source observation become a displayed claim? | Left-to-right transformation stages, versions, digests, policy checks, and a linear text trace. |
 | Audit sequence | Committed H1 | Which actors and controls led from question to action and rollback? | Chronological event list with correlation groups; optional swimlanes by actor/service; canonical table remains authoritative. |
 | Connector freshness | Committed H1 | Which source or projection may limit a conclusion? | Status table and small age bars; explicit timestamps and thresholds; no green-only health signal. |
+| Procedural 3D-style physical-asset view | Committed H1 synthetic path | Where on the demonstration asset is the selected condition measured? | Rotatable perspective SVG with component hotspots tied to stable IDs and telemetry; rotate/reset buttons, pointer drag, arrow keys, keyboard component selection, reduced motion, rendering fallback, and an equivalent ordered component/status/measurement view. It is not a CAD model, contains no exclusive data, and is always labeled synthetic. |
 | Organization graph | Provisional H2 | How are approved teams and reporting structures related at a selected time? | Effective-dated hierarchy with vacancy and source-quality states; no individual performance overlays. |
 | Calendar | Provisional H2 | How do modeled milestones and constraints align over working calendars? | Accessible agenda/table first, timezone and working-day rules, scenario overlay, no automatic source mutation. |
 | Aggregate communication flow | Provisional H2 | Where do approved team-level handoffs appear under a documented purpose? | Minimum group size, aggregate edges, privacy review, no message sentiment or individual centrality. Direct individual communication graph is Rejected through H3. |
 | Financial flow | Provisional H3 | How do approved budgets or cost allocations connect to programs? | Separate authorization domain, currency and period semantics, reconciliation status, lineage, and finance-owner approval. |
 | Geographic view | Provisional H4 | Which approved regions, facilities, or assets are affected? | Coarse location by default, residency-aware data, accessible region table, and no precise person location. |
 | Simulation playback | Provisional H2 | Does temporal playback add insight beyond comparison and distributions? | Aggregated states, pause/step, reduced-motion mode, transcript, and a measured user-value gate. |
-| 3D organizational view | Rejected H1-H3; Research H4 | No H1-H3 decision requires it | Rejected for current delivery because of occlusion, navigation cost, performance, and accessibility burden. H4 research requires a validated decision task that cannot be served by 2D plus table. |
+| 3D organizational view | Rejected H1-H3; Research H4 | No H1-H3 organizational decision requires it | Rejected for organizational delivery because of occlusion, navigation cost, performance, and accessibility burden. The separate H1 physical-asset scene does not change this decision. H4 organizational research requires a validated decision task that cannot be served by 2D plus table. |
 
 ##### 6.3 Knowledge graph behavior
 
@@ -3344,6 +3350,9 @@ Versioned domain payloads carry a `schema_version`. Standard protocol envelopes 
 | `AuditEvent` | Append-only event ID, tenant, actor/service, action, resource refs, outcome, reason, policy version, trace ID, occurred/recorded time, and payload hash. Sensitive detail is stored separately with stricter access. |
 | `TraceContext` | W3C `traceparent`, optional `tracestate`, request ID, and tenant-safe baggage policy. Client baggage cannot set tenant, actor, or authorization fields. |
 | `Problem` | RFC 9457 problem details plus stable `code`, `request_id`, safe `errors[]`, and optional `retry_after`. |
+| `AssetTwinSnapshot` | Tenant-authorized synthetic asset, spatial components, current/history telemetry, deterministic analytics and model card, lifecycle records, simulator control state, and data watermark. |
+| `AssetControlPreview` | Short-lived exact simulated command, expected version, before/after state, safety checks, payload hash, ETag, expiry, and explicit no-external-write marker. |
+| `AssetControlReceipt` | Idempotent simulator transition result, before/after versions, payload hash, audit evidence, and explicit simulation/no-external-write markers. Replay returns this same receipt. |
 
 Canonical date-times are RFC 3339 UTC with millisecond precision; calendar dates are ISO `YYYY-MM-DD`. Monetary amounts use integer minor units plus ISO currency. Arbitrary precision identifiers and seeds are strings. JSON numbers MUST be finite; `NaN` and infinities are invalid.
 
@@ -3383,6 +3392,11 @@ Canonical date-times are RFC 3339 UTC with millisecond precision; calendar dates
 | `POST /v1/approvals/{id}/decisions` | Records one human approve/reject decision after reauthentication when policy requires. |
 | `POST /v1/approvals/{id}/execute` | Consumes a valid execution grant; returns original receipt on idempotent replay. It cannot accept replacement payload fields. |
 | `POST /v1/action-receipts/{id}/compensation-previews` | Produces guarded rollback preview. Execution follows a new approval/action flow. |
+| `GET /v1/assets` | Lists tenant-authorized synthetic asset summaries; it does not discover or connect devices. |
+| `GET /v1/assets/{assetId}/twin` | Returns the physical scene/component metadata, current and historical synthetic telemetry, deterministic analytics/model card, lifecycle, simulator control state, and watermark. |
+| `GET /v1/assets/{assetId}/telemetry` | Advances exactly one deterministic five-second frame and returns the most recent 1-120 frames selected by `limit`. Polling this resource is not an industrial streaming or real-time guarantee. |
+| `POST /v1/assets/{assetId}/control-previews` | Validates type, value, reason, expected version, transition, range, tenant policy, and idempotency; returns a short-lived exact simulator-only preview and ETag. |
+| `POST /v1/assets/{assetId}/control-previews/{previewId}/execute` | Reauthorizes and executes the unchanged preview once against simulator state using `Idempotency-Key` and `If-Match`; performs no device or network write. |
 | `GET /v1/audit-events` | Authorized keyset-paginated audit index with filters; detail access is separately controlled. |
 | `GET /v1/ontology/types` | Installed, visible ontology catalog and versions. |
 | `POST /v1/extension-packages/validations` | Validates a signed package in quarantine; installation is a separate administrator command. |
@@ -3396,6 +3410,10 @@ Every public `POST`, `PUT`, `PATCH`, and state-changing `DELETE` declares whethe
 The first request atomically stores key, request hash, state, and eventual response reference. Same key plus same hash returns the original status/result. Same key plus a different hash returns `409 idempotency_key_reused`. In-progress replay returns the same run. A server timeout does not authorize a client to generate a new key for an external write; the client queries the original command.
 
 Mutable administrative resources use strong ETags. `PUT`, `PATCH`, confirmation, and policy-sensitive actions require `If-Match`; absent precondition returns `428`, stale version returns `412`. A scenario draft may transition once to a confirmed state, but its operation list and digest do not change. Snapshot content, confirmed scenario content, an approval's bound payload/digest, and action receipts are immutable; approval decisions and lifecycle transitions are append-only child records that update a derived state projection.
+
+Physical-asset control previews follow the same strong-precondition and replay rules but are not external actions and do not require the Jira action's two-person approval policy. A preview binds the tenant, actor, synthetic asset ID, expected simulator version, command, reason, safety-policy version, expiry, and payload hash. Execution rejects an altered or expired preview, stale version, unsupported transition, out-of-range value, policy failure, or reused key with a different hash. Every response carries `execution_mode: simulation`; every receipt carries `simulation: true` and `external_write: false`.
+
+Asset reads require `asset.read`, preview requires `asset.control.preview`, and execution requires `asset.control.execute`. These application capabilities are evaluated against the server-derived actor and tenant context on every call; a general login or graph-read grant is insufficient.
 
 ##### 4.4 Pagination, filtering, and sorting
 
@@ -3622,6 +3640,7 @@ Operational metrics include request rate/status/latency by operation, auth failu
 | AC-DATA-001 | Same-key/same-body command replay returns the original result, different-body reuse returns `409`, and randomized duplicate event delivery converges. |
 | AC-CON-001 | H1 inbound webhook tests verify authentication, raw-byte integrity where applicable, expiry/replay, duplicates, retries, and reconciliation; the H2 outbound gate additionally requires signature rotation, redelivery, SSRF/DNS rebinding defense, and delivery reconciliation. |
 | AC-ACT-002 | Ambiguous and concurrent execution requests remain queryable and create exactly one Jira effect and one receipt. |
+| AC-PHY-001 | Physical-twin contract tests reproduce seeded telemetry and analytics, conceal cross-tenant asset IDs, reject unsafe/stale/mutated/replayed-conflicting previews, produce one simulator transition for a valid command, and prove zero device egress. |
 | AC-SUP-001 | Generated SDKs and signed plugins include SBOM/provenance, pass conformance/scanning, never retry unsafe commands, and fail malicious packages before installation. |
 | AC-REL-001 | H1 non-AI API load meets the 2-second p95 target and SSE/webhook connection budgets without bypassing policy or rate limits. |
 | AC-OBS-001 | REST, SSE, webhook, MCP, workflow, and external action activity correlates through one redacted trace/audit path. |
@@ -4420,7 +4439,7 @@ Work may proceed in parallel only after the contracts at its incoming edge are f
 
 | Horizon | Status | Product boundary | Scale and service boundary | Exit decision |
 |---|---|---|---|---|
-| H1 - Hackathon reference slice | Committed | Two synthetic tenants; GitHub metadata read-only; Jira read and one dual-approved remediation update; cited launch-risk answer; seeded launch simulation; rollback | Up to 100 identities, 100,000 graph nodes and 1,000,000 edges per tenant; ten concurrent users; 15-minute freshness; p95 non-AI read under 2 seconds, simulation under 10 seconds, cited answer under 20 seconds | Complete the frozen `CH-02` workload and all H1 security, quality, accessibility, and audit gates |
+| H1 - Hackathon reference slice | Committed | Two synthetic tenants; GitHub metadata read-only; Jira read and one dual-approved remediation update; cited launch-risk answer; seeded launch simulation; rollback; one synthetic physical-asset simulator with 3D-style spatial inspection, deterministic analytics, lifecycle history, and no device egress | Up to 100 identities, 100,000 graph nodes and 1,000,000 edges per tenant; ten concurrent users; 15-minute source freshness; bounded synthetic telemetry polling; p95 non-AI read under 2 seconds, simulation under 10 seconds, cited answer under 20 seconds | Complete `CH-02` and `CH-17` workloads and all H1 security, quality, accessibility, and audit gates |
 | H2 - Design-partner pilot | Committed after H1 exit review | Up to ten tenants; enterprise SSO/SCIM; permission revocation; retention/deletion; connector recovery; partner-approved domains | Up to 1,000 users and 1,000,000 nodes/10,000,000 edges per tenant; 99.9 percent availability; one-hour RPO; four-hour RTO | Partner acceptance, operational evidence, deletion proof, representative load and recovery tests, and no unresolved Critical/High finding |
 | H3 - Enterprise GA | Provisional | Supportable enterprise product, commercial controls, hardened integrations, measured scale tiers | Scale, SLO, cost, isolation, residency, and DR targets are frozen from H2 telemetry and representative benchmarks before commitment | GA readiness review proves targets, support model, security evidence, upgrade/rollback, and unit economics |
 | H4 - Deployment expansion | Provisional | Dedicated data plane, customer VPC, on-premises, air-gapped, regional, and edge profiles introduced separately | Per-profile limits and failure domains; no blanket active-active multi-cloud promise | Each profile passes compatibility, security, operability, upgrade, backup, recovery, and cost gates |
@@ -4452,14 +4471,16 @@ A smaller team preserves subsystem ownership but reduces parallelism; it does no
 | 6 | Cited answer | 2, 5 | Capability-oriented model gateway; structured tool schemas; prompt-injection defenses; citations; abstention; permission-restricted answer; golden and adversarial evaluations |
 | 7 | Scenario and simulation | 3, 5 | Immutable snapshot; validated dependency DAG; seeded PERT/Monte Carlo run; percentiles, critical path, sensitivity, assumptions, warnings, deterministic oracle |
 | 8 | Governed Jira action | 2, 3, 4, 7 | Exact preview; canonical hash; two distinct approvers; 15-minute expiry; policy recheck; source-version precondition; idempotent receipt; compensation and conflict handling |
-| 9 | Integrated product journey | 4-8 | Responsive and WCAG 2.2 AA journey across freshness, Ask, evidence, graph, scenario, comparison, approval, receipt, audit, and rollback |
-| 10 | Release evidence and independent review | 1-9 | Clean-room run; performance/security/accessibility/evaluation reports; failure demonstrations; SBOM and provenance; no Critical/High findings |
+| 9 | Synthetic physical-asset path | 1-3 | Deterministic fixture telemetry; component-linked procedural perspective and structured views; reproducible anomaly/trend result; lifecycle history; simulator-only exact command preview, idempotent receipt, audit verification, and zero egress |
+| 10 | Integrated product journey | 4-9 | Responsive and WCAG 2.2 AA journey across both the organizational and synthetic asset paths |
+| 11 | Release evidence and independent review | 1-10 | Clean-room run; performance/security/accessibility/evaluation reports; failure demonstrations; SBOM and provenance; no Critical/High findings |
 
 ##### 4.3 H1 exit gate
 
 H1 exits only when:
 
 - The exact `edt-h1-github-jira-launch-risk` workload passes from an empty local environment.
+- The `CH-17` physical-asset path reproduces telemetry and analytics, provides an equivalent non-3D view, executes only allowlisted simulator commands, verifies idempotency/audit evidence, and demonstrates zero device egress.
 - All H1 requirements, controls, risks, contracts, and acceptance criteria are traceable to passing evidence.
 - There are zero cross-tenant and unauthorized disclosures in automated, adversarial, and manual tests.
 - Unsupported answers abstain, repeated simulations reproduce, invalid approvals write nothing, duplicate execution writes once, and rollback is verified.
@@ -4648,6 +4669,8 @@ The `1.0.0-rc.1` architecture is suitable as the normative implementation bluepr
 
 No Critical or High architecture finding remains open in the design. Three Medium risks are explicitly accepted with owners, compensating controls, expiry dates, and revisit triggers. Other registered risks are mitigated but remain subject to implementation evidence. This opinion does not assert that the software has been built, that a control has operated effectively, that a compliance certification exists, or that synthetic simulation has external predictive validity.
 
+The `CH-17` synthetic physical-asset amendment was added after the review passes listed in section 2.3. Its scope is deliberately limited to an in-process simulator and reuses the established tenant, API, exact-payload, idempotency, audit, deterministic-model, and accessibility boundaries. This amendment does not claim a completed architecture review or release gate: `TST-PHY-001`, `AC-PHY-001`, contract validation, and independent review remain required before publication evidence can describe the amended H1 scope as passed.
+
 The architecture reached this opinion by narrowing unbounded claims, assigning authority and data ownership, converting ambiguous autonomy into bounded capability contracts, making projection and action failure semantics explicit, and defining a finite release gate. An independent build-readiness review and generated validation evidence remain mandatory release evidence under `AC-REV-001` and `AC-REV-002`; this self-audit does not substitute for them.
 
 #### 2. Audit scope and method
@@ -4761,15 +4784,16 @@ These acceptances cannot override a Critical/High result, law, contract, tenant 
 | `RSK-011` | Users may still over-trust a well-designed distribution or sensitivity chart. | Comprehension testing, claim-language review, calibration/validity documentation, and prohibition of guaranteed-date copy. |
 | `RSK-012` | Provider outage, snapshot retirement, or regression may exceed fallback coverage. | Snapshot registry, failover exercises, capacity/budget alerts, fallback evaluation, and explicit unavailable behavior. |
 | `RSK-014`, `RSK-015` | Logs, audit, backups, and derived stores may retain sensitive or deleted content. | Data inventory, content canaries, retention/deletion scan, backup-expiry evidence, redaction tests, and restricted audit access review. |
-| `RSK-017` | Advanced visualization may exclude users or distract from evidence. | Retain 3D as Rejected unless decision-value and accessibility gates pass; require 2D and structured alternatives for every visualization. |
+| `RSK-017` | Advanced visualization may exclude users or distract from evidence. | Keep 3D organizational visualization Rejected; permit the bounded synthetic physical-asset scene only with a component-location decision task, keyboard/reduced-motion support, rendering fallback, and an equivalent structured view. |
 | `RSK-018` | Sustained backlog may make a graph or answer materially stale. | Lag SLOs, backpressure, priority, reconciliation, stale-result UX, capacity tests, and fail-closed actions. |
 
 #### 6. Known limitations and architecture boundaries
 
 These limitations are intentional and do not represent hidden implementation choices:
 
-- H1 ingests metadata from synthetic GitHub and Jira only. It does not ingest source code, email, private chat, meeting audio, customer data, finance records, or individual activity telemetry.
-- H1's Jira field update is the only external mutation. Every additional action class requires a separate schema, threat model, approver policy, idempotency definition, source concurrency rule, compensation behavior, evaluation, and opt-in.
+- H1 ingests external-source metadata from synthetic GitHub and Jira only. The `CH-17` asset path generates synthetic telemetry inside the application; it has no IoT connector, historian, industrial protocol, physical-device read, or customer data. H1 does not ingest source code, email, private chat, meeting audio, finance records, or individual activity telemetry.
+- H1's Jira field update is the only external mutation. Asset control modifies in-process simulator state and receipts state `external_write: false`. Every additional external action class requires a separate schema, threat model, approver policy, idempotency definition, source concurrency rule, compensation behavior, evaluation, and opt-in.
+- H1 physical-asset anomalies and forecasts are deterministic demonstrations over synthetic history. They are not trained or validated predictive-maintenance models and cannot support maintenance, safety, or equipment-operation decisions.
 - PERT/Monte Carlo output is conditional on fixture distributions and dependency structure. It is not a causal estimate and cannot validate a real launch forecast.
 - Shared tenancy is the reference deployment. Dedicated, customer-managed, regional, air-gapped, and edge profiles remain separately gated.
 - The online OpenAI runtime is an explicit dependency for H1. Air-gapped inference is unavailable until a local model profile passes the same workload-specific quality and safety gates.
@@ -4815,6 +4839,111 @@ Reopening a domain does not automatically invalidate unrelated decisions. The ne
 The strongest aspect of this architecture is that it turns an ambitious organizational-intelligence concept into a complete, testable chain from evidence to governed action while preserving a larger extensibility path. The most consequential remaining weakness is not an unmade architecture choice; it is the amount of disciplined implementation and operating evidence required to prove that tenant isolation, permission fidelity, model safety, deletion, recovery, and action idempotency work together under failure.
 
 The architecture deliberately accepts slower breadth expansion, a multi-runtime learning cost, and limited H1 external validity. Those tradeoffs are preferable to unsupported hyperscale claims, premature infrastructure, hidden workforce inference, or unsafe autonomy. If implementation evidence contradicts a design assumption, the appropriate response is to reopen the decision and narrow or redesign the capability, not to weaken the gate.
+
+## CH-17 - H1 Synthetic Physical-Asset Twin
+
+Status: **committed** | Owners: product-engineering, simulation-team, security-engineering | Last reviewed: 2026-07-14
+
+### H1 Synthetic Physical-Asset Twin
+
+#### 1. Purpose and truth boundary
+
+This chapter defines a second bounded H1 demonstration path for a synthetic industrial asset. It complements, but does not replace or alter, the frozen GitHub/Jira launch-risk workload in `CH-02`. The path demonstrates live-looking telemetry, spatial inspection, deterministic analytics, lifecycle history, and guarded control against an in-process simulator.
+
+Every asset, sensor sample, lifecycle event, analytic result, and command effect is synthetic. H1 has no IoT gateway, message broker, OPC UA, Modbus, MQTT, SCADA, PLC, historian, CMMS, or physical-device connection. It reads no customer telemetry and sends no command outside the application. The interface and API MUST label this boundary, and control receipts MUST state `simulation: true` and `external_write: false`.
+
+The Jira update defined in `CH-02` remains the only H1 external mutation. A simulated asset command changes only tenant-scoped demonstration state and is not evidence that the platform is safe or suitable for real operational-technology control.
+
+| Requirement | H1 commitment |
+|---|---|
+| `REQ-PHY-001` | Produce deterministic, timestamped synthetic temperature, pressure, vibration, flow, and operating-state samples with sequence and quality metadata. |
+| `REQ-PHY-002` | Provide an interactive procedural 3D-style physical-asset view linked to components and telemetry, with a complete keyboard-operable structured alternative. |
+| `REQ-PHY-003` | Detect and forecast synthetic degradation with versioned deterministic algorithms and explicit limitations, without claiming validated machine learning or real failure prediction. |
+| `REQ-PHY-004` | Present design, manufacture, commissioning, service, maintenance, and planned decommissioning history as versioned synthetic lifecycle records. |
+| `REQ-PHY-005` | Preview and execute only allowlisted simulated commands with tenant authorization, expected-version checks, limits, idempotency, audit evidence, and fail-closed safety checks. |
+
+#### 2. Reference asset and snapshot
+
+H1 contains one synthetic centrifugal pump and its component hierarchy. Stable tenant-qualified IDs identify the motor, coupling, drive-end bearing, pump casing, inlet, and outlet. The asset snapshot contains:
+
+- identity, type, location, lifecycle stage, operating state, health summary, and version;
+- a component list with spatial hotspot identifiers and associated sensor tags;
+- current telemetry and a bounded recent history;
+- deterministic anomalies, forecasts, model card, and per-signal contributions;
+- lifecycle stages, dated events, maintenance records, and provenance labels;
+- current simulator control state and an allowlist of available commands; and
+- a data watermark showing the deterministic simulator sequence and observation time.
+
+The H1 asset record is a demonstration projection over checked-in fixture parameters. It does not promote the full `edt.pack.physical` enterprise domain pack or real IoT connector certification from H4 into H1.
+
+#### 3. Synthetic near-real-time telemetry
+
+The server runs a deterministic five-second simulator clock initialized from the fixture. A read materializes only frames due on that clock, so repeated or concurrent readers inside one interval observe the same current frame and cannot make simulated time run faster. Long inactive gaps are bounded to twelve catch-up frames and then rebase to the current server clock rather than replaying an unbounded backlog. The frozen-clock test profile advances exactly one frame per request for reproducible assertions. The `limit` query selects a rolling window of 1 to 120 recent frames; it does not itself select an advancement count. A sample has an asset ID, monotonically increasing sequence, sample timestamp, quality status, and typed values with units. Values vary within configured operating envelopes; a deterministic degradation term produces a reproducible bearing-vibration trend. The same fixture version, initial state, command history, and sequence MUST produce the same canonical samples.
+
+The web client polls the telemetry resource while the twin screen is active, pauses when the document is hidden, aborts outstanding requests on navigation, and stops after repeated errors until the user explicitly retries. The screen shows last update, connection state, data age, units, thresholds, and whether a value is observed from the simulator or derived. A user can pause live updates without losing the last safe snapshot.
+
+This polling loop is a bounded H1 substitute for a telemetry stream. It is not a claim of continuous ingestion, device clock synchronization, exactly-once delivery, industrial event rates, or production freshness. A real connector must separately define authentication, device identity, ordering, clock skew, buffering, backpressure, quality codes, calibration, retention, reconciliation, network segmentation, and safety behavior.
+
+#### 4. Interactive procedural 3D-style inspection
+
+The asset screen renders a purpose-built perspective SVG representation of physical equipment rather than a photorealistic CAD model. Users can rotate and reset the view, select a component hotspot, and correlate the selected component with current measurements, anomaly contributions, forecast, and lifecycle/maintenance context. Selection is state, not decoration: the component ID is shared by the procedural scene and its structured inspector.
+
+The procedural scene MUST NOT be the only way to locate or understand an issue. The same components, statuses, measurements, units, alerts, and actions are available as keyboard-operable controls and a table/list in logical order. Focus is visible, selection is announced, color is not the sole status encoding, pointer gestures have button equivalents, and reduced-motion mode disables continuous nonessential animation. An SVG or rendering failure leaves the structured view fully usable.
+
+This is distinct from the rejected H1-H3 3D organizational view in `CH-11`: the physical scene supports a concrete spatial maintenance question and has no exclusive information.
+
+#### 5. Deterministic anomaly and forecast demonstration
+
+H1 analytics are transparent numerical demonstrations, not an LLM decision and not a validated predictive-maintenance model. The service computes multivariate exponentially weighted moving statistics and normalized residual/z-score contributions over synthetic history, then uses a deterministic least-squares trend to estimate a threshold-crossing horizon or remaining-useful-life range when the data supports it.
+
+Every result identifies input watermark, algorithm and model version, generated time, affected component, signal contributions, severity, confidence expression, forecast horizon or failure mode, recommended maintenance, and missing-data/validity caveat. Identical inputs and model version MUST produce identical results. Insufficient history, non-finite values, or an ill-conditioned trend produces `no_failure_mode_indicated` with null horizon fields and an explicit limitation, not an invented forecast.
+
+The interface MUST use language such as `synthetic anomaly` and `conditional demonstration forecast`. It MUST NOT claim that a failure will occur, that the algorithm learned from real equipment, that a probability is calibrated on field outcomes, or that a recommended action is an engineering safety determination. Production use requires representative historical data, leakage review, backtesting, calibration, false-positive/negative analysis, drift monitoring, human-factors review, domain-engineer approval, and prospective validation.
+
+#### 6. Lifecycle history
+
+The twin presents a coherent synthetic history from design and manufacture through commissioning, service, maintenance, and planned decommissioning. Each lifecycle event has a stable ID, stage, status, effective date/time, title, description, and optional artifact reference. Completed history is append-only in H1; corrections create a superseding event rather than silently rewriting prior history.
+
+Lifecycle records provide context, not authority to perform maintenance or retire equipment. Planned work and decommissioning dates remain proposals. A future CMMS/PLM integration must define source precedence, reconciliation, permissions, retention, legal/quality records, version conflicts, and write governance before the platform can claim lifecycle synchronization.
+
+#### 7. Guarded simulated control
+
+H1 exposes `set_speed_pct`, `set_valve_pct`, `emergency_stop`, and `reset` only when the current synthetic asset state and actor capability allow them. Control is a two-step workflow:
+
+1. The server validates the requested command, reason, expected asset version, allowlisted type, numeric range, transition rule, and tenant context, then returns a short-lived exact-payload preview with before/after simulator state, safety checks, payload hash, and ETag.
+2. Execution requires the preview ID, `Idempotency-Key`, and matching `If-Match`. The server reauthorizes the actor, revalidates expiry and expected version, verifies the preview hash, and either applies one in-process state transition or rejects without an effect.
+
+The same idempotency key and payload returns the original receipt; reuse with different input fails. A stale asset version, expired preview, failed safety check, unsupported transition, out-of-range setpoint, or policy failure performs no state change. `emergency_stop` has no confirmation bypass in the demo; it remains a simulated command with the same authentication, validation, idempotency, and audit requirements. `reset` may clear a simulated trip only when its transition rule passes.
+
+Preview and receipt payloads disclose simulation mode, before/after state, asset versions, payload hash, actor-safe audit reference, and hash-chained audit evidence. They never imply a PLC acknowledgement or physical verification. Adding real device egress is a new external action class and blocks release until an accepted ADR, OT threat model, safety-hazard analysis, device identity and protocol contract, network-zone design, emergency/timeout semantics, independent interlocks, approval policy, post-command verification, rollback/compensation analysis, and representative hardware-in-the-loop evidence exist.
+
+#### 8. Public API and authorization
+
+The normative OpenAPI contract defines:
+
+| Operation | Semantics |
+|---|---|
+| `GET /v1/assets` | List tenant-authorized synthetic asset summaries. |
+| `GET /v1/assets/{assetId}/twin` | Return the component, visualization, telemetry, analytic, lifecycle, control, and watermark snapshot. |
+| `GET /v1/assets/{assetId}/telemetry?limit=...` | Observe the simulator clock and return a bounded deterministic sample batch. |
+| `POST /v1/assets/{assetId}/control-previews` | Validate and freeze an exact synthetic command preview. |
+| `POST /v1/assets/{assetId}/control-previews/{previewId}/execute` | Revalidate and execute the preview once against simulator state. |
+
+Tenant context derives from the authenticated membership; no asset route accepts a tenant selector. Reads require `asset.read`, preview requires `asset.control.preview`, and execution requires `asset.control.execute`. The Beacon analyst has read-only access to its tenant-scoped synthetic asset view and no control grant. Unauthorized and unknown asset IDs receive the same non-enumerating response. Command bodies reject unknown properties. Responses are `private, no-store`; simulator identifiers and payloads are tenant-scoped; every preview, execution, rejection, conflict, and replay is audited.
+
+#### 9. Acceptance and limitations
+
+`AC-PHY-001` is satisfied only when `TST-PHY-001` demonstrates all of the following from a clean synthetic seed:
+
+- telemetry visibly advances, pauses, recovers, and reproduces from the same frozen fixture, state, and sequence without network or device input;
+- selecting a component in the 3D view and structured alternative exposes the same status and measurements, including under keyboard-only and reduced-motion operation;
+- the anomaly/forecast result reproduces exactly and displays its model card and synthetic/no-real-world-validity warning;
+- all lifecycle stages and event provenance remain inspectable without rewriting history;
+- every invalid, stale, expired, unauthorized, cross-tenant, out-of-range, mutated, or duplicate-conflicting command produces zero state transitions;
+- a valid command produces one simulator transition, an idempotent replay returns the same receipt, and the hash-linked audit trail verifies; and
+- UI, API examples, logs, and generated editions never describe the simulator as a connected physical asset.
+
+This capability proves product interaction and guardrail behavior only. It does not establish industrial reliability, real-time determinism, functional safety, cybersecurity certification, model accuracy, asset fitness, maintenance efficacy, or authority to operate physical equipment.
 
 # Part III - Architecture Decision Records
 
@@ -5112,6 +5241,11 @@ Source: `docs/enterprise-digital-twin/catalogs/requirements.yaml`
 | REQ-PROD-003 | Graph simulation wedge | H1 MUST explain launch risk and compare a user-confirmed staffing scope or dependency scenario. | H1 | committed |
 | REQ-PROD-004 | Governed action wedge | H1 MUST preview dual-authorize execute audit and compensate one allowlisted Jira remediation mutation. | H1 | committed |
 | REQ-PROD-005 | Cross-industry extensibility | The core metamodel MUST support namespaced domain and customer ontology packages without changing core code. | H2 | committed |
+| REQ-PHY-001 | Synthetic asset telemetry | H1 MUST produce deterministic timestamped synthetic physical-asset telemetry with typed units sequence quality freshness and reproducible replay metadata. | H1 | committed |
+| REQ-PHY-002 | Accessible physical 3D-style view | H1 MUST provide an interactive component-linked procedural perspective asset view with keyboard reduced-motion and complete structured alternatives. | H1 | committed |
+| REQ-PHY-003 | Honest deterministic asset analytics | H1 anomaly and forecast output MUST be deterministic versioned explainable and labeled synthetic without validated machine-learning or real failure-prediction claims. | H1 | committed |
+| REQ-PHY-004 | Synthetic asset lifecycle | H1 MUST expose versioned synthetic design manufacture commissioning service maintenance and decommissioning history without claiming source-system synchronization. | H1 | committed |
+| REQ-PHY-005 | Guarded simulator control | H1 MUST restrict asset commands to tenant-authorized allowlisted simulator-only previews with expected-version range transition idempotency and audit checks and no device egress. | H1 | committed |
 | REQ-ARCH-001 | Modular deployables | H1 MUST use bounded web API connector-worker and AI-simulation workloads in a modular monorepo. | H1 | committed |
 | REQ-ARCH-002 | Durable workflows | Long-running sync agent approval and simulation operations MUST use durable workflow semantics. | H1 | committed |
 | REQ-ARCH-003 | Transactional events | Domain events MUST be emitted through a transactional outbox before any external event backbone is introduced. | H1 | committed |
@@ -5217,6 +5351,7 @@ Source: `docs/enterprise-digital-twin/catalogs/traceability.yaml`
 | --- | --- | --- | --- | --- | --- | --- |
 | REQ-GOV- | README.md<br>decision-precedence.md<br>manifest.yaml<br>chapters/16-architecture-audit.md | ADR-001<br>ADR-016 | CMP-DOCS | manifest.yaml<br>catalogs/requirements.yaml<br>catalogs/traceability.yaml | CTRL-AUD-001 | AC-DOC-001<br>AC-DOC-002<br>AC-DOC-003<br>AC-REV-002 |
 | REQ-PROD- | chapters/01-product-vision.md<br>chapters/02-reference-workload.md<br>chapters/11-ux-visualizations.md | ADR-002 | CMP-WEB<br>CMP-API | contracts/openapi/enterprise-digital-twin.openapi.yaml<br>contracts/schemas/scenario.schema.json | CTRL-DAT-001<br>CTRL-IAM-003 | AC-PROD-001<br>AC-AI-001 |
+| REQ-PHY- | chapters/17-synthetic-physical-asset-twin.md<br>chapters/11-ux-visualizations.md<br>chapters/12-apis-developer-platform.md | ADR-002<br>ADR-004<br>ADR-013 | CMP-WEB<br>CMP-API<br>CMP-POLICY<br>CMP-POSTGRES | contracts/openapi/enterprise-digital-twin.openapi.yaml | CTRL-IAM-003<br>CTRL-TEN-001<br>CTRL-AUD-001<br>CTRL-PHY-001 | AC-PHY-001 |
 | REQ-ARCH- | chapters/03-system-architecture.md<br>chapters/04-technology-stack.md<br>chapters/13-deployment-operations.md | ADR-003<br>ADR-004<br>ADR-005<br>ADR-015 | CMP-WEB<br>CMP-API<br>CMP-CONNECTOR<br>CMP-AI<br>CMP-WORKFLOW<br>CMP-PLATFORM | contracts/openapi/enterprise-digital-twin.openapi.yaml<br>contracts/asyncapi/events.asyncapi.yaml<br>contracts/proto/digital_twin.proto | CTRL-OPS-002<br>CTRL-SUP-001 | AC-DOC-003<br>AC-REL-003 |
 | REQ-TEN- | chapters/03-system-architecture.md<br>chapters/05-data-knowledge-graph.md<br>chapters/09-security-privacy-compliance.md | ADR-006<br>ADR-007 | CMP-API<br>CMP-POLICY<br>CMP-POSTGRES<br>CMP-PROJECTION | contracts/schemas/canonical.schema.json<br>contracts/openapi/enterprise-digital-twin.openapi.yaml | CTRL-IAM-002<br>CTRL-TEN-001<br>CTRL-TEN-002<br>CTRL-TEN-003 | AC-TEN-001 |
 | REQ-DATA- | chapters/05-data-knowledge-graph.md<br>catalogs/ontology.yaml | ADR-008<br>ADR-009<br>ADR-010 | CMP-POSTGRES<br>CMP-OBJECT<br>CMP-GRAPH<br>CMP-PROJECTION | contracts/schemas/canonical.schema.json<br>contracts/schemas/ontology-package.schema.json | CTRL-DAT-001<br>CTRL-DAT-002<br>CTRL-DAT-003 | AC-DATA-001<br>AC-DATA-002<br>AC-DATA-003<br>AC-PRV-001 |
@@ -5696,6 +5831,7 @@ Source: `docs/enterprise-digital-twin/catalogs/screens.yaml`
 | UX-APPROVAL | Action approval | H1 | Exact immutable diff risk scope expiry two-person control and rollback preview. |  |  |  |
 | UX-CONNECTORS | Connector administration | H1 | Scope freshness cursors errors revocation and reconciliation. |  |  |  |
 | UX-AUDIT | Audit explorer | H1 | Filter export verify and correlate security and action evidence. |  |  |  |
+| UX-ASSET-TWIN | Synthetic physical-asset twin | H1 | Live synthetic telemetry spatial component inspection deterministic analytics lifecycle history and simulator-only control. |  |  |  |
 | UX-ADMIN | Tenant administration | H2 | SSO SCIM membership policy retention residency keys and break-glass. |  |  |  |
 | UX-ONTOLOGY | Ontology studio | H2 | Versioned domain packages constraints mappings migrations and impact preview. |  |  |  |
 | UX-WORKFLOW | Workflow builder | H3 | Typed steps policies approvals budgets simulation and test fixtures. |  |  |  |
@@ -5737,6 +5873,7 @@ evidence: Source provenance time confidence classification and permission explan
 | VIS-GEO | Geographic view | Residency facilities assets and service regions. |  |
 | VIS-PLAYBACK | Simulation playback | Reproducible scenario progression distributions and intervention points. |  |
 | VIS-3D | 3D organizational view | Optional storytelling view with no exclusive information. | H4 |
+| VIS-PHYSICAL-3D | Procedural 3D-style physical-asset view | Spatially locate a synthetic component condition in a rotatable perspective SVG while preserving a complete keyboard-operable structured alternative. | H1 |
 
 ## Simulations
 
@@ -5798,6 +5935,7 @@ Source: `docs/enterprise-digital-twin/catalogs/controls.yaml`
 | CTRL-ACT-001 | actions | Exact-payload approval | Approval binds the canonical payload tenant actors credential target expiry policy and idempotency key. |
 | CTRL-ACT-002 | actions | Dual authorization | Two distinct authenticated people approve the H1 external mutation and requester cannot self-complete control. |
 | CTRL-ACT-003 | actions | Action compensation | Before and after state receipts and idempotent compensation are retained and tested. |
+| CTRL-PHY-001 | physical-assets | Synthetic device boundary | H1 asset telemetry and controls remain inside the tenant-scoped simulator and every preview receipt and user-visible result discloses that no physical read or write occurred. |
 | CTRL-AUD-001 | audit | Tamper-evident audit | Sensitive operations append hash-linked audit envelopes to restricted immutable storage. |
 | CTRL-PRV-001 | privacy | Purpose and minimization | Data collection and derived inference require documented purpose field minimization and retention. |
 | CTRL-PRV-002 | privacy | Sensitive workforce prohibition | Individual employment health emotion productivity and misconduct inference is disabled through H3. |
@@ -5857,6 +5995,7 @@ Source: `docs/enterprise-digital-twin/catalogs/acceptance.yaml`
 | AC-ACT-003 | Compensation | Authorized rollback restores the captured prior state or records a human-action-required terminal state. |
 | AC-SIM-001 | Reproducible simulation | Same snapshot input model and seed yield the identical canonical p50 p80 p95 and sensitivity digest. |
 | AC-SIM-002 | Simulation edge cases | Cycles missing estimates impossible capacity disconnected work and contradictory interventions produce explicit validation outcomes. |
+| AC-PHY-001 | Synthetic physical-asset journey | Deterministic fixture telemetry procedural perspective and structured component selection analytics lifecycle history and guarded simulator commands reproduce with zero device egress and explicit synthetic labels. |
 | AC-SEC-001 | Secrets containment | Scans of logs traces prompts errors exports and artifacts contain no injected canary secrets. |
 | AC-SEC-002 | ACL revocation | Revoked source access is unavailable to all query and agent paths within the committed freshness objective. |
 | AC-PRV-001 | Deletion completeness | Deletion inventory proves removal across authoritative graph vector search cache object trace and backup-expiry workflows. |
@@ -5888,6 +6027,7 @@ A test or evaluation covers only the exact REQ/QAR identifiers enumerated in cov
 | TST-GOV-001 | Normative specification governance conformance | document_conformance | H1 | architecture-governance | Run the blueprint validator, regenerate editions and reports, and independently inspect precedence, identifiers, citations, review gates, and frozen-scope trace expansion. | Zero validation findings; generated artifacts match the manifest; each exact covered identifier has all mandatory trace dimensions. | output/test-evidence/TST-GOV-001.json | REQ-GOV-001<br>REQ-GOV-002<br>REQ-GOV-003<br>REQ-GOV-004 |
 | TST-PROD-001 | Product boundary and demo outcome review | acceptance_review | H1<br>H2 | product-architecture | Replay the frozen demo narrative and design-partner scorecard against personas, non-goals, accessibility principles, source-backed claims, and horizon metrics. | Every claimed outcome has a measurable metric and source or is explicitly labeled an assumption; excluded workforce scoring remains absent. | output/test-evidence/TST-PROD-001.json | REQ-PROD-001<br>REQ-PROD-002<br>REQ-PROD-003<br>REQ-PROD-004<br>REQ-PROD-005 |
 | TST-ARCH-001 | Workload topology and portability verification | architecture_test | H1<br>H2<br>H3<br>H4 | platform-architecture | Validate container boundaries, durable workflow and outbox topology, system-of-record assignments, deployment profiles, and benchmark-gated transition records against the accepted ADRs. | The four H1 workloads deploy with only adopted dependencies; conditional technologies have measurable triggers and no undeclared authority. | output/test-evidence/TST-ARCH-001.json | REQ-ARCH-001<br>REQ-ARCH-002<br>REQ-ARCH-003<br>REQ-ARCH-004<br>REQ-ARCH-005<br>REQ-ARCH-006<br>REQ-ARCH-007 |
+| TST-PHY-001 | Synthetic physical-asset twin conformance | end_to_end_test | H1 | product-engineering<br>simulation-team<br>security-engineering | Replay frozen-fixture telemetry and component selection through procedural perspective and structured views verify deterministic anomaly and trend outputs inspect lifecycle history and exercise valid invalid stale replayed cross-tenant and out-of-range simulator commands. | Identical fixture sequence state and model version reproduce canonical results every invalid command has zero effect a valid preview executes once replay returns its receipt audit hashes verify and no network or device write occurs. | output/test-evidence/TST-PHY-001.json | REQ-PHY-001<br>REQ-PHY-002<br>REQ-PHY-003<br>REQ-PHY-004<br>REQ-PHY-005 |
 | TST-TEN-001 | Tenant isolation and authorization adversarial suite | security_test | H1 | security-engineering<br>data-platform | Exercise server-derived context, RLS, tenant-qualified relations, namespace isolation, ACL revocation, cache barriers, delegation ceilings, and cross-tenant identifier substitution. | Zero cross-tenant existence or content disclosure and no authorization decision derived from caller-supplied tenant context. | output/test-evidence/TST-TEN-001.json | REQ-TEN-001<br>REQ-TEN-002<br>REQ-TEN-003<br>REQ-TEN-004<br>REQ-TEN-005 |
 | TST-DATA-001 | Canonical data, provenance, projection, and lifecycle suite | contract_test | H1<br>H2 | data-platform | Validate canonical schemas, tenant-qualified keys, claim/evidence chains, reversible resolution, deterministic graph rebuilds, ontology extension constraints, retention, deletion, and permission revocation. | Replays are byte-identical, projections rebuild from PostgreSQL/object storage, provenance is complete, and deletion/revocation removes every serving path within the declared SLO. | output/test-evidence/TST-DATA-001.json | REQ-DATA-001<br>REQ-DATA-002<br>REQ-DATA-003<br>REQ-DATA-004<br>REQ-DATA-005<br>REQ-DATA-006<br>REQ-DATA-007<br>REQ-DATA-008<br>REQ-DATA-009<br>QAR-PRV-001 |
 | TST-CON-001 | GitHub and Jira connector certification suite | contract_test | H1<br>H2 | connector-platform | Validate package manifests, content-addressed schemas, positive and negative fixtures, exact permissions/events/egress, duplicate and out-of-order ingress, cursor recovery, reconciliation, tombstones, and connector SDK lifecycle behavior. | Only frozen allowlists validate; retries and recovery produce deterministic observations; invalid, replayed, oversized, or misbound input has no canonical effect. | output/test-evidence/TST-CON-001.json | REQ-CON-001<br>REQ-CON-002<br>REQ-CON-003<br>REQ-CON-004<br>REQ-CON-005<br>QAR-SYNC-001<br>QAR-COR-001 |
@@ -5916,7 +6056,7 @@ Each committed requirement and quality attribute appears in exactly one horizon 
 
 | Id | Title | Status | Owner | Exit Evidence | Requirements | Quality Attributes |
 | --- | --- | --- | --- | --- | --- | --- |
-| H1 | Production-shaped hackathon demonstrator | committed | hackathon-delivery-lead | output/test-evidence/H1-release.json | REQ-GOV-001<br>REQ-GOV-002<br>REQ-GOV-003<br>REQ-GOV-004<br>REQ-PROD-002<br>REQ-PROD-003<br>REQ-PROD-004<br>REQ-ARCH-001<br>REQ-ARCH-002<br>REQ-ARCH-003<br>REQ-TEN-001<br>REQ-TEN-002<br>REQ-TEN-003<br>REQ-TEN-004<br>REQ-TEN-005<br>REQ-DATA-001<br>REQ-DATA-002<br>REQ-DATA-003<br>REQ-DATA-004<br>REQ-DATA-005<br>REQ-CON-001<br>REQ-CON-002<br>REQ-CON-003<br>REQ-CON-004<br>REQ-AI-001<br>REQ-AI-002<br>REQ-AI-003<br>REQ-AI-004<br>REQ-AI-005<br>REQ-AI-006<br>REQ-AI-007<br>REQ-AI-008<br>REQ-ACT-001<br>REQ-ACT-002<br>REQ-ACT-003<br>REQ-SIM-001<br>REQ-SIM-002<br>REQ-SIM-003<br>REQ-SIM-004<br>REQ-UX-001<br>REQ-UX-002<br>REQ-UX-003<br>REQ-UX-004<br>REQ-SEC-001<br>REQ-SEC-002<br>REQ-SEC-003<br>REQ-SEC-004<br>REQ-REL-001<br>REQ-REL-003<br>REQ-REL-004<br>REQ-REL-005<br>REQ-DEV-002<br>REQ-VER-001<br>REQ-VER-002<br>REQ-VER-003<br>REQ-VER-004<br>REQ-VER-005 | QAR-SEC-001<br>QAR-SEC-002<br>QAR-SEC-003<br>QAR-PERF-001<br>QAR-PERF-002<br>QAR-PERF-003<br>QAR-SYNC-001<br>QAR-COR-001<br>QAR-AI-001<br>QAR-AI-002<br>QAR-SIM-001<br>QAR-OBS-001<br>QAR-ACC-001<br>QAR-COST-001 |
+| H1 | Production-shaped hackathon demonstrator | committed | hackathon-delivery-lead | output/test-evidence/H1-release.json | REQ-GOV-001<br>REQ-GOV-002<br>REQ-GOV-003<br>REQ-GOV-004<br>REQ-PROD-002<br>REQ-PROD-003<br>REQ-PROD-004<br>REQ-PHY-001<br>REQ-PHY-002<br>REQ-PHY-003<br>REQ-PHY-004<br>REQ-PHY-005<br>REQ-ARCH-001<br>REQ-ARCH-002<br>REQ-ARCH-003<br>REQ-TEN-001<br>REQ-TEN-002<br>REQ-TEN-003<br>REQ-TEN-004<br>REQ-TEN-005<br>REQ-DATA-001<br>REQ-DATA-002<br>REQ-DATA-003<br>REQ-DATA-004<br>REQ-DATA-005<br>REQ-CON-001<br>REQ-CON-002<br>REQ-CON-003<br>REQ-CON-004<br>REQ-AI-001<br>REQ-AI-002<br>REQ-AI-003<br>REQ-AI-004<br>REQ-AI-005<br>REQ-AI-006<br>REQ-AI-007<br>REQ-AI-008<br>REQ-ACT-001<br>REQ-ACT-002<br>REQ-ACT-003<br>REQ-SIM-001<br>REQ-SIM-002<br>REQ-SIM-003<br>REQ-SIM-004<br>REQ-UX-001<br>REQ-UX-002<br>REQ-UX-003<br>REQ-UX-004<br>REQ-SEC-001<br>REQ-SEC-002<br>REQ-SEC-003<br>REQ-SEC-004<br>REQ-REL-001<br>REQ-REL-003<br>REQ-REL-004<br>REQ-REL-005<br>REQ-DEV-002<br>REQ-VER-001<br>REQ-VER-002<br>REQ-VER-003<br>REQ-VER-004<br>REQ-VER-005 | QAR-SEC-001<br>QAR-SEC-002<br>QAR-SEC-003<br>QAR-PERF-001<br>QAR-PERF-002<br>QAR-PERF-003<br>QAR-SYNC-001<br>QAR-COR-001<br>QAR-AI-001<br>QAR-AI-002<br>QAR-SIM-001<br>QAR-OBS-001<br>QAR-ACC-001<br>QAR-COST-001 |
 | H2 | Design-partner pilot | committed | pilot-program-lead | output/test-evidence/H2-release.json | REQ-PROD-001<br>REQ-PROD-005<br>REQ-ARCH-004<br>REQ-ARCH-007<br>REQ-DATA-006<br>REQ-DATA-007<br>REQ-DATA-008<br>REQ-DATA-009<br>REQ-CON-005<br>REQ-SEC-005<br>REQ-SEC-006<br>REQ-SEC-007<br>REQ-SEC-008<br>REQ-REL-002<br>REQ-DEV-001<br>REQ-DEV-003 | QAR-PRV-001<br>QAR-AVL-001<br>QAR-DR-001<br>QAR-PORT-001 |
 | H3 | Enterprise GA decision boundary | provisional | enterprise-release-board | output/test-evidence/H3-freeze.json | REQ-ARCH-005<br>REQ-ACT-004<br>REQ-SIM-005 |  |
 | H4 | Deployment expansion | provisional | deployment-architecture | output/test-evidence/H4-profile-gates.json | REQ-ARCH-006 |  |
@@ -5928,7 +6068,7 @@ The files listed here are normative and outrank prose when precedence applies. T
 
 | Contract | Format | Contract Version | Bytes | Sha256 Prefix |
 | --- | --- | --- | --- | --- |
-| contracts/openapi/enterprise-digital-twin.openapi.yaml | OpenAPI | 3.1.0 | 40937 | 60bffdb30ca96b81 |
+| contracts/openapi/enterprise-digital-twin.openapi.yaml | OpenAPI | 3.1.0 | 69499 | aca470034c123bbe |
 | contracts/asyncapi/events.asyncapi.yaml | AsyncAPI | 3.0.0 | 11053 | 40134ecc5e79f084 |
 | contracts/graphql/schema.graphql | GraphQL SDL | H2 read-only | 1821 | a2022c3047cc24cf |
 | contracts/proto/digital_twin.proto | Protocol Buffers | proto3 | 2135 | 0df177382df6ce9e |
@@ -6000,7 +6140,7 @@ Tests execute ingestion and projection rather than copying final answers. The or
 
 ## Seed Manifest
 
-Source: `docs/enterprise-digital-twin/fixtures/h1/seed-manifest.yaml` | SHA-256: `e94cd10f563321f3e58bed55d254961a0ce77dd58c5035883389cf77b173bfd4`
+Source: `docs/enterprise-digital-twin/fixtures/h1/seed-manifest.yaml` | SHA-256: `2b58de8cb8d2816ff8ff56c67722b7da296fb0c91351ec9f8288c1a03e55af64`
 
 ```yaml
 schema_version: 1
@@ -6025,7 +6165,7 @@ artifact_digests:
   algorithm: sha256-canonical-json
   source_fixtures: b3d8f648d7bd2d0ed62ab5d803fa25a6aff32a2e0f11ce0f3bddebafc869dd96
   identity_mappings: 61b3729a92713a066df550670f34988fc0817eec84523d0e5e2bfacac0458ab7
-  permission_matrix: ccbaf7af0874b49acea87963ab88dc88022ea10c3fd17255bb8f0bc42cf17935
+  permission_matrix: 9373ff3fc790dd955275a4e8f457e2b41bb6924e4e92c2918de5aac46e5d15a1
   oracle: eba5ed65cf411a137964943d1403144013160e1c53aeb7f2ac72d5fae5fb1a71
 tenants:
   - tenant_alias: tnt_aster
@@ -6254,7 +6394,7 @@ reversibility_case:
 
 ## Permission Matrix
 
-Source: `docs/enterprise-digital-twin/fixtures/h1/permission-matrix.yaml` | SHA-256: `be1a99c3fca7e92536a2893f7123f48db5caee117b9b04f67a041460deb0d169`
+Source: `docs/enterprise-digital-twin/fixtures/h1/permission-matrix.yaml` | SHA-256: `17d6a84b038f29bbce0b34c8b399d48e4646ede61f2de901adccbde7dbf71584`
 
 ```yaml
 schema_version: 1
@@ -6270,7 +6410,7 @@ acl_classes:
     denied_actors: [usr_aster_analyst, usr_aster_limited, usr_aster_ops_approver, usr_aster_security_approver, usr_aster_admin, usr_platform_operator]
 roles:
   usr_aster_analyst:
-    grants: [evidence.read.aster_orion, scenario.create, simulation.run, jira_remediation.preview]
+    grants: [evidence.read.aster_orion, scenario.create, simulation.run, jira_remediation.preview, asset.read, asset.control.preview, asset.control.execute]
     denials: [action.approve, action.execute, connector.admin]
   usr_aster_limited:
     grants: [evidence.read.aster_public]
@@ -6285,7 +6425,7 @@ roles:
     grants: [connector.admin, policy.admin, fixture.reset]
     denials: [action.approve.unless_separately_granted]
   usr_beacon_analyst:
-    grants: [evidence.read.beacon, scenario.create, simulation.run]
+    grants: [evidence.read.beacon, scenario.create, simulation.run, asset.read]
     denials: [tenant.aster.any, action.execute]
   usr_platform_operator:
     grants: [service_health.read, telemetry.redacted.read]
@@ -7026,6 +7166,6 @@ Pooled graph isolation remains weaker than PostgreSQL RLS. H1 accepts this only 
 
 # Build Provenance
 
-Manifest SHA-256: `c17e229ab796c0c142a9d6ecfe7960930855e1e3217c79fefe6df885268ce887`
+Manifest SHA-256: `dfadd51ad2d5f328b5f8a5753f97620a521d11a15f8126993639097a402d799d`
 
 Generated by `scripts/build_blueprint.py`; generated editions are not edited directly.

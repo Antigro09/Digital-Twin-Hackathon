@@ -51,6 +51,31 @@ describe("DigitalTwinApp H1 journey", () => {
     expect(screen.getByRole("heading", { name: "Launch certification" })).toBeInTheDocument();
   });
 
+  it("explores the synthetic pump, streams telemetry, and executes an idempotent control rehearsal", async () => {
+    const user = userEvent.setup();
+    render(<DigitalTwinApp />);
+    await screen.findByRole("heading", { name: /one dependency chain/i });
+    await user.click(within(screen.getByRole("navigation", { name: "Primary navigation" })).getByRole("button", { name: /Asset twin/ }));
+
+    expect(await screen.findByRole("heading", { name: "Interactive asset twin" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Live simulator telemetry" })).toBeInTheDocument();
+    const pump = screen.getByRole("application", { name: /centrifugal pump view/i });
+    pump.focus();
+    await user.keyboard("{ArrowRight}");
+    expect(pump).toHaveAttribute("aria-label", expect.stringContaining("rotated -2 degrees"));
+
+    await user.click(screen.getByRole("button", { name: "Drive-end bearing" }));
+    expect(screen.getByText("Radial bearing with a rising vibration signature.")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Preview exact command" }));
+    expect(await screen.findByRole("heading", { name: "Set drive speed" })).toBeInTheDocument();
+    await user.click(screen.getByRole("checkbox", { name: /confirm this exact synthetic command/i }));
+    await user.click(screen.getByRole("button", { name: "Execute once in simulation" }));
+    expect(await screen.findByRole("heading", { name: "Synthetic command executed once" })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Replay same idempotency key" }));
+    expect(await screen.findByRole("heading", { name: "Replay returned the original receipt" })).toBeInTheDocument();
+  });
+
   it("abstains from an excluded workforce inference without citations", async () => {
     const user = userEvent.setup();
     render(<DigitalTwinApp />);

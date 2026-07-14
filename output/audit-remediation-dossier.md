@@ -207,7 +207,7 @@ Pooled graph isolation remains weaker than PostgreSQL RLS. H1 accepts this only 
 
 ```json
 {
-  "complete": 96,
+  "complete": 101,
   "coverage_percent": 100.0,
   "quality_attribute": {
     "complete": 18,
@@ -225,9 +225,9 @@ Pooled graph isolation remains weaker than PostgreSQL RLS. H1 accepts this only 
     "roadmap"
   ],
   "requirement": {
-    "complete": 78,
-    "total": 78
+    "complete": 83,
+    "total": 83
   },
-  "total": 96
+  "total": 101
 }
 ```

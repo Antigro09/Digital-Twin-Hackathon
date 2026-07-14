@@ -49,7 +49,7 @@ Work may proceed in parallel only after the contracts at its incoming edge are f
 
 | Horizon | Status | Product boundary | Scale and service boundary | Exit decision |
 |---|---|---|---|---|
-| H1 - Hackathon reference slice | Committed | Two synthetic tenants; GitHub metadata read-only; Jira read and one dual-approved remediation update; cited launch-risk answer; seeded launch simulation; rollback | Up to 100 identities, 100,000 graph nodes and 1,000,000 edges per tenant; ten concurrent users; 15-minute freshness; p95 non-AI read under 2 seconds, simulation under 10 seconds, cited answer under 20 seconds | Complete the frozen `CH-02` workload and all H1 security, quality, accessibility, and audit gates |
+| H1 - Hackathon reference slice | Committed | Two synthetic tenants; GitHub metadata read-only; Jira read and one dual-approved remediation update; cited launch-risk answer; seeded launch simulation; rollback; one synthetic physical-asset simulator with 3D-style spatial inspection, deterministic analytics, lifecycle history, and no device egress | Up to 100 identities, 100,000 graph nodes and 1,000,000 edges per tenant; ten concurrent users; 15-minute source freshness; bounded synthetic telemetry polling; p95 non-AI read under 2 seconds, simulation under 10 seconds, cited answer under 20 seconds | Complete `CH-02` and `CH-17` workloads and all H1 security, quality, accessibility, and audit gates |
 | H2 - Design-partner pilot | Committed after H1 exit review | Up to ten tenants; enterprise SSO/SCIM; permission revocation; retention/deletion; connector recovery; partner-approved domains | Up to 1,000 users and 1,000,000 nodes/10,000,000 edges per tenant; 99.9 percent availability; one-hour RPO; four-hour RTO | Partner acceptance, operational evidence, deletion proof, representative load and recovery tests, and no unresolved Critical/High finding |
 | H3 - Enterprise GA | Provisional | Supportable enterprise product, commercial controls, hardened integrations, measured scale tiers | Scale, SLO, cost, isolation, residency, and DR targets are frozen from H2 telemetry and representative benchmarks before commitment | GA readiness review proves targets, support model, security evidence, upgrade/rollback, and unit economics |
 | H4 - Deployment expansion | Provisional | Dedicated data plane, customer VPC, on-premises, air-gapped, regional, and edge profiles introduced separately | Per-profile limits and failure domains; no blanket active-active multi-cloud promise | Each profile passes compatibility, security, operability, upgrade, backup, recovery, and cost gates |
@@ -81,14 +81,16 @@ A smaller team preserves subsystem ownership but reduces parallelism; it does no
 | 6 | Cited answer | 2, 5 | Capability-oriented model gateway; structured tool schemas; prompt-injection defenses; citations; abstention; permission-restricted answer; golden and adversarial evaluations |
 | 7 | Scenario and simulation | 3, 5 | Immutable snapshot; validated dependency DAG; seeded PERT/Monte Carlo run; percentiles, critical path, sensitivity, assumptions, warnings, deterministic oracle |
 | 8 | Governed Jira action | 2, 3, 4, 7 | Exact preview; canonical hash; two distinct approvers; 15-minute expiry; policy recheck; source-version precondition; idempotent receipt; compensation and conflict handling |
-| 9 | Integrated product journey | 4-8 | Responsive and WCAG 2.2 AA journey across freshness, Ask, evidence, graph, scenario, comparison, approval, receipt, audit, and rollback |
-| 10 | Release evidence and independent review | 1-9 | Clean-room run; performance/security/accessibility/evaluation reports; failure demonstrations; SBOM and provenance; no Critical/High findings |
+| 9 | Synthetic physical-asset path | 1-3 | Deterministic fixture telemetry; component-linked procedural perspective and structured views; reproducible anomaly/trend result; lifecycle history; simulator-only exact command preview, idempotent receipt, audit verification, and zero egress |
+| 10 | Integrated product journey | 4-9 | Responsive and WCAG 2.2 AA journey across both the organizational and synthetic asset paths |
+| 11 | Release evidence and independent review | 1-10 | Clean-room run; performance/security/accessibility/evaluation reports; failure demonstrations; SBOM and provenance; no Critical/High findings |
 
 ### 4.3 H1 exit gate
 
 H1 exits only when:
 
 - The exact `edt-h1-github-jira-launch-risk` workload passes from an empty local environment.
+- The `CH-17` physical-asset path reproduces telemetry and analytics, provides an equivalent non-3D view, executes only allowlisted simulator commands, verifies idempotency/audit evidence, and demonstrates zero device egress.
 - All H1 requirements, controls, risks, contracts, and acceptance criteria are traceable to passing evidence.
 - There are zero cross-tenant and unauthorized disclosures in automated, adversarial, and manual tests.
 - Unsupported answers abstain, repeated simulations reproduce, invalid approvals write nothing, duplicate execution writes once, and rollback is verified.

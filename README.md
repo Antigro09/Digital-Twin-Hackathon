@@ -1,6 +1,6 @@
 # Enterprise Digital Twin
 
-This repository contains a runnable, production-shaped H1 demonstrator and the source-controlled enterprise architecture blueprint behind it. The bounded demo turns deterministic synthetic GitHub and Jira observations into a permission-aware graph, produces a cited launch-risk answer, runs a reproducible PERT/Monte Carlo scenario, and governs one exact Jira remediation through two-person approval, idempotent execution, and separately approved compensation.
+This repository contains a runnable, production-shaped H1 demonstrator and the source-controlled enterprise architecture blueprint behind it. The organizational path turns deterministic synthetic GitHub and Jira observations into a permission-aware graph, produces a cited launch-risk answer, runs a reproducible PERT/Monte Carlo scenario, and governs one exact Jira remediation through two-person approval, idempotent execution, and separately approved compensation. A second synthetic physical-asset path adds advancing telemetry, an interactive rotatable 3D-style pump view, deterministic anomaly/forecast demonstrations, lifecycle history, and guarded simulated controls.
 
 The current specification is `1.0.0-rc.1`. Its H1/H2 decisions are Committed, but final `1.0.0` publication remains gated on the independent build-readiness confirmation defined in the blueprint.
 
@@ -14,6 +14,8 @@ npm run demo
 ```
 
 Open <http://localhost:3000>. The launcher builds all four application workloads, starts PostgreSQL, Temporal, Neo4j, Valkey, and MinIO, waits for readiness, and seeds the isolated Aster and Beacon tenants.
+
+Choose **Asset twin** in the application to inspect the synthetic pump. Its telemetry and command effects are generated inside the demo: no IoT device, industrial network, customer historian, or physical actuator is connected. Analytics are deterministic demonstrations over synthetic history, not validated machine-learning predictions. Control previews and receipts explicitly report simulation mode and no external write.
 
 Verify the full machine-driven journey, including replay protection and compensation:
 
@@ -81,6 +83,9 @@ This validates metadata, stable identifiers, traceability, contracts, catalogs, 
 ## Deliberate boundaries
 
 - Only the allowlisted synthetic Jira issue `AST-142` can be mutated in H1.
+- Asset telemetry is synthetic and advanced by the local simulator; H1 has no MQTT, OPC UA, Modbus, SCADA, PLC, historian, or real IoT integration.
+- Asset commands modify only tenant-scoped simulator state. They cannot send a command to physical equipment.
+- Asset anomaly and remaining-useful-life outputs demonstrate deterministic analytics; they are not calibrated or validated for maintenance or safety decisions.
 - Individual productivity, burnout, attrition, performance, health, compensation, emotion, misconduct, and hiring scoring are prohibited.
 - Customer data is not shared across tenants for retrieval, resolution, memory, analytics, training, or evaluation.
 - H3-H5 scale, deployment, causal-prediction, and autonomous-organization capabilities are Provisional or Research, not current product claims.

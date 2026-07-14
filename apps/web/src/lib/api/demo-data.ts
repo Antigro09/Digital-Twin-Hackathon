@@ -1,5 +1,8 @@
 import type {
   ActorContext,
+  AssetSummary,
+  AssetTelemetry,
+  AssetTwinSnapshot,
   CitedAnswer,
   ConnectorHealth,
   GraphResult,
@@ -9,6 +12,208 @@ import type {
 } from "./types";
 
 export const FROZEN_NOW = "2026-07-13T16:00:00Z";
+
+export const ASSETS: AssetSummary[] = [
+  {
+    assetId: "pump-aster-01",
+    name: "Cooling Water Pump P-101",
+    assetType: "centrifugal_pump",
+    model: "Flowserve Mark 3",
+    serialNumber: "P101-AST-2021-0042",
+    site: "Aster Pilot Plant · Utility Bay 2",
+    status: "running",
+    healthScore: 78,
+    lifecycleStage: "operation",
+    version: 42,
+    canControl: true,
+  },
+];
+
+export const ASSET_TWIN: AssetTwinSnapshot = {
+  asset: {
+    ...ASSETS[0],
+    manufacturer: "Flowserve",
+    installedAt: "2021-09-20T14:30:00Z",
+    designFlowM3H: 190,
+    designHeadM: 52,
+    ratedSpeedRpm: 3600,
+  },
+  components: [
+    { componentId: "motor", name: "Drive motor", kind: "motor", status: "normal", description: "250 kW induction motor driving the pump train.", sensorTags: ["P101.SPEED", "P101.MOTOR_TEMP"] },
+    { componentId: "coupling", name: "Flexible coupling", kind: "shaft", status: "normal", description: "Guarded flexible coupling between motor and pump shafts.", sensorTags: ["P101.SHAFT_SPEED"] },
+    { componentId: "bearing", name: "Drive-end bearing", kind: "bearing", status: "attention", description: "Radial bearing with a rising vibration signature.", sensorTags: ["P101.VIB_DE", "P101.BRG_TEMP"] },
+    { componentId: "impeller", name: "Centrifugal impeller", kind: "impeller", status: "normal", description: "Single-stage centrifugal impeller.", sensorTags: ["P101.DISCH_PRESS", "P101.FLOW"] },
+    { componentId: "pump", name: "Pump casing", kind: "casing", status: "normal", description: "Single-stage centrifugal volute casing.", sensorTags: ["P101.DISCH_PRESS"] },
+    { componentId: "seal", name: "Mechanical seal", kind: "seal", status: "attention", description: "Mechanical seal is approaching its planned synthetic service interval.", sensorTags: ["P101.BRG_TEMP"] },
+    { componentId: "inlet", name: "Suction inlet", kind: "inlet", status: "normal", description: "Cooling-water suction connection and isolation valve.", sensorTags: ["P101.SUCT_PRESS"] },
+    { componentId: "outlet", name: "Discharge control valve", kind: "valve", status: "normal", description: "Discharge header connection and control valve.", sensorTags: ["P101.DISCH_PRESS"] },
+  ],
+  predictions: [
+    {
+      predictionId: "pred-bearing-001",
+      componentId: "bearing",
+      severity: "warning",
+      title: "Bearing wear signature emerging",
+      confidence: 0.72,
+      horizonHours: 168,
+      horizonLabel: "Modeled threshold within 7 days",
+      explanation: "Vibration energy at the bearing-pass frequency rose 31% over the last 24 hours while load remained stable.",
+      evidence: ["Vibration 4.8 mm/s exceeds the 4.5 mm/s attention threshold", "Bearing temperature trend is +2.1 °C/day", "Flow and speed stayed within ±1.8%"],
+      recommendation: "Inspect lubrication and alignment during the next planned maintenance window; do not infer imminent failure from this synthetic signal alone.",
+      modelVersion: "pump-anomaly-isolation-forest/1.3.0",
+      generatedAt: FROZEN_NOW,
+    },
+    {
+      predictionId: "pred-seal-001",
+      componentId: "pump",
+      severity: "info",
+      title: "Seal condition stable",
+      confidence: 0.86,
+      horizonHours: 720,
+      horizonLabel: "No threshold crossing in 365-day horizon",
+      explanation: "Pressure, temperature, and flow residuals remain inside the learned synthetic operating envelope.",
+      evidence: ["Discharge pressure residual: 0.08 bar", "Temperature residual: 0.7 °C"],
+      recommendation: "Continue routine monitoring.",
+      modelVersion: "pump-anomaly-isolation-forest/1.3.0",
+      generatedAt: FROZEN_NOW,
+    },
+  ],
+  lifecycle: [
+    { eventId: "life-design", stage: "design", status: "complete", date: "2020-11-12", title: "Hydraulic design approved", detail: "Duty point, materials, and NPSH margin approved for cooling-water service.", artifact: "Design package DP-P101-R3" },
+    { eventId: "life-manufacture", stage: "manufacture", status: "complete", date: "2021-04-08", title: "Factory acceptance test", detail: "Performance curve and vibration acceptance tests completed.", artifact: "FAT-2021-P101-18" },
+    { eventId: "life-commission", stage: "commission", status: "complete", date: "2021-09-20", title: "Commissioned", detail: "Alignment, rotation, interlocks, and baseline sensor readings verified.", artifact: "COM-P101-001" },
+    { eventId: "life-service", stage: "operation", status: "current", date: "2021-09-21", title: "Operational service", detail: "Current lifecycle stage · 31,482 synthetic operating hours.", artifact: "CMMS asset P-101" },
+    { eventId: "life-maintenance", stage: "maintenance", status: "planned", date: "2026-07-18", title: "Bearing inspection planned", detail: "Inspect lubrication, alignment, and bearing condition against the anomaly evidence.", artifact: "WO-8841" },
+    { eventId: "life-decommission", stage: "decommission", status: "planned", date: "2036-09-20", title: "End-of-life review", detail: "Placeholder review; retirement requires a separately approved engineering decision." },
+  ],
+  control: {
+    supportedCommands: ["set_speed_pct", "set_valve_pct", "emergency_stop", "reset"],
+    minSpeedPct: 30,
+    maxSpeedPct: 100,
+    minValvePct: 5,
+    maxValvePct: 100,
+    state: { version: 42, speedPct: 96, valvePct: 82, emergencyStopped: false, status: "running" },
+    mode: "synthetic_sandbox",
+  },
+  projectionAsOf: FROZEN_NOW,
+};
+
+export const ASSET_TELEMETRY: AssetTelemetry = {
+  assetId: ASSETS[0].assetId,
+  sampledAt: FROZEN_NOW,
+  receivedAt: FROZEN_NOW,
+  intervalSeconds: 5,
+  signals: {
+    temperatureC: { label: "Bearing temperature", unit: "°C", status: "normal", valueKind: "observed", warningHigh: 80, criticalHigh: 90 },
+    pressureBar: { label: "Discharge pressure", unit: "bar", status: "warning", valueKind: "observed", warningLow: 4.5, criticalLow: 3.5, warningHigh: 8, criticalHigh: 9 },
+    vibrationMmS: { label: "Drive-end vibration", unit: "mm/s RMS", status: "warning", valueKind: "observed", warningHigh: 4.5, criticalHigh: 7.1 },
+    flowM3H: { label: "Cooling-water flow", unit: "m³/h", status: "normal", valueKind: "derived", warningLow: 57, criticalLow: 48 },
+    motorCurrentA: { label: "Motor current", unit: "A", status: "normal", valueKind: "observed", warningHigh: 52, criticalHigh: 60 },
+    speedRpm: { label: "Shaft speed", unit: "rpm", status: "warning", valueKind: "observed", warningHigh: 3400, criticalHigh: 3600 },
+  },
+  points: Array.from({ length: 30 }, (_, index) => {
+    const progress = index / 29;
+    return {
+      timestamp: new Date(new Date(FROZEN_NOW).getTime() - (29 - index) * 5_000).toISOString(),
+      temperatureC: Number((71.8 + progress * 2.4 + Math.sin(index * 0.62) * 0.32).toFixed(2)),
+      pressureBar: Number((8.38 + Math.sin(index * 0.45) * 0.09).toFixed(2)),
+      vibrationMmS: Number((3.52 + progress * 1.28 + Math.sin(index * 0.73) * 0.16).toFixed(2)),
+      flowM3H: Number((184.4 + Math.sin(index * 0.38) * 2.1).toFixed(1)),
+      motorCurrentA: Number((43.1 + progress * 1.2 + Math.sin(index * 0.53) * 0.28).toFixed(2)),
+      speedRpm: Math.round(3475 + Math.sin(index * 0.31) * 14),
+    };
+  }),
+};
+
+export const BEACON_ASSETS: AssetSummary[] = [{
+  assetId: "pump-beacon-07",
+  name: "Process Water Pump B-07",
+  assetType: "centrifugal_pump",
+  model: "HM-Aqua-250",
+  serialNumber: "BCN-B07-2023-0119",
+  site: "Beacon Harbor Works · Process Utility Bay",
+  status: "running",
+  healthScore: 96,
+  lifecycleStage: "operation",
+  version: 3,
+  canControl: false,
+}];
+
+export const BEACON_ASSET_TWIN: AssetTwinSnapshot = {
+  asset: {
+    ...BEACON_ASSETS[0],
+    manufacturer: "Harbor Motion Systems",
+    installedAt: "2023-09-01T13:00:00Z",
+    designFlowM3H: 72,
+    designHeadM: 36,
+    ratedSpeedRpm: 3600,
+  },
+  components: [
+    { componentId: "b07-motor", name: "Induction motor", kind: "motor", status: "normal", description: "Healthy synthetic drive motor with stable current and speed.", sensorTags: ["B07.MOTOR", "B07.SPEED"] },
+    { componentId: "b07-shaft", name: "Drive shaft", kind: "shaft", status: "normal", description: "Synthetic shaft and coupling assembly.", sensorTags: ["B07.SPEED"] },
+    { componentId: "b07-bearing", name: "Drive-end bearing", kind: "bearing", status: "normal", description: "Bearing telemetry remains inside the synthetic operating envelope.", sensorTags: ["B07.VIB", "B07.TEMP"] },
+    { componentId: "b07-impeller", name: "Centrifugal impeller", kind: "impeller", status: "normal", description: "Process-water pump impeller.", sensorTags: ["B07.FLOW"] },
+    { componentId: "b07-casing", name: "Volute casing", kind: "casing", status: "normal", description: "Process-water pump casing.", sensorTags: ["B07.PRESS"] },
+    { componentId: "b07-seal", name: "Mechanical seal", kind: "seal", status: "normal", description: "Mechanical seal remains inside its service interval.", sensorTags: ["B07.TEMP"] },
+    { componentId: "b07-valve", name: "Discharge control valve", kind: "valve", status: "normal", description: "Read-only simulated discharge valve.", sensorTags: ["B07.FLOW"] },
+  ],
+  predictions: [{
+    predictionId: "b07-prediction-stable",
+    componentId: "b07-bearing",
+    severity: "info",
+    title: "No failure threshold forecast",
+    confidence: 0.91,
+    horizonHours: 8760,
+    horizonLabel: "No threshold crossing in 365-day horizon",
+    explanation: "The deterministic synthetic vibration trend remains below the demonstration threshold.",
+    evidence: ["Vibration trend is stable", "Temperature residual remains within 0.4 °C"],
+    recommendation: "Continue routine synthetic condition monitoring.",
+    modelVersion: "pump-anomaly-isolation-forest/1.3.0",
+    generatedAt: FROZEN_NOW,
+  }],
+  lifecycle: [
+    { eventId: "b07-design", stage: "design", status: "complete", date: "2023-01-20", title: "Design complete", detail: "Process-water duty point approved.", artifact: "BCN-DESIGN-PUMP-01" },
+    { eventId: "b07-manufacture", stage: "manufacture", status: "complete", date: "2023-06-18", title: "Factory test complete", detail: "Synthetic factory acceptance completed.", artifact: "BCN-MFG-CERT-01" },
+    { eventId: "b07-commission", stage: "commission", status: "complete", date: "2023-09-01", title: "Commissioned", detail: "Baseline checks completed.", artifact: "BCN-COMMISSION-01" },
+    { eventId: "b07-service", stage: "operation", status: "current", date: "2023-09-01", title: "Operational service", detail: "Current read-only lifecycle stage.", artifact: "BCN-OPS-LEDGER-01" },
+    { eventId: "b07-maintenance", stage: "maintenance", status: "planned", date: "2026-08-21", title: "Routine inspection", detail: "Planned condition-monitoring review.", artifact: "BCN-WO-2026-117" },
+    { eventId: "b07-decommission", stage: "decommission", status: "planned", date: "2043-09-01", title: "End-of-life review", detail: "Notional lifecycle planning milestone.", artifact: "BCN-LIFECYCLE-PLAN-01" },
+  ],
+  control: {
+    supportedCommands: ["set_speed_pct", "set_valve_pct", "emergency_stop", "reset"],
+    minSpeedPct: 30,
+    maxSpeedPct: 100,
+    minValvePct: 5,
+    maxValvePct: 100,
+    state: { version: 3, speedPct: 74, valvePct: 72, emergencyStopped: false, status: "running" },
+    mode: "synthetic_sandbox",
+  },
+  projectionAsOf: FROZEN_NOW,
+};
+
+export const BEACON_ASSET_TELEMETRY: AssetTelemetry = {
+  assetId: BEACON_ASSETS[0].assetId,
+  sampledAt: FROZEN_NOW,
+  receivedAt: FROZEN_NOW,
+  intervalSeconds: 5,
+  signals: {
+    temperatureC: { label: "Bearing temperature", unit: "°C", status: "normal", valueKind: "observed", warningHigh: 80, criticalHigh: 90 },
+    pressureBar: { label: "Discharge pressure", unit: "bar", status: "normal", valueKind: "observed", warningLow: 4.5, criticalLow: 3.5, warningHigh: 8, criticalHigh: 9 },
+    vibrationMmS: { label: "Drive-end vibration", unit: "mm/s RMS", status: "normal", valueKind: "observed", warningHigh: 4.5, criticalHigh: 7.1 },
+    flowM3H: { label: "Process flow", unit: "m³/h", status: "normal", valueKind: "derived", warningLow: 57, criticalLow: 48 },
+    motorCurrentA: { label: "Motor current", unit: "A", status: "normal", valueKind: "observed", warningHigh: 52, criticalHigh: 60 },
+    speedRpm: { label: "Motor speed", unit: "rpm", status: "normal", valueKind: "observed", warningHigh: 3400, criticalHigh: 3600 },
+  },
+  points: ASSET_TELEMETRY.points.map((point, index) => ({
+    ...point,
+    temperatureC: Number((61.2 + Math.sin(index * 0.42) * 0.18).toFixed(2)),
+    pressureBar: Number((6.15 + Math.sin(index * 0.35) * 0.04).toFixed(2)),
+    vibrationMmS: Number((1.42 + Math.sin(index * 0.51) * 0.06).toFixed(2)),
+    flowM3H: Number((70.8 + Math.sin(index * 0.38) * 0.5).toFixed(2)),
+    motorCurrentA: Number((34.5 + Math.sin(index * 0.41) * 0.22).toFixed(2)),
+    speedRpm: Math.round(2664 + Math.sin(index * 0.31) * 3),
+  })),
+};
 
 export const MEMBERSHIPS: ActorContext = {
   actor: {
@@ -24,14 +229,14 @@ export const MEMBERSHIPS: ActorContext = {
       tenantAlias: "tnt_aster",
       tenantName: "Aster Labs",
       role: "Program operator",
-      capabilities: ["graph:read", "questions:ask", "scenario:write", "action:propose"],
+      capabilities: ["graph:read", "questions:ask", "scenario:write", "action:propose", "asset:read", "asset:control.preview", "asset:control.execute"],
     },
     {
       membershipId: "mem_beacon_observer",
       tenantAlias: "tnt_beacon",
       tenantName: "Beacon Works",
       role: "Read-only observer",
-      capabilities: ["graph:read", "questions:ask"],
+      capabilities: ["graph:read", "questions:ask", "asset:read"],
     },
   ],
 };

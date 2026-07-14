@@ -19,6 +19,7 @@ acceptance_criteria:
   - {id: AC-ACT-003, title: Compensation, evidence: Authorized rollback restores the captured prior state or records a human-action-required terminal state.}
   - {id: AC-SIM-001, title: Reproducible simulation, evidence: Same snapshot input model and seed yield the identical canonical p50 p80 p95 and sensitivity digest.}
   - {id: AC-SIM-002, title: Simulation edge cases, evidence: Cycles missing estimates impossible capacity disconnected work and contradictory interventions produce explicit validation outcomes.}
+  - {id: AC-PHY-001, title: Synthetic physical-asset journey, evidence: Deterministic fixture telemetry procedural perspective and structured component selection analytics lifecycle history and guarded simulator commands reproduce with zero device egress and explicit synthetic labels.}
   - {id: AC-SEC-001, title: Secrets containment, evidence: Scans of logs traces prompts errors exports and artifacts contain no injected canary secrets.}
   - {id: AC-SEC-002, title: ACL revocation, evidence: Revoked source access is unavailable to all query and agent paths within the committed freshness objective.}
   - {id: AC-PRV-001, title: Deletion completeness, evidence: Deletion inventory proves removal across authoritative graph vector search cache object trace and backup-expiry workflows.}
@@ -30,4 +31,3 @@ acceptance_criteria:
   - {id: AC-SUP-001, title: Supply-chain evidence, evidence: Release includes SBOM vulnerability results signatures provenance and dependency license report.}
   - {id: AC-REV-001, title: Independent build readiness, evidence: Independent engineer records that H1 requires no unstated major product security data topology or interface decision.}
   - {id: AC-REV-002, title: Clear audit convergence, evidence: No open Critical or High risk and two consecutive cross-domain reviews introduce no new blocker.}
-

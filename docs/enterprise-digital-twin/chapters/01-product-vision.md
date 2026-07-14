@@ -135,7 +135,7 @@ Business impact such as avoided delay or reduced coordination cost is reported a
 
 ### 8.1 Production-shaped demonstrator
 
-H1 proves the complete thin slice described in `CH-02`: synthetic GitHub and Jira observations, a permission-aware graph, cited launch-risk analysis, seeded schedule simulation, an exact Jira remediation preview, two-person approval, idempotent execution, and compensation. It favors depth and verifiability over connector or domain breadth.
+H1 proves the complete thin slice described in `CH-02`: synthetic GitHub and Jira observations, a permission-aware graph, cited launch-risk analysis, seeded schedule simulation, an exact Jira remediation preview, two-person approval, idempotent execution, and compensation. `CH-17` adds a separately bounded synthetic physical-asset demonstration with advancing telemetry, spatial inspection, deterministic analytics, lifecycle history, and simulator-only control. Neither track claims real customer integration or predictive validity. H1 favors depth and verifiability over connector or domain breadth.
 
 ### 8.2 Enterprise reference architecture
 

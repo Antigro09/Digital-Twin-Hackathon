@@ -15,6 +15,7 @@ screens:
   - {id: UX-APPROVAL, name: Action approval, horizon: H1, purpose: Exact immutable diff risk scope expiry two-person control and rollback preview.}
   - {id: UX-CONNECTORS, name: Connector administration, horizon: H1, purpose: Scope freshness cursors errors revocation and reconciliation.}
   - {id: UX-AUDIT, name: Audit explorer, horizon: H1, purpose: Filter export verify and correlate security and action evidence.}
+  - {id: UX-ASSET-TWIN, name: Synthetic physical-asset twin, horizon: H1, purpose: Live synthetic telemetry spatial component inspection deterministic analytics lifecycle history and simulator-only control.}
   - {id: UX-ADMIN, name: Tenant administration, horizon: H2, purpose: SSO SCIM membership policy retention residency keys and break-glass.}
   - {id: UX-ONTOLOGY, name: Ontology studio, horizon: H2, purpose: Versioned domain packages constraints mappings migrations and impact preview.}
   - {id: UX-WORKFLOW, name: Workflow builder, horizon: H3, purpose: Typed steps policies approvals budgets simulation and test fixtures.}
@@ -33,4 +34,4 @@ visualizations:
   - {id: VIS-GEO, name: Geographic view, purpose: Residency facilities assets and service regions.}
   - {id: VIS-PLAYBACK, name: Simulation playback, purpose: Reproducible scenario progression distributions and intervention points.}
   - {id: VIS-3D, name: 3D organizational view, purpose: Optional storytelling view with no exclusive information., horizon: H4}
-
+  - {id: VIS-PHYSICAL-3D, name: Procedural 3D-style physical-asset view, purpose: Spatially locate a synthetic component condition in a rotatable perspective SVG while preserving a complete keyboard-operable structured alternative., horizon: H1}

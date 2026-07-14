@@ -109,6 +109,9 @@ class SampleCollection:
 @dataclass(frozen=True)
 class PreparedSchedule:
     base: datetime
+    active_tasks: dict[UUID, PlanTask]
+    active_task_ids: tuple[UUID, ...]
+    team_slot_counts: dict[UUID, int]
     releases: dict[UUID, "WorkInstant"]
     completed_finishes: dict[UUID, "WorkInstant"]
     predecessor_edges: dict[UUID, tuple[PlanEdge, ...]]
@@ -457,6 +460,9 @@ def _prepare_schedule(
             predecessor_edges[edge.successor].append(edge)
     return PreparedSchedule(
         base=base,
+        active_tasks=active,
+        active_task_ids=tuple(sorted(active, key=lambda task_id: task_id.bytes)),
+        team_slot_counts={team_id: team.capacity for team_id, team in plan.teams.items()},
         releases=releases,
         completed_finishes=completed,
         predecessor_edges={
@@ -500,11 +506,7 @@ def _schedule_iteration(
     zeroed: frozenset[UUID] = frozenset(),
     sample_cache: SampleCache | None = None,
 ) -> IterationSchedule:
-    active = {
-        task_id: task
-        for task_id, task in plan.tasks.items()
-        if task.state not in ("completed", "cancelled")
-    }
+    active = prepared.active_tasks
     if not active:
         return IterationSchedule(WorkInstant(0.0), (), {})
 
@@ -513,16 +515,19 @@ def _schedule_iteration(
         for task_id, task in active.items()
     }
     finished: dict[UUID, WorkInstant] = dict(prepared.completed_finishes)
+    zero = WorkInstant(0.0)
     team_slots: dict[UUID, list[tuple[WorkInstant, UUID | None]]] = {
-        team_id: [(WorkInstant(0.0), None) for _ in range(team.capacity)]
-        for team_id, team in plan.teams.items()
+        team_id: [(zero, None)] * capacity
+        for team_id, capacity in prepared.team_slot_counts.items()
     }
     parent: dict[UUID, UUID | None] = {}
-    unscheduled = set(active)
+    unscheduled = set(prepared.active_task_ids)
 
     while unscheduled:
-        candidates: list[tuple[float, float, bytes, int, UUID, WorkInstant, UUID | None]] = []
-        for task_id in sorted(unscheduled, key=lambda value: value.bytes):
+        selected: tuple[float, float, bytes, int, UUID, WorkInstant, UUID | None] | None = None
+        for task_id in prepared.active_task_ids:
+            if task_id not in unscheduled:
+                continue
             edges = prepared.predecessor_edges[task_id]
             if any(edge.predecessor not in finished for edge in edges):
                 continue
@@ -530,37 +535,37 @@ def _schedule_iteration(
             slots = team_slots[task.team_id]
             slot_index = min(range(len(slots)), key=lambda idx: (slots[idx][0].key(), idx))
             slot_ready, slot_parent = slots[slot_index]
-            constraints: list[tuple[WorkInstant, UUID | None]] = [
-                (prepared.releases[task_id], None),
-                (slot_ready, slot_parent),
-            ]
-            constraints.extend(
-                (finished[edge.predecessor].advance(edge.lag), edge.predecessor)
-                for edge in edges
+            start = prepared.releases[task_id]
+            start_key = start.key()
+            governing: list[UUID] = []
+            slot_key = slot_ready.key()
+            if slot_key > start_key:
+                start, start_key = slot_ready, slot_key
+                governing = [slot_parent] if slot_parent is not None else []
+            elif slot_key == start_key and slot_parent is not None:
+                governing.append(slot_parent)
+            for edge in edges:
+                predecessor_finish = finished[edge.predecessor].advance(edge.lag)
+                predecessor_key = predecessor_finish.key()
+                if predecessor_key > start_key:
+                    start, start_key = predecessor_finish, predecessor_key
+                    governing = [edge.predecessor]
+                elif predecessor_key == start_key:
+                    governing.append(edge.predecessor)
+            candidate = (
+                start.workdays,
+                start.gap_phase,
+                task_id.bytes,
+                slot_index,
+                task_id,
+                start,
+                min(governing, key=lambda value: value.bytes) if governing else None,
             )
-            start = max((value for value, _ in constraints), key=lambda value: value.key())
-            governing = sorted(
-                (
-                    owner
-                    for value, owner in constraints
-                    if owner is not None and value.key() == start.key()
-                ),
-                key=lambda value: value.bytes,
-            )
-            candidates.append(
-                (
-                    start.workdays,
-                    start.gap_phase,
-                    task_id.bytes,
-                    slot_index,
-                    task_id,
-                    start,
-                    governing[0] if governing else None,
-                )
-            )
-        if not candidates:
+            if selected is None or candidate[:4] < selected[:4]:
+                selected = candidate
+        if selected is None:
             raise DomainError("unschedulable_graph", "Validated plan reached an impossible scheduling state.")
-        _, _, _, slot_index, task_id, start, governing_parent = min(candidates)
+        _, _, _, slot_index, task_id, start, governing_parent = selected
         task = active[task_id]
         effective_days = sampled[task_id] / plan.teams[task.team_id].availability
         finish = start.advance(effective_days)

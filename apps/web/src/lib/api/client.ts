@@ -1,4 +1,10 @@
 import {
+  ASSETS,
+  ASSET_TELEMETRY,
+  ASSET_TWIN,
+  BEACON_ASSETS,
+  BEACON_ASSET_TELEMETRY,
+  BEACON_ASSET_TWIN,
   ASTER_GRAPH,
   BEACON_GRAPH,
   CONNECTOR_HEALTH,
@@ -12,6 +18,14 @@ import {
 import type {
   ActionReceipt,
   ActorContext,
+  AssetCommand,
+  AssetCommandPreview,
+  AssetCommandReceipt,
+  AssetComponent,
+  AssetControlState,
+  AssetSummary,
+  AssetTelemetry,
+  AssetTwinSnapshot,
   AnswerMode,
   ApprovalDecision,
   ApprovalRequest,
@@ -21,6 +35,8 @@ import type {
   ConnectorHealth,
   DigitalTwinApi,
   GraphResult,
+  FailurePrediction,
+  LifecycleEvent,
   RemediationPreview,
   ScenarioDraft,
   SimulationComparison,
@@ -48,6 +64,12 @@ export class DemoDigitalTwinApi implements DigitalTwinApi {
   private approval?: ApprovalRequest;
   private receipt?: ActionReceipt;
   private compensation?: CompensationPreview;
+  private controlState = clone(ASSET_TWIN.control.state);
+  private telemetry = clone(ASSET_TELEMETRY);
+  private beaconTelemetry = clone(BEACON_ASSET_TELEMETRY);
+  private telemetryTick = 0;
+  private assetPreview?: AssetCommandPreview;
+  private assetReceipt?: AssetCommandReceipt;
 
   private async delay(signal?: AbortSignal) {
     await sleep(90, signal);
@@ -282,6 +304,162 @@ export class DemoDigitalTwinApi implements DigitalTwinApi {
     this.compensation.status = "compensated";
     return clone(this.compensation);
   }
+
+  async getAssets(signal?: AbortSignal): Promise<AssetSummary[]> {
+    await this.delay(signal);
+    if (this.actor.activeMembershipId === "mem_beacon_observer") return clone(BEACON_ASSETS);
+    return ASSETS.map((asset) => ({ ...clone(asset), status: this.controlState.status, version: this.controlState.version }));
+  }
+
+  async getAssetTwin(assetId: string, signal?: AbortSignal): Promise<AssetTwinSnapshot> {
+    await this.delay(signal);
+    this.assertAssetAccess(assetId);
+    if (this.actor.activeMembershipId === "mem_beacon_observer") return clone(BEACON_ASSET_TWIN);
+    const twin = clone(ASSET_TWIN);
+    twin.asset.status = this.controlState.status;
+    twin.asset.version = this.controlState.version;
+    twin.control.state = clone(this.controlState);
+    twin.projectionAsOf = this.telemetry.sampledAt;
+    return twin;
+  }
+
+  async getAssetTelemetry(assetId: string, limit = 30, signal?: AbortSignal): Promise<AssetTelemetry> {
+    await this.delay(signal);
+    this.assertAssetAccess(assetId);
+    const beacon = this.actor.activeMembershipId === "mem_beacon_observer";
+    const stream = beacon ? this.beaconTelemetry : this.telemetry;
+    const controlState = beacon ? BEACON_ASSET_TWIN.control.state : this.controlState;
+    this.telemetryTick += 1;
+    const previous = stream.points.at(-1)!;
+    const index = stream.points.length + this.telemetryTick;
+    const stopped = controlState.emergencyStopped;
+    const speedRatio = stopped ? 0 : controlState.speedPct / (beacon ? 74 : 96);
+    const next = {
+      timestamp: new Date(new Date(previous.timestamp).getTime() + this.telemetry.intervalSeconds * 1_000).toISOString(),
+      temperatureC: Number((previous.temperatureC + (stopped ? -0.22 : 0.03) + Math.sin(index * 0.61) * 0.08).toFixed(2)),
+      pressureBar: Number((stopped ? Math.max(0.2, previous.pressureBar - 0.72) : (beacon ? 6.15 : 8.38) * speedRatio + Math.sin(index * 0.43) * (beacon ? 0.04 : 0.08)).toFixed(2)),
+      vibrationMmS: Number((stopped ? Math.max(0.08, previous.vibrationMmS - 0.55) : (beacon ? 1.42 : 4.72) + Math.sin(index * 0.71) * (beacon ? 0.06 : 0.17)).toFixed(2)),
+      flowM3H: Number((stopped ? Math.max(0, previous.flowM3H - 18) : (beacon ? 70.8 : 184.4) * speedRatio * (controlState.valvePct / (beacon ? 72 : 82)) + Math.sin(index * 0.37) * (beacon ? 0.4 : 1.8)).toFixed(1)),
+      motorCurrentA: Number((stopped ? 0.4 : (beacon ? 34.5 : 44.1) * speedRatio + Math.sin(index * 0.57) * 0.25).toFixed(2)),
+      speedRpm: stopped ? 0 : Math.round(3600 * controlState.speedPct / 100 + Math.sin(index * 0.29) * (beacon ? 3 : 8)),
+    };
+    stream.points.push(next);
+    stream.points = stream.points.slice(-Math.max(1, Math.min(limit, 120)));
+    stream.sampledAt = next.timestamp;
+    stream.receivedAt = new Date().toISOString();
+    (Object.keys(stream.signals) as Array<keyof AssetTelemetry["signals"]>).forEach((key) => {
+      const signalDefinition = stream.signals[key];
+      const value = next[key];
+      const critical = (signalDefinition.criticalLow !== undefined && value <= signalDefinition.criticalLow)
+        || (signalDefinition.criticalHigh !== undefined && value >= signalDefinition.criticalHigh);
+      const warning = (signalDefinition.warningLow !== undefined && value <= signalDefinition.warningLow)
+        || (signalDefinition.warningHigh !== undefined && value >= signalDefinition.warningHigh);
+      signalDefinition.status = critical ? "critical" : warning ? "warning" : "normal";
+    });
+    return clone(stream);
+  }
+
+  async previewAssetCommand(assetId: string, command: AssetCommand, signal?: AbortSignal): Promise<AssetCommandPreview> {
+    await this.delay(signal);
+    this.assertAssetAccess(assetId);
+    if (this.actor.activeMembershipId !== "mem_aster_operator") throw new ApiProblem("This membership cannot preview asset control commands.", 403, "asset_control_denied", false);
+    const after = this.applyAssetCommand(this.controlState, command);
+    const fingerprint = `${command.type}-${"value" in command ? command.value : "none"}-v${this.controlState.version}`;
+    const checks = [
+      { check: "Tenant and asset scope", passed: true, detail: "Command is bound to Aster Labs and P-101 only." },
+      { check: "Fresh state version", passed: true, detail: `Expected control state version ${this.controlState.version}.` },
+      { check: "Synthetic execution boundary", passed: true, detail: "No PLC, actuator, or external system is connected." },
+    ];
+    if (command.type === "set_speed_pct") checks.push({ check: "Speed envelope", passed: true, detail: `${command.value}% is inside the approved 30–100% range.` });
+    if (command.type === "set_valve_pct") checks.push({ check: "Valve envelope", passed: true, detail: `${command.value}% is inside the approved 5–100% range.` });
+    this.assetPreview = {
+      previewId: `asset-preview-${this.controlState.version}-${command.type}`,
+      assetId,
+      command: clone(command),
+      expectedAssetVersion: this.controlState.version,
+      payloadHash: `sha256:demo-${fingerprint}`,
+      currentState: clone(this.controlState),
+      predictedState: after,
+      safetyChecks: checks,
+      risks: command.type === "emergency_stop"
+        ? ["Immediately reduces simulated speed and flow to zero", "Reset requires a separate preview after the stop"]
+        : ["Changing the operating point can alter pressure, flow, and vibration", "Preview expires if control state changes"],
+      expiresAt: new Date(new Date(FROZEN_NOW).getTime() + 15 * 60_000).toISOString(),
+      executionMode: "simulation",
+      externalWrite: false,
+    };
+    this.assetReceipt = undefined;
+    return clone(this.assetPreview);
+  }
+
+  async executeAssetCommand(
+    assetId: string,
+    previewId: string,
+    payloadHash: string,
+    idempotencyKey: string,
+    signal?: AbortSignal,
+  ): Promise<AssetCommandReceipt> {
+    await this.delay(signal);
+    this.assertAssetAccess(assetId);
+    if (!this.assetPreview || this.assetPreview.previewId !== previewId || this.assetPreview.payloadHash !== payloadHash) {
+      throw new ApiProblem("The exact command preview is no longer current.", 409, "asset_command_payload_mismatch", false);
+    }
+    if (this.assetReceipt) {
+      if (this.assetReceipt.idempotencyKey !== idempotencyKey) throw new ApiProblem("This preview has already been consumed.", 409, "asset_preview_consumed", false);
+      return { ...clone(this.assetReceipt), replayed: true };
+    }
+    if (this.assetPreview.expectedAssetVersion !== this.controlState.version) {
+      throw new ApiProblem("The asset control state changed after preview.", 409, "asset_version_conflict", true);
+    }
+    const before = clone(this.controlState);
+    this.controlState = clone(this.assetPreview.predictedState);
+    this.assetReceipt = {
+      receiptId: `asset-receipt-${this.controlState.version}`,
+      assetId,
+      status: "succeeded",
+      command: clone(this.assetPreview.command),
+      assetVersionBefore: before.version,
+      assetVersionAfter: this.controlState.version,
+      idempotencyKey,
+      payloadHash,
+      executedAt: this.telemetry.sampledAt,
+      replayed: false,
+      auditEventId: `audit-asset-control-${this.controlState.version}`,
+      simulation: true,
+      externalWrite: false,
+    };
+    return clone(this.assetReceipt);
+  }
+
+  private assertAssetAccess(assetId: string) {
+    const expected = this.actor.activeMembershipId === "mem_aster_operator" ? ASSETS[0].assetId : BEACON_ASSETS[0].assetId;
+    if (assetId !== expected) {
+      throw new ApiProblem("Asset not found in this tenant scope.", 404, "asset_not_found", false);
+    }
+  }
+
+  private applyAssetCommand(state: AssetControlState, command: AssetCommand): AssetControlState {
+    const next = { ...clone(state), version: state.version + 1 };
+    if (command.type === "set_speed_pct") {
+      if (command.value < 30 || command.value > 100) throw new ApiProblem("Speed must be between 30% and 100%.", 422, "unsafe_setpoint", false);
+      if (state.emergencyStopped) throw new ApiProblem("Reset the emergency stop before changing speed.", 409, "emergency_stop_active", false);
+      next.speedPct = command.value;
+      next.status = "running";
+    } else if (command.type === "set_valve_pct") {
+      if (command.value < 5 || command.value > 100) throw new ApiProblem("Valve position must be between 5% and 100%.", 422, "unsafe_setpoint", false);
+      if (state.emergencyStopped) throw new ApiProblem("Reset the emergency stop before changing the valve.", 409, "emergency_stop_active", false);
+      next.valvePct = command.value;
+    } else if (command.type === "emergency_stop") {
+      next.speedPct = 0;
+      next.emergencyStopped = true;
+      next.status = "offline";
+    } else {
+      if (!state.emergencyStopped) throw new ApiProblem("The emergency stop is not active.", 409, "reset_not_required", false);
+      next.emergencyStopped = false;
+      next.status = "idle";
+    }
+    return next;
+  }
 }
 
 type FetchOptions = RequestInit & { signal?: AbortSignal };
@@ -298,6 +476,9 @@ export class FetchDigitalTwinApi implements DigitalTwinApi {
   private previewEtag?: string;
   private receipt?: ActionReceipt;
   private compensationWire?: Wire;
+  private assetControlStates = new Map<string, AssetControlState>();
+  private assetCommandPreviews = new Map<string, { preview: AssetCommandPreview; etag: string }>();
+  private assetCommandReceipts = new Map<string, AssetCommandReceipt>();
 
   constructor(private readonly baseUrl: string) {}
 
@@ -358,6 +539,9 @@ export class FetchDigitalTwinApi implements DigitalTwinApi {
     this.previewEtag = undefined;
     this.receipt = undefined;
     this.compensationWire = undefined;
+    this.assetControlStates.clear();
+    this.assetCommandPreviews.clear();
+    this.assetCommandReceipts.clear();
     return clone(this.actor);
   }
 
@@ -654,6 +838,372 @@ export class FetchDigitalTwinApi implements DigitalTwinApi {
     const value = this.mapCompensation(this.compensationWire);
     value.status = receipt.status === "compensated" ? "compensated" : "conflict";
     return value;
+  }
+
+  async getAssets(signal?: AbortSignal): Promise<AssetSummary[]> {
+    const page = await this.request<Wire>("/v1/assets", { signal });
+    return (page.items as Wire[] ?? []).map((raw) => this.mapAsset(raw));
+  }
+
+  async getAssetTwin(assetId: string, signal?: AbortSignal): Promise<AssetTwinSnapshot> {
+    const raw = await this.request<Wire>(`/v1/assets/${encodeURIComponent(assetId)}/twin`, { signal });
+    const assetRaw = (raw.asset ?? raw) as Wire;
+    const summary = this.mapAsset(assetRaw);
+    const controlRaw = (raw.control?.state ?? raw.control_state ?? {}) as Wire;
+    const controlState = this.mapAssetControlState(controlRaw, summary.version);
+    this.assetControlStates.set(assetId, controlState);
+
+    const components = (raw.components as Wire[] ?? []).map((component, index) => ({
+      componentId: String(component.component_id ?? component.id ?? `component-${index}`),
+      name: String(component.display_name ?? component.name ?? component.label ?? `Component ${index + 1}`),
+      kind: this.mapComponentKind(String(component.kind ?? component.component_type ?? component.type ?? "pump")),
+      status: this.mapComponentStatus(String(component.status ?? component.condition ?? "normal")),
+      description: String(component.description ?? component.detail ?? `${String(component.name ?? component.component_type ?? "Asset component")} has ${Number(component.operating_hours ?? 0).toLocaleString()} recorded synthetic operating hours${component.installed_at ? ` since ${String(component.installed_at).slice(0, 10)}` : ""}.`),
+      sensorTags: (component.sensor_tags ?? component.sensor_ids ?? component.sensors ?? []).map(String),
+    }));
+
+    const analytics = (raw.analytics ?? {}) as Wire;
+    const bearingComponentId = components.find((component) => component.kind === "bearing")?.componentId ?? components[0]?.componentId ?? "unknown-component";
+    const pumpComponentId = components.find((component) => component.kind === "casing")?.componentId
+      ?? components.find((component) => component.kind === "impeller")?.componentId
+      ?? bearingComponentId;
+    const predictionSource = (analytics.predictions as Wire[] ?? []);
+    const predictions = predictionSource.map((prediction, index) => {
+      const confidence = (prediction.confidence ?? {}) as Wire;
+      const predictionConfidence = Number(prediction.probability ?? confidence.score ?? prediction.score ?? 0);
+      const failureMode = String(prediction.predicted_failure_mode ?? prediction.failure_mode ?? "operating_anomaly");
+      const horizonDays = prediction.horizon_days === null ? 365 : Number(prediction.horizon_days ?? 7);
+      const contributions = (prediction.contributions as Wire[] ?? []);
+      return {
+        predictionId: String(prediction.prediction_id ?? prediction.anomaly_id ?? prediction.id ?? `prediction-${index}`),
+        componentId: String(prediction.component_id ?? prediction.component_ref ?? (failureMode.includes("bearing") ? bearingComponentId : pumpComponentId)),
+        severity: this.mapPredictionSeverity(String(prediction.severity ?? prediction.level ?? (failureMode === "no_failure_mode_indicated" ? "info" : "warning"))),
+        title: String(prediction.title ?? prediction.name ?? (failureMode === "drive_end_bearing_degradation" ? "Drive-end bearing degradation forecast" : "No failure threshold forecast")),
+        confidence: predictionConfidence > 1 ? predictionConfidence / 100 : predictionConfidence,
+        horizonHours: Math.max(1, Math.round(Number(prediction.horizon_hours ?? prediction.time_to_event_hours ?? horizonDays * 24))),
+        horizonLabel: prediction.horizon_days === null || failureMode === "no_failure_mode_indicated"
+          ? "No threshold crossing in 365-day horizon"
+          : `Modeled threshold within ${Number(prediction.horizon_days ?? horizonDays).toFixed(1)} days`,
+        explanation: String(prediction.explanation ?? prediction.rationale ?? confidence.basis ?? prediction.caveat ?? "Telemetry differs from the learned operating envelope."),
+        evidence: contributions.length
+          ? contributions.map((item) => `${String(item.signal).replaceAll("_", " ")}: ${Number(item.current_value).toFixed(2)} (${Number(item.contribution * 100).toFixed(0)}% contribution, z=${Number(item.z_score).toFixed(2)})`)
+          : (prediction.evidence ?? prediction.drivers ?? prediction.signals ?? []).map(String),
+        recommendation: String(prediction.recommended_maintenance ?? prediction.recommendation ?? prediction.recommended_action ?? "Continue monitoring."),
+        modelVersion: String(prediction.model_version ?? analytics.model_card?.model_version ?? analytics.model_card?.version ?? "asset-anomaly/1.0.0"),
+        generatedAt: String(prediction.generated_at ?? prediction.observed_at ?? raw.current_telemetry?.observed_at ?? new Date().toISOString()),
+      } as FailurePrediction;
+    });
+
+    (analytics.anomalies as Wire[] ?? []).forEach((anomaly, index) => {
+      const contributions = (anomaly.contributions as Wire[] ?? []);
+      const leadingSignal = String(contributions[0]?.signal ?? "");
+      predictions.push({
+        predictionId: String(anomaly.anomaly_id ?? `anomaly-${index}`),
+        componentId: leadingSignal.includes("vibration") || leadingSignal.includes("temperature") ? bearingComponentId : pumpComponentId,
+        severity: this.mapPredictionSeverity(String(anomaly.severity ?? "info")),
+        title: String(anomaly.summary ?? "Current multivariate operating anomaly"),
+        confidence: Math.min(1, Number(anomaly.anomaly_score ?? 0) / 10),
+        horizonHours: 24,
+        horizonLabel: "Current-condition detector signal",
+        explanation: `Current-condition detector using ${String(anomaly.method ?? "multivariate telemetry analysis").replaceAll("_", " ")}.`,
+        evidence: contributions.map((item) => `${String(item.signal).replaceAll("_", " ")}: z=${Number(item.z_score).toFixed(2)}, ${Number(item.contribution * 100).toFixed(0)}% contribution`),
+        recommendation: "Review the contributing signals with a qualified operator; the synthetic detector does not authorize maintenance or control.",
+        modelVersion: String(anomaly.model_version ?? analytics.model_card?.model_version ?? "asset-anomaly/1.0.0"),
+        generatedAt: String(anomaly.detected_at ?? raw.current_telemetry?.observed_at ?? new Date().toISOString()),
+      });
+    });
+
+    const lifecycle = (raw.lifecycle ?? {}) as Wire;
+    const lifecycleStages = (lifecycle.stages as Wire[] ?? []);
+    const recordedEvents = (lifecycle.events as Wire[] ?? []);
+    const lifecycleSource = lifecycleStages.length ? lifecycleStages : recordedEvents;
+    const lifecycleEvents = lifecycleSource.map((event, index) => {
+      const recorded = lifecycleStages.length ? recordedEvents[Math.min(index, recordedEvents.length - 1)] ?? {} : event;
+      const stageValue = String(event.stage ?? event.event_type ?? event.type ?? event.name ?? "service");
+      return {
+        eventId: String(event.event_id ?? event.id ?? `lifecycle-stage-${stageValue}`),
+        stage: this.mapLifecycleStage(stageValue),
+        status: this.mapLifecycleStatus(String(event.status ?? "complete")),
+        date: String(event.completed_at ?? event.date ?? event.occurred_at ?? event.started_at ?? event.planned_at ?? ""),
+        title: String(event.title ?? recorded.title ?? this.lifecycleTitle(stageValue)),
+        detail: String(event.detail ?? event.description ?? recorded.description ?? `The ${stageValue.replaceAll("_", " ")} stage is ${String(event.status ?? "recorded")}.`),
+        artifact: event.evidence_ref ?? event.artifact ?? event.document_ref ?? recorded.work_order_ref ? String(event.evidence_ref ?? event.artifact ?? event.document_ref ?? recorded.work_order_ref) : undefined,
+      };
+    });
+
+    const commandDescriptors = (raw.control?.available_commands as Array<string | Wire> ?? []);
+    const available = commandDescriptors.map((item) => String(typeof item === "string" ? item : item.type));
+    const safeRange = (type: string) => (commandDescriptors.find((item) => typeof item !== "string" && item.type === type) as Wire | undefined)?.safe_range as Wire | undefined;
+    return {
+      asset: {
+        ...summary,
+        version: controlState.version,
+        lifecycleStage: this.mapLifecycleStage(String(raw.lifecycle?.current_stage ?? summary.lifecycleStage)),
+        manufacturer: String(assetRaw.manufacturer ?? "Unknown manufacturer"),
+        installedAt: String(assetRaw.installed_at ?? assetRaw.commissioned_at ?? lifecycleEvents.find((event) => event.stage === "commission")?.date ?? ""),
+        designFlowM3H: Number(assetRaw.design_flow_m3h ?? assetRaw.rated_flow_m3h ?? assetRaw.specifications?.design_flow_m3h ?? 0),
+        designHeadM: Number(assetRaw.design_head_m ?? assetRaw.rated_head_m ?? assetRaw.specifications?.design_head_m ?? 0),
+        ratedSpeedRpm: Number(assetRaw.rated_speed_rpm ?? assetRaw.specifications?.rated_speed_rpm ?? 3600),
+      },
+      components,
+      predictions,
+      lifecycle: lifecycleEvents,
+      control: {
+        supportedCommands: available.filter((command): command is AssetTwinSnapshot["control"]["supportedCommands"][number] => ["set_speed_pct", "set_valve_pct", "emergency_stop", "reset"].includes(command)),
+        minSpeedPct: Number(raw.control?.limits?.speed_pct?.min ?? safeRange("set_speed_pct")?.min ?? 30),
+        maxSpeedPct: Number(raw.control?.limits?.speed_pct?.max ?? safeRange("set_speed_pct")?.max ?? 100),
+        minValvePct: Number(raw.control?.limits?.valve_pct?.min ?? safeRange("set_valve_pct")?.min ?? 5),
+        maxValvePct: Number(raw.control?.limits?.valve_pct?.max ?? safeRange("set_valve_pct")?.max ?? 100),
+        state: controlState,
+        mode: "synthetic_sandbox",
+      },
+      projectionAsOf: String(raw.data_watermark?.observed_at ?? raw.current_telemetry?.observed_at ?? raw.projection_as_of ?? new Date().toISOString()),
+    };
+  }
+
+  async getAssetTelemetry(assetId: string, limit = 30, signal?: AbortSignal): Promise<AssetTelemetry> {
+    const raw = await this.request<Wire>(`/v1/assets/${encodeURIComponent(assetId)}/telemetry?limit=${Math.max(1, Math.min(limit, 20))}`, { signal });
+    const frames = (raw.samples as Wire[] ?? raw.telemetry_history as Wire[] ?? []);
+    const current = raw.current_telemetry as Wire | undefined;
+    if (current && !frames.some((frame) => frame.sequence === current.sequence)) frames.push(current);
+    const points = frames.map((frame) => this.mapTelemetryFrame(frame));
+    if (raw.control_state) this.assetControlStates.set(assetId, this.mapAssetControlState(raw.control_state as Wire));
+    return {
+      assetId: String(raw.asset_id ?? assetId),
+      sampledAt: String(current?.observed_at ?? points.at(-1)?.timestamp ?? new Date().toISOString()),
+      receivedAt: new Date().toISOString(),
+      intervalSeconds: Number(raw.interval_seconds ?? 5),
+      points,
+      signals: this.mapTelemetrySignals(current ?? frames.at(-1) ?? {}),
+    };
+  }
+
+  async previewAssetCommand(assetId: string, command: AssetCommand, signal?: AbortSignal): Promise<AssetCommandPreview> {
+    const expectedVersion = this.assetControlStates.get(assetId)?.version;
+    if (expectedVersion === undefined) throw new ApiProblem("Load the current asset twin before previewing a command.", 409, "asset_state_required", true);
+    const response = await this.envelope<Wire>(`/v1/assets/${encodeURIComponent(assetId)}/control-previews`, {
+      method: "POST",
+      headers: this.mutation("asset-control-preview"),
+      body: JSON.stringify({ command, expected_version: expectedVersion, reason: "Operator-requested control adjustment from the digital twin." }),
+      signal,
+    });
+    const raw = response.data;
+    const before = this.mapAssetControlState((raw.before_state ?? {}) as Wire, expectedVersion);
+    const after = this.mapAssetControlState((raw.after_state ?? {}) as Wire, expectedVersion + 1);
+    const safety = (raw.safety ?? {}) as Wire;
+    const preview: AssetCommandPreview = {
+      previewId: String(raw.preview_id),
+      assetId: String(raw.asset_id ?? assetId),
+      command: this.mapAssetCommand((raw.command ?? command) as Wire | AssetCommand),
+      expectedAssetVersion: Number(raw.expected_version ?? before.version),
+      payloadHash: String(raw.payload_hash).startsWith("sha256:") ? String(raw.payload_hash) : `sha256:${raw.payload_hash}`,
+      currentState: before,
+      predictedState: after,
+      safetyChecks: (safety.checks as Wire[] ?? raw.safety_checks as Wire[] ?? []).map((check) => ({
+        check: String(check.check ?? check.name ?? check.code ?? "Safety check"),
+        passed: Boolean(check.passed ?? check.status === "passed"),
+        detail: String(check.detail ?? check.message ?? check.description ?? ""),
+      })),
+      risks: (safety.risks ?? raw.risks ?? []).map(String),
+      expiresAt: String(raw.expires_at ?? new Date(Date.now() + 15 * 60_000).toISOString()),
+      executionMode: "simulation",
+      externalWrite: false,
+    };
+    this.assetCommandPreviews.set(preview.previewId, { preview, etag: response.response.headers.get("etag") ?? String(raw.etag ?? "") });
+    return clone(preview);
+  }
+
+  async executeAssetCommand(
+    assetId: string,
+    previewId: string,
+    payloadHash: string,
+    idempotencyKey: string,
+    signal?: AbortSignal,
+  ): Promise<AssetCommandReceipt> {
+    const stored = this.assetCommandPreviews.get(previewId);
+    if (!stored || stored.preview.assetId !== assetId || stored.preview.payloadHash !== payloadHash) {
+      throw new ApiProblem("The exact command preview is no longer current.", 409, "asset_command_payload_mismatch", false);
+    }
+    const response = await this.envelope<Wire>(`/v1/assets/${encodeURIComponent(assetId)}/control-previews/${encodeURIComponent(previewId)}/execute`, {
+      method: "POST",
+      headers: { "Idempotency-Key": idempotencyKey, "If-Match": stored.etag },
+      body: "{}",
+      signal,
+    });
+    const raw = response.data;
+    const before = this.mapAssetControlState((raw.before_state ?? {}) as Wire, stored.preview.currentState.version);
+    const after = this.mapAssetControlState((raw.after_state ?? {}) as Wire, before.version + 1);
+    this.assetControlStates.set(assetId, after);
+    const receipt: AssetCommandReceipt = {
+      receiptId: String(raw.receipt_id),
+      assetId: String(raw.asset_id ?? assetId),
+      status: raw.status === "rejected" ? "rejected" : "succeeded",
+      command: this.mapAssetCommand((raw.command ?? stored.preview.command) as Wire | AssetCommand),
+      assetVersionBefore: before.version,
+      assetVersionAfter: after.version,
+      idempotencyKey: String(raw.idempotency_key ?? idempotencyKey),
+      payloadHash: stored.preview.payloadHash,
+      executedAt: String(raw.executed_at ?? raw.recorded_at ?? new Date().toISOString()),
+      replayed: this.assetCommandReceipts.has(idempotencyKey) || Boolean(raw.replayed ?? response.response.headers.get("idempotent-replay") === "true"),
+      auditEventId: String(raw.audit_event_id ?? raw.audit_evidence?.event_id ?? raw.receipt_id),
+      simulation: true,
+      externalWrite: false,
+    };
+    this.assetCommandReceipts.set(idempotencyKey, receipt);
+    return receipt;
+  }
+
+  private mapAsset(raw: Wire): AssetSummary {
+    const location = (raw.location ?? {}) as Wire;
+    const site = [location.site ?? raw.site, location.area ?? raw.area].filter(Boolean).join(" · ");
+    return {
+      assetId: String(raw.asset_id ?? raw.id),
+      name: String(raw.display_name ?? raw.name ?? "Industrial asset"),
+      assetType: "centrifugal_pump",
+      model: String(raw.model ?? "Unknown model"),
+      serialNumber: String(raw.serial_number ?? "Unknown serial"),
+      site: site || "Unknown site",
+      status: this.mapOperatingStatus(String(raw.operational_status ?? raw.status ?? "offline")),
+      healthScore: Number(raw.health_score ?? raw.health?.score ?? 0),
+      lifecycleStage: this.mapLifecycleStage(String(raw.current_stage ?? raw.lifecycle_stage ?? "service")),
+      version: Number(raw.version ?? raw.control_version ?? 0),
+      canControl: Boolean(raw.can_control ?? raw.canControl ?? false),
+    };
+  }
+
+  private mapAssetControlState(raw: Wire, fallbackVersion = 0): AssetControlState {
+    const operatingMode = String(raw.operating_mode ?? raw.operational_status ?? raw.status ?? "");
+    return {
+      version: Number(raw.version ?? fallbackVersion),
+      speedPct: Number(raw.speed_pct ?? raw.speed_percent ?? 0),
+      valvePct: Number(raw.valve_pct ?? raw.valve_percent ?? 0),
+      emergencyStopped: Boolean(raw.emergency_stopped ?? raw.emergency_stop_active ?? false),
+      status: this.mapOperatingStatus(operatingMode || (raw.emergency_stopped ? "offline" : Number(raw.speed_pct ?? 0) === 0 ? "idle" : "running")),
+    };
+  }
+
+  private mapTelemetryFrame(frame: Wire): AssetTelemetry["points"][number] {
+    const readings = (frame.readings as Wire[] ?? []);
+    const value = (terms: string[], fallback = 0) => {
+      const reading = readings.find((item) => terms.some((term) => String(item.metric ?? item.sensor_id ?? item.label ?? "").toLowerCase().includes(term)));
+      return Number(reading?.value ?? fallback);
+    };
+    return {
+      timestamp: String(frame.observed_at ?? frame.timestamp ?? new Date().toISOString()),
+      temperatureC: value(["temperature", "temp"]),
+      pressureBar: value(["discharge_pressure", "pressure"]),
+      vibrationMmS: value(["vibration", "vib"]),
+      flowM3H: Number((value(["flow_l_min", "flow"]) * 0.06).toFixed(2)),
+      motorCurrentA: value(["motor_current", "current"]),
+      speedRpm: value(["speed_rpm", "speed"]),
+    };
+  }
+
+  private mapTelemetrySignals(frame: Wire): AssetTelemetry["signals"] {
+    const readings = (frame.readings as Wire[] ?? []);
+    const find = (terms: string[]) => readings.find((item) => terms.some((term) => String(item.metric ?? item.sensor_id ?? item.label ?? "").toLowerCase().includes(term))) ?? {};
+    const map = (
+      terms: string[],
+      fallbackLabel: string,
+      fallbackUnit: string,
+      valueKind: "observed" | "derived" = "observed",
+      scale = 1,
+    ) => {
+      const reading = find(terms);
+      const thresholds = (reading.thresholds ?? {}) as Wire;
+      const threshold = (key: string) => thresholds[key] === undefined ? undefined : Number((Number(thresholds[key]) * scale).toFixed(2));
+      const rawStatus = String(reading.status ?? "normal").toLowerCase();
+      return {
+        label: String(reading.label ?? fallbackLabel),
+        unit: scale === 1 ? String(reading.unit ?? fallbackUnit) : fallbackUnit,
+        status: rawStatus === "critical" ? "critical" as const : rawStatus === "warning" ? "warning" as const : "normal" as const,
+        valueKind,
+        warningLow: threshold("warning_low"),
+        criticalLow: threshold("critical_low"),
+        warningHigh: threshold("warning_high"),
+        criticalHigh: threshold("critical_high"),
+      };
+    };
+    return {
+      temperatureC: map(["temperature", "temp"], "Bearing temperature", "°C"),
+      pressureBar: map(["discharge_pressure", "pressure"], "Discharge pressure", "bar"),
+      vibrationMmS: map(["vibration", "vib"], "Drive-end vibration", "mm/s RMS"),
+      flowM3H: map(["flow_l_min", "flow"], "Process flow", "m³/h", "derived", 0.06),
+      motorCurrentA: map(["motor_current", "current"], "Motor current", "A"),
+      speedRpm: map(["speed_rpm", "speed"], "Motor speed", "rpm"),
+    };
+  }
+
+  private mapAssetCommand(raw: Wire | AssetCommand): AssetCommand {
+    const type = String(raw.type);
+    if (type === "set_speed_pct") return { type, value: Number((raw as Wire).value) };
+    if (type === "set_valve_pct") return { type, value: Number((raw as Wire).value) };
+    if (type === "emergency_stop") return { type };
+    return { type: "reset" };
+  }
+
+  private mapOperatingStatus(value: string): AssetSummary["status"] {
+    const normalized = value.toLowerCase();
+    if (["running", "operating", "online", "active", "automatic", "manual"].includes(normalized)) return "running";
+    if (["idle", "standby", "stopped"].includes(normalized)) return "idle";
+    if (normalized.includes("maintenance")) return "maintenance";
+    return "offline";
+  }
+
+  private mapComponentKind(value: string): AssetComponent["kind"] {
+    const normalized = value.toLowerCase();
+    if (normalized.includes("motor")) return "motor";
+    if (normalized.includes("coupl") || normalized.includes("shaft")) return "shaft";
+    if (normalized.includes("bear")) return "bearing";
+    if (normalized.includes("inlet") || normalized.includes("suction")) return "inlet";
+    if (normalized.includes("outlet") || normalized.includes("discharge") || normalized.includes("valve")) return "valve";
+    if (normalized.includes("impeller")) return "impeller";
+    if (normalized.includes("seal")) return "seal";
+    return "casing";
+  }
+
+  private mapComponentStatus(value: string): AssetComponent["status"] {
+    const normalized = value.toLowerCase();
+    if (["critical", "alarm", "failed", "danger"].some((item) => normalized.includes(item))) return "critical";
+    if (["attention", "warning", "anomaly", "degraded", "watch", "service_due"].some((item) => normalized.includes(item))) return "attention";
+    return "normal";
+  }
+
+  private mapPredictionSeverity(value: string): FailurePrediction["severity"] {
+    const normalized = value.toLowerCase();
+    if (["critical", "high", "danger"].includes(normalized)) return "critical";
+    if (["warning", "medium", "attention"].includes(normalized)) return "warning";
+    return "info";
+  }
+
+  private mapLifecycleStage(value: string): AssetSummary["lifecycleStage"] {
+    const normalized = value.toLowerCase();
+    if (normalized.includes("design")) return "design";
+    if (normalized.includes("manufact")) return "manufacture";
+    if (normalized.includes("commission")) return "commission";
+    if (normalized === "operation" || normalized.includes("operat")) return "operation";
+    if (normalized.includes("maint")) return "maintenance";
+    if (normalized === "service") return "service";
+    if (normalized.includes("decommission") || normalized.includes("retire")) return "decommission";
+    return "service";
+  }
+
+  private lifecycleTitle(value: string): string {
+    const normalized = value.toLowerCase();
+    if (normalized.includes("design")) return "Hydraulic design approved";
+    if (normalized.includes("manufact")) return "Factory acceptance completed";
+    if (normalized.includes("commission")) return "Asset commissioned";
+    if (normalized === "operation") return "Operational service";
+    if (normalized === "service") return "Planned maintenance window";
+    if (normalized.includes("decommission")) return "End-of-life review planned";
+    return "Lifecycle event";
+  }
+
+  private mapLifecycleStatus(value: string): LifecycleEvent["status"] {
+    const normalized = value.toLowerCase();
+    if (["current", "active", "in_progress"].includes(normalized)) return "current";
+    if (["planned", "future", "scheduled"].includes(normalized)) return "planned";
+    return "complete";
   }
 
   private mapSnapshot(raw: Wire): ActionReceipt["before"] {

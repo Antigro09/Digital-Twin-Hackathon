@@ -73,6 +73,9 @@ Versioned domain payloads carry a `schema_version`. Standard protocol envelopes 
 | `AuditEvent` | Append-only event ID, tenant, actor/service, action, resource refs, outcome, reason, policy version, trace ID, occurred/recorded time, and payload hash. Sensitive detail is stored separately with stricter access. |
 | `TraceContext` | W3C `traceparent`, optional `tracestate`, request ID, and tenant-safe baggage policy. Client baggage cannot set tenant, actor, or authorization fields. |
 | `Problem` | RFC 9457 problem details plus stable `code`, `request_id`, safe `errors[]`, and optional `retry_after`. |
+| `AssetTwinSnapshot` | Tenant-authorized synthetic asset, spatial components, current/history telemetry, deterministic analytics and model card, lifecycle records, simulator control state, and data watermark. |
+| `AssetControlPreview` | Short-lived exact simulated command, expected version, before/after state, safety checks, payload hash, ETag, expiry, and explicit no-external-write marker. |
+| `AssetControlReceipt` | Idempotent simulator transition result, before/after versions, payload hash, audit evidence, and explicit simulation/no-external-write markers. Replay returns this same receipt. |
 
 Canonical date-times are RFC 3339 UTC with millisecond precision; calendar dates are ISO `YYYY-MM-DD`. Monetary amounts use integer minor units plus ISO currency. Arbitrary precision identifiers and seeds are strings. JSON numbers MUST be finite; `NaN` and infinities are invalid.
 
@@ -112,6 +115,11 @@ Canonical date-times are RFC 3339 UTC with millisecond precision; calendar dates
 | `POST /v1/approvals/{id}/decisions` | Records one human approve/reject decision after reauthentication when policy requires. |
 | `POST /v1/approvals/{id}/execute` | Consumes a valid execution grant; returns original receipt on idempotent replay. It cannot accept replacement payload fields. |
 | `POST /v1/action-receipts/{id}/compensation-previews` | Produces guarded rollback preview. Execution follows a new approval/action flow. |
+| `GET /v1/assets` | Lists tenant-authorized synthetic asset summaries; it does not discover or connect devices. |
+| `GET /v1/assets/{assetId}/twin` | Returns the physical scene/component metadata, current and historical synthetic telemetry, deterministic analytics/model card, lifecycle, simulator control state, and watermark. |
+| `GET /v1/assets/{assetId}/telemetry` | Advances exactly one deterministic five-second frame and returns the most recent 1-120 frames selected by `limit`. Polling this resource is not an industrial streaming or real-time guarantee. |
+| `POST /v1/assets/{assetId}/control-previews` | Validates type, value, reason, expected version, transition, range, tenant policy, and idempotency; returns a short-lived exact simulator-only preview and ETag. |
+| `POST /v1/assets/{assetId}/control-previews/{previewId}/execute` | Reauthorizes and executes the unchanged preview once against simulator state using `Idempotency-Key` and `If-Match`; performs no device or network write. |
 | `GET /v1/audit-events` | Authorized keyset-paginated audit index with filters; detail access is separately controlled. |
 | `GET /v1/ontology/types` | Installed, visible ontology catalog and versions. |
 | `POST /v1/extension-packages/validations` | Validates a signed package in quarantine; installation is a separate administrator command. |
@@ -125,6 +133,10 @@ Every public `POST`, `PUT`, `PATCH`, and state-changing `DELETE` declares whethe
 The first request atomically stores key, request hash, state, and eventual response reference. Same key plus same hash returns the original status/result. Same key plus a different hash returns `409 idempotency_key_reused`. In-progress replay returns the same run. A server timeout does not authorize a client to generate a new key for an external write; the client queries the original command.
 
 Mutable administrative resources use strong ETags. `PUT`, `PATCH`, confirmation, and policy-sensitive actions require `If-Match`; absent precondition returns `428`, stale version returns `412`. A scenario draft may transition once to a confirmed state, but its operation list and digest do not change. Snapshot content, confirmed scenario content, an approval's bound payload/digest, and action receipts are immutable; approval decisions and lifecycle transitions are append-only child records that update a derived state projection.
+
+Physical-asset control previews follow the same strong-precondition and replay rules but are not external actions and do not require the Jira action's two-person approval policy. A preview binds the tenant, actor, synthetic asset ID, expected simulator version, command, reason, safety-policy version, expiry, and payload hash. Execution rejects an altered or expired preview, stale version, unsupported transition, out-of-range value, policy failure, or reused key with a different hash. Every response carries `execution_mode: simulation`; every receipt carries `simulation: true` and `external_write: false`.
+
+Asset reads require `asset.read`, preview requires `asset.control.preview`, and execution requires `asset.control.execute`. These application capabilities are evaluated against the server-derived actor and tenant context on every call; a general login or graph-read grant is insufficient.
 
 ### 4.4 Pagination, filtering, and sorting
 
@@ -351,6 +363,7 @@ Operational metrics include request rate/status/latency by operation, auth failu
 | AC-DATA-001 | Same-key/same-body command replay returns the original result, different-body reuse returns `409`, and randomized duplicate event delivery converges. |
 | AC-CON-001 | H1 inbound webhook tests verify authentication, raw-byte integrity where applicable, expiry/replay, duplicates, retries, and reconciliation; the H2 outbound gate additionally requires signature rotation, redelivery, SSRF/DNS rebinding defense, and delivery reconciliation. |
 | AC-ACT-002 | Ambiguous and concurrent execution requests remain queryable and create exactly one Jira effect and one receipt. |
+| AC-PHY-001 | Physical-twin contract tests reproduce seeded telemetry and analytics, conceal cross-tenant asset IDs, reject unsafe/stale/mutated/replayed-conflicting previews, produce one simulator transition for a valid command, and prove zero device egress. |
 | AC-SUP-001 | Generated SDKs and signed plugins include SBOM/provenance, pass conformance/scanning, never retry unsafe commands, and fail malicious packages before installation. |
 | AC-REL-001 | H1 non-AI API load meets the 2-second p95 target and SSE/webhook connection budgets without bypassing policy or rate limits. |
 | AC-OBS-001 | REST, SSE, webhook, MCP, workflow, and external action activity correlates through one redacted trace/audit path. |

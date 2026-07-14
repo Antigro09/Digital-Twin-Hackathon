@@ -226,6 +226,157 @@ export type CompensationPreview = {
 
 export type DemoState = "live" | "loading" | "empty" | "error" | "stale" | "revoked";
 
+export type AssetOperatingStatus = "running" | "idle" | "maintenance" | "offline";
+export type AssetComponentStatus = "normal" | "attention" | "critical";
+
+export type AssetSummary = {
+  assetId: string;
+  name: string;
+  assetType: "centrifugal_pump";
+  model: string;
+  serialNumber: string;
+  site: string;
+  status: AssetOperatingStatus;
+  healthScore: number;
+  lifecycleStage: "design" | "manufacture" | "commission" | "operation" | "service" | "maintenance" | "decommission";
+  version: number;
+  canControl: boolean;
+};
+
+export type AssetComponent = {
+  componentId: string;
+  name: string;
+  kind: "motor" | "shaft" | "bearing" | "impeller" | "casing" | "seal" | "valve" | "inlet";
+  status: AssetComponentStatus;
+  description: string;
+  sensorTags: string[];
+};
+
+export type TelemetryPoint = {
+  timestamp: string;
+  temperatureC: number;
+  pressureBar: number;
+  vibrationMmS: number;
+  flowM3H: number;
+  motorCurrentA: number;
+  speedRpm: number;
+};
+
+export type AssetTelemetryMetric = Exclude<keyof TelemetryPoint, "timestamp">;
+
+export type AssetTelemetrySignal = {
+  label: string;
+  unit: string;
+  status: "normal" | "warning" | "critical";
+  valueKind: "observed" | "derived";
+  warningLow?: number;
+  criticalLow?: number;
+  warningHigh?: number;
+  criticalHigh?: number;
+};
+
+export type AssetTelemetry = {
+  assetId: string;
+  sampledAt: string;
+  receivedAt: string;
+  intervalSeconds: number;
+  points: TelemetryPoint[];
+  signals: Record<AssetTelemetryMetric, AssetTelemetrySignal>;
+};
+
+export type FailurePrediction = {
+  predictionId: string;
+  componentId: string;
+  severity: "info" | "warning" | "critical";
+  title: string;
+  confidence: number;
+  horizonHours: number;
+  horizonLabel: string;
+  explanation: string;
+  evidence: string[];
+  recommendation: string;
+  modelVersion: string;
+  generatedAt: string;
+};
+
+export type LifecycleEvent = {
+  eventId: string;
+  stage: "design" | "manufacture" | "commission" | "operation" | "service" | "maintenance" | "decommission";
+  status: "complete" | "current" | "planned";
+  date: string;
+  title: string;
+  detail: string;
+  artifact?: string;
+};
+
+export type AssetTwinSnapshot = {
+  asset: AssetSummary & {
+    manufacturer: string;
+    installedAt: string;
+    designFlowM3H: number;
+    designHeadM: number;
+    ratedSpeedRpm: number;
+  };
+  components: AssetComponent[];
+  predictions: FailurePrediction[];
+  lifecycle: LifecycleEvent[];
+  control: {
+    supportedCommands: Array<"set_speed_pct" | "set_valve_pct" | "emergency_stop" | "reset">;
+    minSpeedPct: number;
+    maxSpeedPct: number;
+    minValvePct: number;
+    maxValvePct: number;
+    state: AssetControlState;
+    mode: "synthetic_sandbox";
+  };
+  projectionAsOf: string;
+};
+
+export type AssetCommand =
+  | { type: "set_speed_pct"; value: number }
+  | { type: "set_valve_pct"; value: number }
+  | { type: "emergency_stop" }
+  | { type: "reset" };
+
+export type AssetControlState = {
+  version: number;
+  speedPct: number;
+  valvePct: number;
+  emergencyStopped: boolean;
+  status: AssetOperatingStatus;
+};
+
+export type AssetCommandPreview = {
+  previewId: string;
+  assetId: string;
+  command: AssetCommand;
+  expectedAssetVersion: number;
+  payloadHash: string;
+  currentState: AssetControlState;
+  predictedState: AssetControlState;
+  safetyChecks: Array<{ check: string; passed: boolean; detail: string }>;
+  risks: string[];
+  expiresAt: string;
+  executionMode: "simulation";
+  externalWrite: false;
+};
+
+export type AssetCommandReceipt = {
+  receiptId: string;
+  assetId: string;
+  status: "succeeded" | "rejected";
+  command: AssetCommand;
+  assetVersionBefore: number;
+  assetVersionAfter: number;
+  idempotencyKey: string;
+  payloadHash: string;
+  executedAt: string;
+  replayed: boolean;
+  auditEventId: string;
+  simulation: true;
+  externalWrite: false;
+};
+
 export type DemoSnapshot = {
   actor: ActorContext;
   connectorHealth: ConnectorHealth[];
@@ -264,6 +415,17 @@ export interface DigitalTwinApi {
     signal?: AbortSignal,
   ): Promise<CompensationPreview>;
   compensate(compensationId: string, idempotencyKey: string, signal?: AbortSignal): Promise<CompensationPreview>;
+  getAssets(signal?: AbortSignal): Promise<AssetSummary[]>;
+  getAssetTwin(assetId: string, signal?: AbortSignal): Promise<AssetTwinSnapshot>;
+  getAssetTelemetry(assetId: string, limit?: number, signal?: AbortSignal): Promise<AssetTelemetry>;
+  previewAssetCommand(assetId: string, command: AssetCommand, signal?: AbortSignal): Promise<AssetCommandPreview>;
+  executeAssetCommand(
+    assetId: string,
+    previewId: string,
+    payloadHash: string,
+    idempotencyKey: string,
+    signal?: AbortSignal,
+  ): Promise<AssetCommandReceipt>;
 }
 
 export class ApiProblem extends Error {

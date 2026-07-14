@@ -28,6 +28,15 @@ tests_evaluations:
     oracle: The four H1 workloads deploy with only adopted dependencies; conditional technologies have measurable triggers and no undeclared authority.
     evidence: output/test-evidence/TST-ARCH-001.json
     covers: [REQ-ARCH-001, REQ-ARCH-002, REQ-ARCH-003, REQ-ARCH-004, REQ-ARCH-005, REQ-ARCH-006, REQ-ARCH-007]
+  - id: TST-PHY-001
+    title: Synthetic physical-asset twin conformance
+    kind: end_to_end_test
+    horizons: [H1]
+    owners: [product-engineering, simulation-team, security-engineering]
+    method: Replay frozen-fixture telemetry and component selection through procedural perspective and structured views verify deterministic anomaly and trend outputs inspect lifecycle history and exercise valid invalid stale replayed cross-tenant and out-of-range simulator commands.
+    oracle: Identical fixture sequence state and model version reproduce canonical results every invalid command has zero effect a valid preview executes once replay returns its receipt audit hashes verify and no network or device write occurs.
+    evidence: output/test-evidence/TST-PHY-001.json
+    covers: [REQ-PHY-001, REQ-PHY-002, REQ-PHY-003, REQ-PHY-004, REQ-PHY-005]
   - id: TST-TEN-001
     title: Tenant isolation and authorization adversarial suite
     kind: security_test

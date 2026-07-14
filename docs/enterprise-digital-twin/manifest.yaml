@@ -25,6 +25,7 @@ documents:
   - chapters/14-testing-evaluation-dx.md
   - chapters/15-roadmap-research.md
   - chapters/16-architecture-audit.md
+  - chapters/17-synthetic-physical-asset-twin.md
 normative_catalogs:
   - source-ledger.yaml
   - catalogs/requirements.yaml

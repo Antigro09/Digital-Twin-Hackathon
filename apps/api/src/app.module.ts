@@ -2,6 +2,8 @@ import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ActionController } from './action.controller';
 import { AdminController } from './admin.controller';
 import { AgentController } from './agent.controller';
+import { AssetTwinController } from './asset-twin.controller';
+import { AssetTwinService } from './asset-twin.service';
 import { ContextService } from './context.service';
 import { DatabaseService } from './database.service';
 import { DemoStoreService } from './demo-store.service';
@@ -10,8 +12,8 @@ import { KnowledgeController } from './knowledge.controller';
 import { SimulationController } from './simulation.controller';
 
 @Module({
-  controllers: [AdminController, KnowledgeController, AgentController, SimulationController, ActionController],
-  providers: [FixtureService, ContextService, DatabaseService, DemoStoreService],
+  controllers: [AdminController, KnowledgeController, AgentController, SimulationController, ActionController, AssetTwinController],
+  providers: [FixtureService, ContextService, DatabaseService, DemoStoreService, AssetTwinService],
 })
 export class AppModule implements NestModule {
   configure(_consumer: MiddlewareConsumer): void {

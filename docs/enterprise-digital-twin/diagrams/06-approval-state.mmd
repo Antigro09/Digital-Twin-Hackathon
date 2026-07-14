@@ -1,0 +1,21 @@
+stateDiagram-v2
+  [*] --> Pending: preview created
+  Pending --> Pending: first distinct approval
+  Pending --> Approved: second distinct approval and policy recheck
+  Pending --> Denied: any deny decision
+  Pending --> Expired: 15 minutes elapsed
+  Pending --> Cancelled: requester cancels
+  Pending --> Pending: identical idempotent replay
+  Pending --> Invalidated: payload policy credential or target changes
+  Approved --> Executing: durable workflow starts
+  Executing --> Executed: Jira receipt stored
+  Executing --> Failed: classified terminal failure
+  Executed --> Compensating: authorized rollback
+  Compensating --> Compensated: prior state restored
+  Compensating --> ManualIntervention: compensation cannot safely complete
+  Denied --> [*]
+  Expired --> [*]
+  Cancelled --> [*]
+  Invalidated --> [*]
+  Compensated --> [*]
+

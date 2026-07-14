@@ -1,0 +1,27 @@
+{
+  "schema_version": "1.0",
+  "observation_id": "53000000-0000-4000-8000-000000000142",
+  "tenant_id": "10000000-0000-4000-8000-000000000001",
+  "installation_id": "30000000-0000-4000-8000-000000000001",
+  "provider": "jira",
+  "source_key": "AST-142",
+  "source_revision": "7",
+  "ontology_candidate_type": "edt.work.WorkItem",
+  "attributes": [
+    {"predicate": "edt.work.summary", "value": "Complete SSO cutover", "value_type": "string", "classification": "confidential", "authority": "source"},
+    {"predicate": "edt.work.status", "value": "In Progress", "value_type": "string", "classification": "internal", "authority": "source"},
+    {"predicate": "edt.work.due_date", "value": "2026-08-07", "value_type": "date", "classification": "confidential", "authority": "source"}
+  ],
+  "relationships": [
+    {"predicate": "edt.work.belongsToProject", "target_source_key": "AST", "classification": "internal", "confidence": 1.0}
+  ],
+  "source_acl": {"acl_class": "aster-orion-full", "visibility": "project", "principal_ids": ["20000000-0000-4000-8000-000000000001"], "permission_revision": "jira-cloud-aster-v9"},
+  "effective_time": {"valid_from": "2026-07-13T15:45:00Z", "valid_to": null},
+  "source_locator": {"application_path": "/evidence/54000000-0000-4000-8000-000000000142", "provider_path": "/browse/AST-142"},
+  "parser_version": "1.0.0",
+  "mapping_id": "jira.issue.h1",
+  "mapping_version": "1.0.0",
+  "raw_payload_sha256": "ba671758e02d1f8ccf68c8fa75e991545261dc9a5416d2ebab9ecc09dd2f661b",
+  "warnings": [],
+  "status": "active"
+}

@@ -1,0 +1,57 @@
+global:
+  imagePullSecrets: []
+  existingSecret: edt-runtime-secrets
+  fixtureConfigMap: edt-h1-fixtures
+
+images:
+  api: {repository: enterprise-digital-twin/api, tag: "1.0.0", pullPolicy: IfNotPresent}
+  web: {repository: enterprise-digital-twin/web, tag: "1.0.0", pullPolicy: IfNotPresent}
+  syncWorker: {repository: enterprise-digital-twin/sync-worker, tag: "1.0.0", pullPolicy: IfNotPresent}
+  aiWorker: {repository: enterprise-digital-twin/ai-worker, tag: "1.0.0", pullPolicy: IfNotPresent}
+
+replicas: {api: 2, web: 2, syncWorker: 2, aiWorker: 2}
+
+config:
+  webOrigin: https://digital-twin.example.com
+  aiWorkerUrl: http://edt-ai-worker:8080
+  temporalAddress: temporal-frontend.temporal.svc.cluster.local:7233
+  temporalNamespace: edt
+  neo4jUri: neo4j://neo4j.edt-data.svc.cluster.local:7687
+  s3Endpoint: https://s3.example.com
+  s3Region: us-east-1
+  sourceBucket: edt-source-payloads
+  requirePostgres: "true"
+  allowOracleFallback: "false"
+  demoAuth: "false"
+  frozenClock: "false"
+
+secretKeys:
+  databaseUrl: DATABASE_URL
+  neo4jUser: NEO4J_USER
+  neo4jPassword: NEO4J_PASSWORD
+  s3AccessKeyId: S3_ACCESS_KEY_ID
+  s3SecretAccessKey: S3_SECRET_ACCESS_KEY
+
+resources:
+  api: {requests: {cpu: 250m, memory: 384Mi}, limits: {cpu: "1", memory: 1Gi}}
+  web: {requests: {cpu: 100m, memory: 256Mi}, limits: {cpu: 500m, memory: 512Mi}}
+  syncWorker: {requests: {cpu: 250m, memory: 512Mi}, limits: {cpu: "1", memory: 1Gi}}
+  aiWorker: {requests: {cpu: 500m, memory: 512Mi}, limits: {cpu: "2", memory: 2Gi}}
+
+ingress:
+  enabled: false
+  className: ""
+  host: digital-twin.example.com
+  tlsSecretName: edt-tls
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
+networkPolicy:
+  enabled: true
+
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}

@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://enterprise-digital-twin.example/connectors/github/1.0.0/cursor.schema.json",
+  "title": "GitHub H1 Versioned Cursor",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "repository_id", "collection", "page_token", "updated_at", "object_id", "lookback_lower_bound", "manifest_generation"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "repository_id": {"type": "integer", "minimum": 1},
+    "collection": {"enum": ["repositories", "branches", "commits", "comparisons", "pull_requests", "reviews", "workflow_runs", "workflow_jobs", "checks", "deployments", "deployment_statuses", "members", "teams"]},
+    "page_token": {"type": ["string", "null"], "maxLength": 2048},
+    "updated_at": {"type": ["string", "null"], "format": "date-time"},
+    "object_id": {"type": ["integer", "null"], "minimum": 1},
+    "lookback_lower_bound": {"type": "string", "format": "date-time"},
+    "manifest_generation": {"type": "integer", "minimum": 1}
+  }
+}

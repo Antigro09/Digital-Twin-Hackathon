@@ -1,0 +1,23 @@
+flowchart LR
+  subgraph Orient
+    direction TB
+    O1[User views organizational cockpit] --> O2[User inspects freshness and access caveats]
+  end
+  subgraph Investigate
+    direction TB
+    I1[User asks why launch is at risk] --> I2[User follows citations into graph and timeline]
+    I2 --> I3[User reviews uncertainty or abstention]
+  end
+  subgraph Simulate
+    direction TB
+    S1[User confirms assumptions and interventions] --> S2[User compares baseline with scenario]
+    S2 --> S3[User inspects sensitivity and missing data]
+  end
+  subgraph Act
+    direction TB
+    A1[User previews exact Jira change and rollback] --> A2[Two distinct approvers bind the exact payload]
+    A2 --> A3[User verifies receipt audit and graph update]
+  end
+  O2 --> I1
+  I3 --> S1
+  S3 --> A1

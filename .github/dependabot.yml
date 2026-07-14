@@ -1,0 +1,17 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule: {interval: weekly, day: monday}
+    open-pull-requests-limit: 5
+    groups:
+      runtime-patches:
+        update-types: [patch]
+  - package-ecosystem: pip
+    directory: /apps/ai-worker
+    schedule: {interval: weekly, day: monday}
+    open-pull-requests-limit: 3
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: {interval: weekly, day: monday}
+    open-pull-requests-limit: 3

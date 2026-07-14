@@ -1,0 +1,13 @@
+{{- if .Values.podDisruptionBudget.enabled }}
+{{- $root := . -}}
+{{- range $index, $name := list "api" "web" "sync-worker" "ai-worker" }}
+{{- if $index }}---{{ end }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata: {name: edt-{{ $name }}}
+spec:
+  minAvailable: {{ $root.Values.podDisruptionBudget.minAvailable }}
+  selector:
+    matchLabels: {app.kubernetes.io/instance: {{ $root.Release.Name }}, app.kubernetes.io/component: {{ $name }}}
+{{- end }}
+{{- end }}

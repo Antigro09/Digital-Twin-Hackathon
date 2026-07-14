@@ -1,0 +1,16 @@
+{{- $root := . -}}
+{{- $services := list (dict "name" "api" "port" 8080) (dict "name" "web" "port" 3000) (dict "name" "sync-worker" "port" 8090) (dict "name" "ai-worker" "port" 8080) -}}
+{{- range $index, $service := $services }}
+{{- if $index }}---{{ end }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: edt-{{ $service.name }}
+  labels:
+    {{- include "edt.labels" $root | nindent 4 }}
+    app.kubernetes.io/component: {{ $service.name }}
+spec:
+  type: ClusterIP
+  selector: {app.kubernetes.io/instance: {{ $root.Release.Name }}, app.kubernetes.io/component: {{ $service.name }}}
+  ports: [{name: http, port: {{ $service.port }}, targetPort: http, protocol: TCP}]
+{{- end }}

@@ -1,0 +1,14 @@
+flowchart TB
+  H0[Decision baseline] --> H1A[Synthetic data and connector contracts]
+  H1A --> H1B[Claims evidence ACL and graph]
+  H1B --> H1C[Cited launch-risk answer]
+  H1B --> H1D[PERT Monte Carlo simulation]
+  H1C --> H1E[Mitigation draft]
+  H1D --> H1E
+  H1E --> H1F[Dual approval Jira action and rollback]
+  H1F --> H1G[Hackathon release gate]
+  H1G --> H2A[SSO SCIM revocation deletion and HA]
+  H2A --> H2B[Design-partner pilot]
+  H2B --> H3[Telemetry-derived GA targets]
+  H3 --> H4[Dedicated on-prem air-gap multi-region profiles]
+  H3 --> H5[Research gates for causal prediction and broad autonomy]

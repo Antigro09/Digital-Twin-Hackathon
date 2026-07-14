@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://enterprise-digital-twin.example/connectors/jira-cloud/1.0.0/cursor.schema.json",
+  "title": "Jira Cloud H1 Versioned Cursor",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "updated_at", "issue_id", "page_token", "field_schema_sha256", "jql_version", "lookback_lower_bound", "manifest_generation"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "updated_at": {"type": ["string", "null"], "format": "date-time"},
+    "issue_id": {"type": ["string", "null"], "pattern": "^[0-9]+$"},
+    "page_token": {"type": ["string", "null"], "maxLength": 2048},
+    "field_schema_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "jql_version": {"const": "h1-v1"},
+    "lookback_lower_bound": {"type": "string", "format": "date-time"},
+    "manifest_generation": {"type": "integer", "minimum": 1}
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "id": 900184,
+  "number": 184,
+  "state": "open",
+  "title": "Finalize token migration",
+  "updated_at": "2026-07-13T15:47:00Z",
+  "repository": "aster-labs/identity-service",
+  "author": "aster-dev-17",
+  "base_sha": "1111111111111111111111111111111111111111",
+  "head_sha": "2222222222222222222222222222222222222222",
+  "requested_reviewers": [],
+  "requested_teams": ["aster-security"],
+  "labels": ["orion", "security-review"],
+  "draft": false,
+  "linked_issue": "AST-142",
+  "provider_additive_field": {"accepted_only_inside_untrusted_payload": true}
+}

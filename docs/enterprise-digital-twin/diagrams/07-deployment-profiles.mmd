@@ -1,0 +1,32 @@
+flowchart TB
+  subgraph H1[H1 Local and Demo]
+    Compose[Docker Compose]
+    LocalPG[(PostgreSQL)]
+    LocalGraph[(Neo4j)]
+    MinIO[(MinIO)]
+    LocalTemporal[Temporal]
+    Compose --> LocalPG
+    Compose --> LocalGraph
+    Compose --> MinIO
+    Compose --> LocalTemporal
+  end
+  subgraph H2[H2 Shared SaaS]
+    K8s[Kubernetes OCI workloads]
+    RegionalPG[(Regional PostgreSQL HA)]
+    RegionalGraph[(Regional graph clusters)]
+    S3[(S3 compatible object service)]
+    OTel[OpenTelemetry collectors]
+    K8s --> RegionalPG
+    K8s --> RegionalGraph
+    K8s --> S3
+    K8s --> OTel
+  end
+  subgraph H4[H4 Gated Profiles]
+    Dedicated[Dedicated customer data plane]
+    OnPrem[On-premises Kubernetes]
+    AirGap[Air-gapped local-model profile]
+    MultiRegion[Regional cells and DR]
+  end
+  H1 -->|promote after gates| H2
+  H2 -->|customer and benchmark gates| H4
+

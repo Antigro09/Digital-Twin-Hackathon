@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://enterprise-digital-twin.example/connectors/github/1.0.0/raw-payload.schema.json",
+  "title": "GitHub H1 Pull Request Raw Payload",
+  "description": "A bounded, untrusted provider payload. Additive provider fields are permitted only at this payload boundary; secret-like property names are rejected.",
+  "type": "object",
+  "required": ["id", "number", "state", "title", "updated_at", "repository", "author", "base_sha", "head_sha", "requested_reviewers", "requested_teams"],
+  "propertyNames": {"not": {"pattern": "(?:[Tt][Oo][Kk][Ee][Nn]|[Ss][Ee][Cc][Rr][Ee][Tt]|[Aa][Uu][Tt][Hh][Oo][Rr][Ii][Zz][Aa][Tt][Ii][Oo][Nn]|[Pp][Aa][Ss][Ss][Ww][Oo][Rr][Dd])"}},
+  "properties": {
+    "id": {"type": "integer", "minimum": 1},
+    "number": {"type": "integer", "minimum": 1},
+    "state": {"enum": ["open", "closed"]},
+    "title": {"type": "string", "maxLength": 1048576},
+    "updated_at": {"type": "string", "format": "date-time"},
+    "repository": {"type": "string", "pattern": "^[a-z0-9-]+/[a-z0-9._-]+$"},
+    "author": {"type": "string", "minLength": 1},
+    "base_sha": {"type": "string", "pattern": "^[a-f0-9]{40}$"},
+    "head_sha": {"type": "string", "pattern": "^[a-f0-9]{40}$"},
+    "requested_reviewers": {"type": "array", "uniqueItems": true, "items": {"type": "string"}},
+    "requested_teams": {"type": "array", "uniqueItems": true, "items": {"type": "string"}},
+    "labels": {"type": "array", "uniqueItems": true, "items": {"type": "string"}},
+    "draft": {"type": "boolean"},
+    "linked_issue": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{1,19}-[1-9][0-9]*$"}
+  },
+  "additionalProperties": true
+}

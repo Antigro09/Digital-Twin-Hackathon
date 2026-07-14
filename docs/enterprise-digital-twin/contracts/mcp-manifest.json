@@ -1,0 +1,151 @@
+{
+  "name": "enterprise-digital-twin",
+  "version": "1.0.0",
+  "description": "Permission-aware resources, bounded analysis, and an exact-payload approval-gated Jira action facade.",
+  "resources": [
+    {"uri_template": "edt://entities/{entity_id}", "name": "Authorized entity", "mime_type": "application/json", "reauthorize_on_read": true},
+    {"uri_template": "edt://evidence/{evidence_id}", "name": "Citation-safe evidence", "mime_type": "application/json", "reauthorize_on_read": true},
+    {"uri_template": "edt://runs/{run_id}", "name": "Safe agent or workflow run state", "mime_type": "application/json", "reauthorize_on_read": true},
+    {"uri_template": "edt://scenarios/{scenario_id}", "name": "Confirmed scenario diff and assumptions", "mime_type": "application/json", "reauthorize_on_read": true},
+    {"uri_template": "edt://simulation-runs/{run_id}", "name": "Structured forecast and comparison", "mime_type": "application/json", "reauthorize_on_read": true}
+  ],
+  "tools": [
+    {
+      "name": "twin_search_evidence",
+      "class": "read",
+      "risk": "authorized_read",
+      "approval": "mcp_client_policy_never_auto_for_external",
+      "side_effects": false,
+      "input_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["query", "scope", "limit"],
+        "properties": {
+          "query": {"type": "string", "minLength": 1, "maxLength": 500},
+          "scope": {"type": "array", "minItems": 1, "maxItems": 20, "items": {"type": "object", "additionalProperties": false, "required": ["resource_type", "resource_id"], "properties": {"resource_type": {"type": "string", "minLength": 1}, "resource_id": {"type": "string", "format": "uuid"}, "version": {"type": ["integer", "string"]}}}},
+          "limit": {"type": "integer", "minimum": 1, "maximum": 40}
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["items", "next_cursor", "has_more", "data_watermark"],
+        "properties": {
+          "items": {"type": "array", "maxItems": 40, "items": {"type": "object", "additionalProperties": false, "required": ["evidence_id", "claim_id", "source_provider", "source_object_id", "source_revision", "content_hash", "authorized_locator"], "properties": {"evidence_id": {"type": "string", "format": "uuid"}, "claim_id": {"type": "string", "format": "uuid"}, "source_provider": {"enum": ["github", "jira"]}, "source_object_id": {"type": "string"}, "source_revision": {"type": "string"}, "content_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "authorized_locator": {"type": "string", "format": "uri-reference"}, "excerpt": {"type": "string", "maxLength": 1000}}}},
+          "next_cursor": {"type": ["string", "null"]},
+          "has_more": {"type": "boolean"},
+          "data_watermark": {"type": "object", "additionalProperties": false, "required": ["projection_checkpoint_id", "outbox_position", "observed_at"], "properties": {"projection_checkpoint_id": {"type": "string", "format": "uuid"}, "outbox_position": {"type": "integer", "minimum": 0}, "observed_at": {"type": "string", "format": "date-time"}}}
+        }
+      }
+    },
+    {
+      "name": "twin_get_entity",
+      "class": "read",
+      "risk": "authorized_read",
+      "approval": "mcp_client_policy_never_auto_for_external",
+      "side_effects": false,
+      "input_schema": {"type": "object", "additionalProperties": false, "required": ["entity_id"], "properties": {"entity_id": {"type": "string", "format": "uuid"}}},
+      "output_schema_ref": "./schemas/canonical.schema.json#/$defs/Entity"
+    },
+    {
+      "name": "twin_traverse_graph",
+      "class": "read",
+      "risk": "bounded_authorized_read",
+      "approval": "mcp_client_policy_never_auto_for_external",
+      "side_effects": false,
+      "input_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["start_entity_id", "template", "max_depth", "max_nodes"],
+        "properties": {
+          "start_entity_id": {"type": "string", "format": "uuid"},
+          "template": {"enum": ["delivery_dependencies", "ownership_path", "evidence_path", "incident_blast_radius"]},
+          "max_depth": {"type": "integer", "minimum": 1, "maximum": 4},
+          "max_nodes": {"type": "integer", "minimum": 1, "maximum": 500}
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["nodes", "relationships", "truncated", "data_watermark"],
+        "properties": {
+          "nodes": {"type": "array", "maxItems": 500, "items": {"$ref": "./schemas/canonical.schema.json#/$defs/Entity"}},
+          "relationships": {"type": "array", "maxItems": 2000, "items": {"$ref": "./schemas/canonical.schema.json#/$defs/Relationship"}},
+          "truncated": {"type": "boolean"},
+          "data_watermark": {"type": "object", "additionalProperties": false, "required": ["projection_checkpoint_id", "outbox_position"], "properties": {"projection_checkpoint_id": {"type": "string", "format": "uuid"}, "outbox_position": {"type": "integer", "minimum": 0}}}
+        }
+      }
+    },
+    {
+      "name": "twin_compile_scenario",
+      "class": "draft",
+      "risk": "compute_draft",
+      "approval": "user_confirmation_before_simulation",
+      "side_effects": false,
+      "input_schema_ref": "./openapi/enterprise-digital-twin.openapi.yaml#/components/schemas/ScenarioDraft",
+      "output_schema_ref": "./openapi/enterprise-digital-twin.openapi.yaml#/components/schemas/ScenarioDraftResource"
+    },
+    {
+      "name": "twin_run_simulation",
+      "class": "compute",
+      "risk": "bounded_compute",
+      "approval": "confirmed_scenario",
+      "side_effects": false,
+      "input_schema": {"type": "object", "additionalProperties": false, "required": ["scenario_id"], "properties": {"scenario_id": {"type": "string", "format": "uuid"}}},
+      "output_schema_ref": "./openapi/enterprise-digital-twin.openapi.yaml#/components/schemas/SimulationRunAccepted"
+    },
+    {
+      "name": "twin_preview_jira_remediation",
+      "class": "draft",
+      "risk": "external_write_preview",
+      "approval": "policy",
+      "side_effects": false,
+      "input_schema_ref": "./openapi/enterprise-digital-twin.openapi.yaml#/components/schemas/JiraIssueUpdatePreviewRequest",
+      "output_schema_ref": "./openapi/enterprise-digital-twin.openapi.yaml#/components/schemas/JiraIssueUpdatePreview"
+    },
+    {
+      "name": "twin_request_approval",
+      "class": "workflow",
+      "risk": "approval_workflow_state",
+      "approval": "authenticated_requester",
+      "side_effects": true,
+      "input_schema": {"type": "object", "additionalProperties": false, "required": ["preview_id", "preview_etag", "idempotency_key"], "properties": {"preview_id": {"type": "string", "format": "uuid"}, "preview_etag": {"type": "string", "minLength": 3, "maxLength": 200}, "idempotency_key": {"type": "string", "minLength": 16, "maxLength": 128}}},
+      "output_schema_ref": "./schemas/canonical.schema.json#/$defs/ApprovalRequest"
+    },
+    {
+      "name": "twin_execute_approved_action",
+      "class": "external_write",
+      "risk": "external_write",
+      "approval": "explicit_client_plus_server_two_person_execution_grant",
+      "side_effects": true,
+      "input_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["approval_id", "idempotency_key"],
+        "properties": {
+          "approval_id": {"type": "string", "format": "uuid"},
+          "idempotency_key": {"type": "string", "minLength": 16, "maxLength": 128}
+        }
+      },
+      "output_schema_ref": "./schemas/canonical.schema.json#/$defs/ActionReceipt"
+    }
+  ],
+  "compatibility": {
+    "tool_names_immutable_within_v1": true,
+    "incompatible_schema_or_side_effect_change": "new tool name with _v2 suffix and a migration period",
+    "strict_inputs": true,
+    "strict_outputs": true,
+    "schema_hash_required_at_runtime": true
+  },
+  "security": {
+    "authentication": "oauth",
+    "tenant_context": "server_derived",
+    "delegation": "intersection_only",
+    "unknown_and_unauthorized": "indistinguishable_not_found",
+    "untrusted_content": "never_in_privileged_instructions",
+    "sensitive_actions": "exact_payload_approval_and_execution_grant_required",
+    "prohibited_capabilities": ["tenant_selector", "generic_url_fetch", "sql", "cypher", "shell", "filesystem", "unrestricted_provider_operation"],
+    "remote_servers": "disabled_by_default",
+    "audit": "all_resource_reads_tool_calls_policy_decisions_approvals_and_effects"
+  }
+}

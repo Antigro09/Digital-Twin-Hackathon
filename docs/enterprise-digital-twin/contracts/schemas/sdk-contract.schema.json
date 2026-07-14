@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://enterprise-digital-twin.example/schemas/sdk-contract.schema.json",
+  "title": "Generated SDK Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "id", "version", "language", "horizon", "api_contract", "tenant_context", "authentication", "pagination", "idempotency", "retries", "timeouts", "rate_limits", "errors", "redaction", "audit", "compatibility", "supply_chain"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "id": {"type": "string", "pattern": "^sdk\\.[a-z0-9_.-]+$"},
+    "version": {"$ref": "#/$defs/semver"},
+    "language": {"enum": ["typescript", "python", "go", "java", "csharp", "kotlin", "swift", "rust", "cpp"]},
+    "horizon": {"enum": ["H1", "H2", "H3", "H4"]},
+    "api_contract": {"type": "object", "required": ["openapi_version", "sha256"], "properties": {"openapi_version": {"type": "string"}, "sha256": {"$ref": "#/$defs/sha256"}}, "additionalProperties": false},
+    "tenant_context": {"type": "object", "required": ["derivation", "transport", "reject_tenant_selector"], "properties": {"derivation": {"const": "server_derived"}, "transport": {"enum": ["EDT-Context cookie", "X-EDT-Context header"]}, "reject_tenant_selector": {"const": true}}, "additionalProperties": false},
+    "authentication": {"type": "object", "required": ["methods", "token_storage", "refresh"], "properties": {"methods": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"enum": ["oidc_authorization_code_pkce", "oauth_device_code", "workload_identity"]}}, "token_storage": {"type": "string"}, "refresh": {"type": "string"}}, "additionalProperties": false},
+    "pagination": {"type": "object", "required": ["style", "opaque_cursor", "stable_order", "maximum_page_size"], "properties": {"style": {"const": "cursor"}, "opaque_cursor": {"const": true}, "stable_order": {"const": true}, "maximum_page_size": {"type": "integer", "minimum": 1, "maximum": 1000}}, "additionalProperties": false},
+    "idempotency": {"type": "object", "required": ["header", "unsafe_command_auto_retry"], "properties": {"header": {"const": "Idempotency-Key"}, "unsafe_command_auto_retry": {"const": false}}, "additionalProperties": false},
+    "retries": {"type": "object", "required": ["retryable_statuses", "honor_retry_after", "jitter", "maximum_attempts"], "properties": {"retryable_statuses": {"type": "array", "uniqueItems": true, "items": {"type": "integer", "enum": [408, 425, 429, 500, 502, 503, 504]}}, "honor_retry_after": {"const": true}, "jitter": {"const": true}, "maximum_attempts": {"type": "integer", "minimum": 0, "maximum": 10}}, "additionalProperties": false},
+    "timeouts": {"type": "object", "required": ["connect_seconds", "request_seconds"], "properties": {"connect_seconds": {"type": "integer", "minimum": 1}, "request_seconds": {"type": "integer", "minimum": 1}}, "additionalProperties": false},
+    "rate_limits": {"type": "object", "required": ["surface_headers", "client_throttling"], "properties": {"surface_headers": {"const": true}, "client_throttling": {"type": "boolean"}}, "additionalProperties": false},
+    "errors": {"type": "object", "required": ["media_type", "standard", "preserve_trace_id", "unknown_error_fallback"], "properties": {"media_type": {"const": "application/problem+json"}, "standard": {"const": "RFC 9457"}, "preserve_trace_id": {"const": true}, "unknown_error_fallback": {"const": true}}, "additionalProperties": false},
+    "redaction": {"type": "object", "required": ["tokens", "headers", "bodies_by_default"], "properties": {"tokens": {"const": true}, "headers": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string"}}, "bodies_by_default": {"const": true}}, "additionalProperties": false},
+    "audit": {"type": "object", "required": ["client_version", "operation_id", "trace_context"], "properties": {"client_version": {"const": true}, "operation_id": {"const": true}, "trace_context": {"const": true}}, "additionalProperties": false},
+    "compatibility": {"type": "object", "required": ["semantic_versioning", "supported_api_versions", "deprecation_days"], "properties": {"semantic_versioning": {"const": true}, "supported_api_versions": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string"}}, "deprecation_days": {"type": "integer", "minimum": 90}}, "additionalProperties": false},
+    "supply_chain": {"type": "object", "required": ["locked_dependencies", "sbom", "provenance", "signed"], "properties": {"locked_dependencies": {"const": true}, "sbom": {"const": true}, "provenance": {"const": true}, "signed": {"const": true}}, "additionalProperties": false}
+  },
+  "$defs": {
+    "semver": {"type": "string", "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z.-]+)?$"},
+    "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+  }
+}

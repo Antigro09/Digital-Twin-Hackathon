@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0",
+  "tenant_id": "10000000-0000-4000-8000-000000000001",
+  "installation_id": "30000000-0000-4000-8000-000000000002",
+  "provider": "github",
+  "delivery_id": "41000000-0000-4000-8000-000000000184",
+  "event_type": "pull_request",
+  "external_object_id": "aster-labs/identity-service#184",
+  "external_version": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "observed_at": "2026-07-13T15:47:00Z",
+  "source_updated_at": "2026-07-13T15:47:00Z",
+  "payload_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "payload_object_uri": "s3://edt-fixtures/tenant/10000000-0000-4000-8000-000000000001/connector/30000000-0000-4000-8000-000000000002/sha256/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "ingest_run_id": "42000000-0000-4000-8000-000000000184",
+  "caller_tenant_id": "10000000-0000-4000-8000-000000000002",
+  "payload": {
+    "id": 900184,
+    "number": 184,
+    "state": "open",
+    "title": "Finalize token migration",
+    "updated_at": "2026-07-13T15:47:00Z",
+    "repository": "aster-labs/identity-service",
+    "author": "aster-dev-17",
+    "base_sha": "1111111111111111111111111111111111111111",
+    "head_sha": "2222222222222222222222222222222222222222",
+    "requested_reviewers": [],
+    "requested_teams": ["aster-security"]
+  }
+}

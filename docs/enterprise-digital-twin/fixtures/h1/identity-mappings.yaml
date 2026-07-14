@@ -1,0 +1,38 @@
+schema_version: 1
+actors:
+  - {actor_alias: usr_aster_analyst, actor_id: 20000000-0000-4000-8000-000000000001, tenant_id: 10000000-0000-4000-8000-000000000001, principal_ref: idp:aster:analyst}
+  - {actor_alias: usr_aster_limited, actor_id: 20000000-0000-4000-8000-000000000002, tenant_id: 10000000-0000-4000-8000-000000000001, principal_ref: idp:aster:limited}
+  - {actor_alias: usr_aster_ops_approver, actor_id: 20000000-0000-4000-8000-000000000003, tenant_id: 10000000-0000-4000-8000-000000000001, principal_ref: idp:aster:ops-approver}
+  - {actor_alias: usr_aster_security_approver, actor_id: 20000000-0000-4000-8000-000000000004, tenant_id: 10000000-0000-4000-8000-000000000001, principal_ref: idp:aster:security-approver}
+  - {actor_alias: usr_aster_admin, actor_id: 20000000-0000-4000-8000-000000000005, tenant_id: 10000000-0000-4000-8000-000000000001, principal_ref: idp:aster:admin}
+  - {actor_alias: usr_beacon_analyst, actor_id: 20000000-0000-4000-8000-000000000006, tenant_id: 10000000-0000-4000-8000-000000000002, principal_ref: idp:beacon:analyst}
+  - {actor_alias: usr_platform_operator, actor_id: 20000000-0000-4000-8000-000000000007, tenant_id: 10000000-0000-4000-8000-000000000001, principal_ref: idp:platform:operator}
+generated_people:
+  - tenant_id: 10000000-0000-4000-8000-000000000001
+    source_range: aster-person-001..aster-person-048
+    count: 48
+    stable_uuid_rule: uuidv5(urn:edt:h1:tnt_aster:person:{zero_padded_index})
+  - tenant_id: 10000000-0000-4000-8000-000000000002
+    source_range: beacon-person-001..beacon-person-032
+    count: 32
+    stable_uuid_rule: uuidv5(urn:edt:h1:tnt_beacon:person:{zero_padded_index})
+resolution_oracle:
+  - mapping_key: aster-jordan-lee
+    tenant_id: 10000000-0000-4000-8000-000000000001
+    source_aliases: [github:aster:jordan-lee, jira:aster:account-1042]
+    expected_outcome: merge
+    canonical_person_key: aster-person-017
+  - mapping_key: beacon-jordan-lee
+    tenant_id: 10000000-0000-4000-8000-000000000002
+    source_aliases: [github:beacon:jordan-lee, jira:beacon:account-773]
+    expected_outcome: merge
+    canonical_person_key: beacon-person-009
+  - mapping_key: cross-tenant-jordan-lee
+    source_aliases: [github:aster:jordan-lee, github:beacon:jordan-lee]
+    expected_outcome: do_not_merge
+    reason: Cross-tenant resolution is prohibited even when display names match.
+reversibility_case:
+  source_aliases: [github:aster:sam-rivera, jira:aster:account-1188]
+  initial_outcome: merge
+  corrected_outcome: split
+  expected_preservation: [both_source_aliases, all_evidence, version_history, unrelated_edges]

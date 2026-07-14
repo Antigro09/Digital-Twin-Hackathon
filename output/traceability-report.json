@@ -1,0 +1,4280 @@
+{
+  "schema_version": 1,
+  "specification": {
+    "id": "EDT",
+    "publication_date": "2026-07-13",
+    "release_stage": "candidate",
+    "version": "1.0.0-rc.1"
+  },
+  "summary": {
+    "complete": 96,
+    "coverage_percent": 100.0,
+    "quality_attribute": {
+      "complete": 18,
+      "total": 18
+    },
+    "release_gate_percent": 100,
+    "required_dimensions": [
+      "artifacts",
+      "decisions",
+      "components",
+      "contracts",
+      "controls",
+      "acceptance",
+      "tests_evaluations",
+      "roadmap"
+    ],
+    "requirement": {
+      "complete": 78,
+      "total": 78
+    },
+    "total": 96
+  },
+  "traces": [
+    {
+      "acceptance": [
+        "AC-ACT-001",
+        "AC-ACT-002",
+        "AC-ACT-003"
+      ],
+      "artifacts": [
+        "chapters/07-ai-agents-reasoning.md",
+        "chapters/09-security-privacy-compliance.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-API",
+        "CMP-WORKFLOW",
+        "CMP-POLICY",
+        "CMP-CONNECTOR"
+      ],
+      "contracts": [
+        "contracts/schemas/canonical.schema.json",
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml"
+      ],
+      "controls": [
+        "CTRL-ACT-001",
+        "CTRL-ACT-002",
+        "CTRL-ACT-003"
+      ],
+      "decisions": [
+        "ADR-013"
+      ],
+      "horizon": "H1",
+      "id": "REQ-ACT-001",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-ACT-001"
+      ],
+      "title": "Exact-payload approval"
+    },
+    {
+      "acceptance": [
+        "AC-ACT-001",
+        "AC-ACT-002",
+        "AC-ACT-003"
+      ],
+      "artifacts": [
+        "chapters/07-ai-agents-reasoning.md",
+        "chapters/09-security-privacy-compliance.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-API",
+        "CMP-WORKFLOW",
+        "CMP-POLICY",
+        "CMP-CONNECTOR"
+      ],
+      "contracts": [
+        "contracts/schemas/canonical.schema.json",
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml"
+      ],
+      "controls": [
+        "CTRL-ACT-001",
+        "CTRL-ACT-002",
+        "CTRL-ACT-003"
+      ],
+      "decisions": [
+        "ADR-013"
+      ],
+      "horizon": "H1",
+      "id": "REQ-ACT-002",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-ACT-001"
+      ],
+      "title": "Dual control"
+    },
+    {
+      "acceptance": [
+        "AC-ACT-001",
+        "AC-ACT-002",
+        "AC-ACT-003"
+      ],
+      "artifacts": [
+        "chapters/07-ai-agents-reasoning.md",
+        "chapters/09-security-privacy-compliance.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-API",
+        "CMP-WORKFLOW",
+        "CMP-POLICY",
+        "CMP-CONNECTOR"
+      ],
+      "contracts": [
+        "contracts/schemas/canonical.schema.json",
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml"
+      ],
+      "controls": [
+        "CTRL-ACT-001",
+        "CTRL-ACT-002",
+        "CTRL-ACT-003"
+      ],
+      "decisions": [
+        "ADR-013"
+      ],
+      "horizon": "H1",
+      "id": "REQ-ACT-003",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-ACT-001"
+      ],
+      "title": "Compensating rollback"
+    },
+    {
+      "acceptance": [
+        "AC-ACT-001",
+        "AC-ACT-002",
+        "AC-ACT-003"
+      ],
+      "artifacts": [
+        "chapters/07-ai-agents-reasoning.md",
+        "chapters/09-security-privacy-compliance.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-API",
+        "CMP-WORKFLOW",
+        "CMP-POLICY",
+        "CMP-CONNECTOR"
+      ],
+      "contracts": [
+        "contracts/schemas/canonical.schema.json",
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml"
+      ],
+      "controls": [
+        "CTRL-ACT-001",
+        "CTRL-ACT-002",
+        "CTRL-ACT-003"
+      ],
+      "decisions": [
+        "ADR-013"
+      ],
+      "horizon": "H3",
+      "id": "REQ-ACT-004",
+      "kind": "requirement",
+      "roadmap": [
+        "H3"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-ACT-001"
+      ],
+      "title": "Prohibited high-impact autonomy"
+    },
+    {
+      "acceptance": [
+        "AC-AI-001",
+        "AC-AI-002",
+        "AC-AI-003",
+        "AC-AI-004"
+      ],
+      "artifacts": [
+        "chapters/07-ai-agents-reasoning.md",
+        "catalogs/agents.yaml"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-AI",
+        "CMP-MODEL-GATEWAY",
+        "CMP-POLICY",
+        "CMP-WORKFLOW"
+      ],
+      "contracts": [
+        "contracts/schemas/canonical.schema.json",
+        "contracts/mcp-manifest.json",
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml"
+      ],
+      "controls": [
+        "CTRL-AI-001",
+        "CTRL-AI-002",
+        "CTRL-AI-003",
+        "CTRL-AI-004",
+        "CTRL-AI-005"
+      ],
+      "decisions": [
+        "ADR-012",
+        "ADR-013"
+      ],
+      "horizon": "H1",
+      "id": "REQ-AI-001",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-AI-001"
+      ],
+      "title": "OpenAI-first gateway"
+    },
+    {
+      "acceptance": [
+        "AC-AI-001",
+        "AC-AI-002",
+        "AC-AI-003",
+        "AC-AI-004"
+      ],
+      "artifacts": [
+        "chapters/07-ai-agents-reasoning.md",
+        "catalogs/agents.yaml"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-AI",
+        "CMP-MODEL-GATEWAY",
+        "CMP-POLICY",
+        "CMP-WORKFLOW"
+      ],
+      "contracts": [
+        "contracts/schemas/canonical.schema.json",
+        "contracts/mcp-manifest.json",
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml"
+      ],
+      "controls": [
+        "CTRL-AI-001",
+        "CTRL-AI-002",
+        "CTRL-AI-003",
+        "CTRL-AI-004",
+        "CTRL-AI-005"
+      ],
+      "decisions": [
+        "ADR-012",
+        "ADR-013"
+      ],
+      "horizon": "H1",
+      "id": "REQ-AI-002",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-AI-001"
+      ],
+      "title": "Bounded capability agents"
+    },
+    {
+      "acceptance": [
+        "AC-AI-001",
+        "AC-AI-002",
+        "AC-AI-003",
+        "AC-AI-004"
+      ],
+      "artifacts": [
+        "chapters/07-ai-agents-reasoning.md",
+        "catalogs/agents.yaml"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-AI",
+        "CMP-MODEL-GATEWAY",
+        "CMP-POLICY",
+        "CMP-WORKFLOW"
+      ],
+      "contracts": [
+        "contracts/schemas/canonical.schema.json",
+        "contracts/mcp-manifest.json",
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml"
+      ],
+      "controls": [
+        "CTRL-AI-001",
+        "CTRL-AI-002",
+        "CTRL-AI-003",
+        "CTRL-AI-004",
+        "CTRL-AI-005"
+      ],
+      "decisions": [
+        "ADR-012",
+        "ADR-013"
+      ],
+      "horizon": "H1",
+      "id": "REQ-AI-003",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-AI-001"
+      ],
+      "title": "Deterministic policy envelope"
+    },
+    {
+      "acceptance": [
+        "AC-AI-001",
+        "AC-AI-002",
+        "AC-AI-003",
+        "AC-AI-004"
+      ],
+      "artifacts": [
+        "chapters/07-ai-agents-reasoning.md",
+        "catalogs/agents.yaml"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-AI",
+        "CMP-MODEL-GATEWAY",
+        "CMP-POLICY",
+        "CMP-WORKFLOW"
+      ],
+      "contracts": [
+        "contracts/schemas/canonical.schema.json",
+        "contracts/mcp-manifest.json",
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml"
+      ],
+      "controls": [
+        "CTRL-AI-001",
+        "CTRL-AI-002",
+        "CTRL-AI-003",
+        "CTRL-AI-004",
+        "CTRL-AI-005"
+      ],
+      "decisions": [
+        "ADR-012",
+        "ADR-013"
+      ],
+      "horizon": "H1",
+      "id": "REQ-AI-004",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-AI-001"
+      ],
+      "title": "Untrusted content separation"
+    },
+    {
+      "acceptance": [
+        "AC-AI-001",
+        "AC-AI-002",
+        "AC-AI-003",
+        "AC-AI-004"
+      ],
+      "artifacts": [
+        "chapters/07-ai-agents-reasoning.md",
+        "catalogs/agents.yaml"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-AI",
+        "CMP-MODEL-GATEWAY",
+        "CMP-POLICY",
+        "CMP-WORKFLOW"
+      ],
+      "contracts": [
+        "contracts/schemas/canonical.schema.json",
+        "contracts/mcp-manifest.json",
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml"
+      ],
+      "controls": [
+        "CTRL-AI-001",
+        "CTRL-AI-002",
+        "CTRL-AI-003",
+        "CTRL-AI-004",
+        "CTRL-AI-005"
+      ],
+      "decisions": [
+        "ADR-012",
+        "ADR-013"
+      ],
+      "horizon": "H1",
+      "id": "REQ-AI-005",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-AI-001"
+      ],
+      "title": "Scoped memory"
+    },
+    {
+      "acceptance": [
+        "AC-AI-001",
+        "AC-AI-002",
+        "AC-AI-003",
+        "AC-AI-004"
+      ],
+      "artifacts": [
+        "chapters/07-ai-agents-reasoning.md",
+        "catalogs/agents.yaml"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-AI",
+        "CMP-MODEL-GATEWAY",
+        "CMP-POLICY",
+        "CMP-WORKFLOW"
+      ],
+      "contracts": [
+        "contracts/schemas/canonical.schema.json",
+        "contracts/mcp-manifest.json",
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml"
+      ],
+      "controls": [
+        "CTRL-AI-001",
+        "CTRL-AI-002",
+        "CTRL-AI-003",
+        "CTRL-AI-004",
+        "CTRL-AI-005"
+      ],
+      "decisions": [
+        "ADR-012",
+        "ADR-013"
+      ],
+      "horizon": "H1",
+      "id": "REQ-AI-006",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-AI-001"
+      ],
+      "title": "No raw chain of thought"
+    },
+    {
+      "acceptance": [
+        "AC-AI-001",
+        "AC-AI-002",
+        "AC-AI-003",
+        "AC-AI-004"
+      ],
+      "artifacts": [
+        "chapters/07-ai-agents-reasoning.md",
+        "catalogs/agents.yaml"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-AI",
+        "CMP-MODEL-GATEWAY",
+        "CMP-POLICY",
+        "CMP-WORKFLOW"
+      ],
+      "contracts": [
+        "contracts/schemas/canonical.schema.json",
+        "contracts/mcp-manifest.json",
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml"
+      ],
+      "controls": [
+        "CTRL-AI-001",
+        "CTRL-AI-002",
+        "CTRL-AI-003",
+        "CTRL-AI-004",
+        "CTRL-AI-005"
+      ],
+      "decisions": [
+        "ADR-012",
+        "ADR-013"
+      ],
+      "horizon": "H1",
+      "id": "REQ-AI-007",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-AI-001"
+      ],
+      "title": "Evaluated model routing"
+    },
+    {
+      "acceptance": [
+        "AC-AI-001",
+        "AC-AI-002",
+        "AC-AI-003",
+        "AC-AI-004"
+      ],
+      "artifacts": [
+        "chapters/07-ai-agents-reasoning.md",
+        "catalogs/agents.yaml"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-AI",
+        "CMP-MODEL-GATEWAY",
+        "CMP-POLICY",
+        "CMP-WORKFLOW"
+      ],
+      "contracts": [
+        "contracts/schemas/canonical.schema.json",
+        "contracts/mcp-manifest.json",
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml"
+      ],
+      "controls": [
+        "CTRL-AI-001",
+        "CTRL-AI-002",
+        "CTRL-AI-003",
+        "CTRL-AI-004",
+        "CTRL-AI-005"
+      ],
+      "decisions": [
+        "ADR-012",
+        "ADR-013"
+      ],
+      "horizon": "H1",
+      "id": "REQ-AI-008",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-AI-001"
+      ],
+      "title": "Delegation cannot expand power"
+    },
+    {
+      "acceptance": [
+        "AC-DOC-003",
+        "AC-REL-003"
+      ],
+      "artifacts": [
+        "chapters/03-system-architecture.md",
+        "chapters/04-technology-stack.md",
+        "chapters/13-deployment-operations.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-WEB",
+        "CMP-API",
+        "CMP-CONNECTOR",
+        "CMP-AI",
+        "CMP-WORKFLOW",
+        "CMP-PLATFORM"
+      ],
+      "contracts": [
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml",
+        "contracts/asyncapi/events.asyncapi.yaml",
+        "contracts/proto/digital_twin.proto"
+      ],
+      "controls": [
+        "CTRL-OPS-002",
+        "CTRL-SUP-001"
+      ],
+      "decisions": [
+        "ADR-003",
+        "ADR-004",
+        "ADR-005",
+        "ADR-015"
+      ],
+      "horizon": "H1",
+      "id": "REQ-ARCH-001",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-ARCH-001"
+      ],
+      "title": "Modular deployables"
+    },
+    {
+      "acceptance": [
+        "AC-DOC-003",
+        "AC-REL-003"
+      ],
+      "artifacts": [
+        "chapters/03-system-architecture.md",
+        "chapters/04-technology-stack.md",
+        "chapters/13-deployment-operations.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-WEB",
+        "CMP-API",
+        "CMP-CONNECTOR",
+        "CMP-AI",
+        "CMP-WORKFLOW",
+        "CMP-PLATFORM"
+      ],
+      "contracts": [
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml",
+        "contracts/asyncapi/events.asyncapi.yaml",
+        "contracts/proto/digital_twin.proto"
+      ],
+      "controls": [
+        "CTRL-OPS-002",
+        "CTRL-SUP-001"
+      ],
+      "decisions": [
+        "ADR-003",
+        "ADR-004",
+        "ADR-005",
+        "ADR-015"
+      ],
+      "horizon": "H1",
+      "id": "REQ-ARCH-002",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-ARCH-001"
+      ],
+      "title": "Durable workflows"
+    },
+    {
+      "acceptance": [
+        "AC-DOC-003",
+        "AC-REL-003"
+      ],
+      "artifacts": [
+        "chapters/03-system-architecture.md",
+        "chapters/04-technology-stack.md",
+        "chapters/13-deployment-operations.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-WEB",
+        "CMP-API",
+        "CMP-CONNECTOR",
+        "CMP-AI",
+        "CMP-WORKFLOW",
+        "CMP-PLATFORM"
+      ],
+      "contracts": [
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml",
+        "contracts/asyncapi/events.asyncapi.yaml",
+        "contracts/proto/digital_twin.proto"
+      ],
+      "controls": [
+        "CTRL-OPS-002",
+        "CTRL-SUP-001"
+      ],
+      "decisions": [
+        "ADR-003",
+        "ADR-004",
+        "ADR-005",
+        "ADR-015"
+      ],
+      "horizon": "H1",
+      "id": "REQ-ARCH-003",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-ARCH-001"
+      ],
+      "title": "Transactional events"
+    },
+    {
+      "acceptance": [
+        "AC-DOC-003",
+        "AC-REL-003"
+      ],
+      "artifacts": [
+        "chapters/03-system-architecture.md",
+        "chapters/04-technology-stack.md",
+        "chapters/13-deployment-operations.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-WEB",
+        "CMP-API",
+        "CMP-CONNECTOR",
+        "CMP-AI",
+        "CMP-WORKFLOW",
+        "CMP-PLATFORM"
+      ],
+      "contracts": [
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml",
+        "contracts/asyncapi/events.asyncapi.yaml",
+        "contracts/proto/digital_twin.proto"
+      ],
+      "controls": [
+        "CTRL-OPS-002",
+        "CTRL-SUP-001"
+      ],
+      "decisions": [
+        "ADR-003",
+        "ADR-004",
+        "ADR-005",
+        "ADR-015"
+      ],
+      "horizon": "H2",
+      "id": "REQ-ARCH-004",
+      "kind": "requirement",
+      "roadmap": [
+        "H2"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-ARCH-001"
+      ],
+      "title": "Cloud-neutral contracts"
+    },
+    {
+      "acceptance": [
+        "AC-DOC-003",
+        "AC-REL-003"
+      ],
+      "artifacts": [
+        "chapters/03-system-architecture.md",
+        "chapters/04-technology-stack.md",
+        "chapters/13-deployment-operations.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-WEB",
+        "CMP-API",
+        "CMP-CONNECTOR",
+        "CMP-AI",
+        "CMP-WORKFLOW",
+        "CMP-PLATFORM"
+      ],
+      "contracts": [
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml",
+        "contracts/asyncapi/events.asyncapi.yaml",
+        "contracts/proto/digital_twin.proto"
+      ],
+      "controls": [
+        "CTRL-OPS-002",
+        "CTRL-SUP-001"
+      ],
+      "decisions": [
+        "ADR-003",
+        "ADR-004",
+        "ADR-005",
+        "ADR-015"
+      ],
+      "horizon": "H3",
+      "id": "REQ-ARCH-005",
+      "kind": "requirement",
+      "roadmap": [
+        "H3"
+      ],
+      "status": "provisional",
+      "tests_evaluations": [
+        "TST-ARCH-001"
+      ],
+      "title": "Measured service extraction"
+    },
+    {
+      "acceptance": [
+        "AC-DOC-003",
+        "AC-REL-003"
+      ],
+      "artifacts": [
+        "chapters/03-system-architecture.md",
+        "chapters/04-technology-stack.md",
+        "chapters/13-deployment-operations.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-WEB",
+        "CMP-API",
+        "CMP-CONNECTOR",
+        "CMP-AI",
+        "CMP-WORKFLOW",
+        "CMP-PLATFORM"
+      ],
+      "contracts": [
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml",
+        "contracts/asyncapi/events.asyncapi.yaml",
+        "contracts/proto/digital_twin.proto"
+      ],
+      "controls": [
+        "CTRL-OPS-002",
+        "CTRL-SUP-001"
+      ],
+      "decisions": [
+        "ADR-003",
+        "ADR-004",
+        "ADR-005",
+        "ADR-015"
+      ],
+      "horizon": "H4",
+      "id": "REQ-ARCH-006",
+      "kind": "requirement",
+      "roadmap": [
+        "H4"
+      ],
+      "status": "provisional",
+      "tests_evaluations": [
+        "TST-ARCH-001"
+      ],
+      "title": "Offline deployment profiles"
+    },
+    {
+      "acceptance": [
+        "AC-DOC-003",
+        "AC-REL-003"
+      ],
+      "artifacts": [
+        "chapters/03-system-architecture.md",
+        "chapters/04-technology-stack.md",
+        "chapters/13-deployment-operations.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-WEB",
+        "CMP-API",
+        "CMP-CONNECTOR",
+        "CMP-AI",
+        "CMP-WORKFLOW",
+        "CMP-PLATFORM"
+      ],
+      "contracts": [
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml",
+        "contracts/asyncapi/events.asyncapi.yaml",
+        "contracts/proto/digital_twin.proto"
+      ],
+      "controls": [
+        "CTRL-OPS-002",
+        "CTRL-SUP-001"
+      ],
+      "decisions": [
+        "ADR-003",
+        "ADR-004",
+        "ADR-005",
+        "ADR-015"
+      ],
+      "horizon": "H2",
+      "id": "REQ-ARCH-007",
+      "kind": "requirement",
+      "roadmap": [
+        "H2"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-ARCH-001"
+      ],
+      "title": "Public interface portfolio"
+    },
+    {
+      "acceptance": [
+        "AC-CON-001",
+        "AC-CON-002"
+      ],
+      "artifacts": [
+        "chapters/06-ingestion-connectors-sync.md",
+        "catalogs/connectors.yaml"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-CONNECTOR",
+        "CMP-WORKFLOW",
+        "CMP-PROJECTION"
+      ],
+      "contracts": [
+        "contracts/schemas/connector-manifest.schema.json",
+        "contracts/connectors/github/manifest.json",
+        "contracts/connectors/github/schemas/raw-envelope.schema.json",
+        "contracts/connectors/github/schemas/raw-payload.schema.json",
+        "contracts/connectors/github/schemas/normalized-observation.schema.json",
+        "contracts/connectors/github/schemas/cursor.schema.json",
+        "contracts/connectors/github/schemas/ontology-mapping.schema.json",
+        "contracts/connectors/jira-cloud/manifest.json",
+        "contracts/connectors/jira-cloud/schemas/raw-envelope.schema.json",
+        "contracts/connectors/jira-cloud/schemas/raw-payload.schema.json",
+        "contracts/connectors/jira-cloud/schemas/normalized-observation.schema.json",
+        "contracts/connectors/jira-cloud/schemas/cursor.schema.json",
+        "contracts/connectors/jira-cloud/schemas/ontology-mapping.schema.json",
+        "contracts/asyncapi/events.asyncapi.yaml"
+      ],
+      "controls": [
+        "CTRL-CON-001",
+        "CTRL-CON-002",
+        "CTRL-CON-003",
+        "CTRL-CRY-002"
+      ],
+      "decisions": [
+        "ADR-011"
+      ],
+      "horizon": "H1",
+      "id": "REQ-CON-001",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-CON-001"
+      ],
+      "title": "Least-privilege GitHub"
+    },
+    {
+      "acceptance": [
+        "AC-CON-001",
+        "AC-CON-002"
+      ],
+      "artifacts": [
+        "chapters/06-ingestion-connectors-sync.md",
+        "catalogs/connectors.yaml"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-CONNECTOR",
+        "CMP-WORKFLOW",
+        "CMP-PROJECTION"
+      ],
+      "contracts": [
+        "contracts/schemas/connector-manifest.schema.json",
+        "contracts/connectors/github/manifest.json",
+        "contracts/connectors/github/schemas/raw-envelope.schema.json",
+        "contracts/connectors/github/schemas/raw-payload.schema.json",
+        "contracts/connectors/github/schemas/normalized-observation.schema.json",
+        "contracts/connectors/github/schemas/cursor.schema.json",
+        "contracts/connectors/github/schemas/ontology-mapping.schema.json",
+        "contracts/connectors/jira-cloud/manifest.json",
+        "contracts/connectors/jira-cloud/schemas/raw-envelope.schema.json",
+        "contracts/connectors/jira-cloud/schemas/raw-payload.schema.json",
+        "contracts/connectors/jira-cloud/schemas/normalized-observation.schema.json",
+        "contracts/connectors/jira-cloud/schemas/cursor.schema.json",
+        "contracts/connectors/jira-cloud/schemas/ontology-mapping.schema.json",
+        "contracts/asyncapi/events.asyncapi.yaml"
+      ],
+      "controls": [
+        "CTRL-CON-001",
+        "CTRL-CON-002",
+        "CTRL-CON-003",
+        "CTRL-CRY-002"
+      ],
+      "decisions": [
+        "ADR-011"
+      ],
+      "horizon": "H1",
+      "id": "REQ-CON-002",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-CON-001"
+      ],
+      "title": "Bounded Jira mutation"
+    },
+    {
+      "acceptance": [
+        "AC-CON-001",
+        "AC-CON-002"
+      ],
+      "artifacts": [
+        "chapters/06-ingestion-connectors-sync.md",
+        "catalogs/connectors.yaml"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-CONNECTOR",
+        "CMP-WORKFLOW",
+        "CMP-PROJECTION"
+      ],
+      "contracts": [
+        "contracts/schemas/connector-manifest.schema.json",
+        "contracts/connectors/github/manifest.json",
+        "contracts/connectors/github/schemas/raw-envelope.schema.json",
+        "contracts/connectors/github/schemas/raw-payload.schema.json",
+        "contracts/connectors/github/schemas/normalized-observation.schema.json",
+        "contracts/connectors/github/schemas/cursor.schema.json",
+        "contracts/connectors/github/schemas/ontology-mapping.schema.json",
+        "contracts/connectors/jira-cloud/manifest.json",
+        "contracts/connectors/jira-cloud/schemas/raw-envelope.schema.json",
+        "contracts/connectors/jira-cloud/schemas/raw-payload.schema.json",
+        "contracts/connectors/jira-cloud/schemas/normalized-observation.schema.json",
+        "contracts/connectors/jira-cloud/schemas/cursor.schema.json",
+        "contracts/connectors/jira-cloud/schemas/ontology-mapping.schema.json",
+        "contracts/asyncapi/events.asyncapi.yaml"
+      ],
+      "controls": [
+        "CTRL-CON-001",
+        "CTRL-CON-002",
+        "CTRL-CON-003",
+        "CTRL-CRY-002"
+      ],
+      "decisions": [
+        "ADR-011"
+      ],
+      "horizon": "H1",
+      "id": "REQ-CON-003",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-CON-001"
+      ],
+      "title": "Verifiable synchronization"
+    },
+    {
+      "acceptance": [
+        "AC-CON-001",
+        "AC-CON-002"
+      ],
+      "artifacts": [
+        "chapters/06-ingestion-connectors-sync.md",
+        "catalogs/connectors.yaml"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-CONNECTOR",
+        "CMP-WORKFLOW",
+        "CMP-PROJECTION"
+      ],
+      "contracts": [
+        "contracts/schemas/connector-manifest.schema.json",
+        "contracts/connectors/github/manifest.json",
+        "contracts/connectors/github/schemas/raw-envelope.schema.json",
+        "contracts/connectors/github/schemas/raw-payload.schema.json",
+        "contracts/connectors/github/schemas/normalized-observation.schema.json",
+        "contracts/connectors/github/schemas/cursor.schema.json",
+        "contracts/connectors/github/schemas/ontology-mapping.schema.json",
+        "contracts/connectors/jira-cloud/manifest.json",
+        "contracts/connectors/jira-cloud/schemas/raw-envelope.schema.json",
+        "contracts/connectors/jira-cloud/schemas/raw-payload.schema.json",
+        "contracts/connectors/jira-cloud/schemas/normalized-observation.schema.json",
+        "contracts/connectors/jira-cloud/schemas/cursor.schema.json",
+        "contracts/connectors/jira-cloud/schemas/ontology-mapping.schema.json",
+        "contracts/asyncapi/events.asyncapi.yaml"
+      ],
+      "controls": [
+        "CTRL-CON-001",
+        "CTRL-CON-002",
+        "CTRL-CON-003",
+        "CTRL-CRY-002"
+      ],
+      "decisions": [
+        "ADR-011"
+      ],
+      "horizon": "H1",
+      "id": "REQ-CON-004",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-CON-001"
+      ],
+      "title": "Compromised connector containment"
+    },
+    {
+      "acceptance": [
+        "AC-CON-001",
+        "AC-CON-002"
+      ],
+      "artifacts": [
+        "chapters/06-ingestion-connectors-sync.md",
+        "catalogs/connectors.yaml"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-CONNECTOR",
+        "CMP-WORKFLOW",
+        "CMP-PROJECTION"
+      ],
+      "contracts": [
+        "contracts/schemas/connector-manifest.schema.json",
+        "contracts/connectors/github/manifest.json",
+        "contracts/connectors/github/schemas/raw-envelope.schema.json",
+        "contracts/connectors/github/schemas/raw-payload.schema.json",
+        "contracts/connectors/github/schemas/normalized-observation.schema.json",
+        "contracts/connectors/github/schemas/cursor.schema.json",
+        "contracts/connectors/github/schemas/ontology-mapping.schema.json",
+        "contracts/connectors/jira-cloud/manifest.json",
+        "contracts/connectors/jira-cloud/schemas/raw-envelope.schema.json",
+        "contracts/connectors/jira-cloud/schemas/raw-payload.schema.json",
+        "contracts/connectors/jira-cloud/schemas/normalized-observation.schema.json",
+        "contracts/connectors/jira-cloud/schemas/cursor.schema.json",
+        "contracts/connectors/jira-cloud/schemas/ontology-mapping.schema.json",
+        "contracts/asyncapi/events.asyncapi.yaml"
+      ],
+      "controls": [
+        "CTRL-CON-001",
+        "CTRL-CON-002",
+        "CTRL-CON-003",
+        "CTRL-CRY-002"
+      ],
+      "decisions": [
+        "ADR-011"
+      ],
+      "horizon": "H2",
+      "id": "REQ-CON-005",
+      "kind": "requirement",
+      "roadmap": [
+        "H2"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-CON-001"
+      ],
+      "title": "Connector SDK"
+    },
+    {
+      "acceptance": [
+        "AC-DATA-001",
+        "AC-DATA-002",
+        "AC-DATA-003",
+        "AC-PRV-001"
+      ],
+      "artifacts": [
+        "chapters/05-data-knowledge-graph.md",
+        "catalogs/ontology.yaml"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-POSTGRES",
+        "CMP-OBJECT",
+        "CMP-GRAPH",
+        "CMP-PROJECTION"
+      ],
+      "contracts": [
+        "contracts/schemas/canonical.schema.json",
+        "contracts/schemas/ontology-package.schema.json"
+      ],
+      "controls": [
+        "CTRL-DAT-001",
+        "CTRL-DAT-002",
+        "CTRL-DAT-003"
+      ],
+      "decisions": [
+        "ADR-008",
+        "ADR-009",
+        "ADR-010"
+      ],
+      "horizon": "H1",
+      "id": "REQ-DATA-001",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-DATA-001"
+      ],
+      "title": "Authoritative claims"
+    },
+    {
+      "acceptance": [
+        "AC-DATA-001",
+        "AC-DATA-002",
+        "AC-DATA-003",
+        "AC-PRV-001"
+      ],
+      "artifacts": [
+        "chapters/05-data-knowledge-graph.md",
+        "catalogs/ontology.yaml"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-POSTGRES",
+        "CMP-OBJECT",
+        "CMP-GRAPH",
+        "CMP-PROJECTION"
+      ],
+      "contracts": [
+        "contracts/schemas/canonical.schema.json",
+        "contracts/schemas/ontology-package.schema.json"
+      ],
+      "controls": [
+        "CTRL-DAT-001",
+        "CTRL-DAT-002",
+        "CTRL-DAT-003"
+      ],
+      "decisions": [
+        "ADR-008",
+        "ADR-009",
+        "ADR-010"
+      ],
+      "horizon": "H1",
+      "id": "REQ-DATA-002",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-DATA-001"
+      ],
+      "title": "Bitemporal provenance"
+    },
+    {
+      "acceptance": [
+        "AC-DATA-001",
+        "AC-DATA-002",
+        "AC-DATA-003",
+        "AC-PRV-001"
+      ],
+      "artifacts": [
+        "chapters/05-data-knowledge-graph.md",
+        "catalogs/ontology.yaml"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-POSTGRES",
+        "CMP-OBJECT",
+        "CMP-GRAPH",
+        "CMP-PROJECTION"
+      ],
+      "contracts": [
+        "contracts/schemas/canonical.schema.json",
+        "contracts/schemas/ontology-package.schema.json"
+      ],
+      "controls": [
+        "CTRL-DAT-001",
+        "CTRL-DAT-002",
+        "CTRL-DAT-003"
+      ],
+      "decisions": [
+        "ADR-008",
+        "ADR-009",
+        "ADR-010"
+      ],
+      "horizon": "H1",
+      "id": "REQ-DATA-003",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-DATA-001"
+      ],
+      "title": "Rebuildable projections"
+    },
+    {
+      "acceptance": [
+        "AC-DATA-001",
+        "AC-DATA-002",
+        "AC-DATA-003",
+        "AC-PRV-001"
+      ],
+      "artifacts": [
+        "chapters/05-data-knowledge-graph.md",
+        "catalogs/ontology.yaml"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-POSTGRES",
+        "CMP-OBJECT",
+        "CMP-GRAPH",
+        "CMP-PROJECTION"
+      ],
+      "contracts": [
+        "contracts/schemas/canonical.schema.json",
+        "contracts/schemas/ontology-package.schema.json"
+      ],
+      "controls": [
+        "CTRL-DAT-001",
+        "CTRL-DAT-002",
+        "CTRL-DAT-003"
+      ],
+      "decisions": [
+        "ADR-008",
+        "ADR-009",
+        "ADR-010"
+      ],
+      "horizon": "H1",
+      "id": "REQ-DATA-004",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-DATA-001"
+      ],
+      "title": "Reversible resolution"
+    },
+    {
+      "acceptance": [
+        "AC-DATA-001",
+        "AC-DATA-002",
+        "AC-DATA-003",
+        "AC-PRV-001"
+      ],
+      "artifacts": [
+        "chapters/05-data-knowledge-graph.md",
+        "catalogs/ontology.yaml"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-POSTGRES",
+        "CMP-OBJECT",
+        "CMP-GRAPH",
+        "CMP-PROJECTION"
+      ],
+      "contracts": [
+        "contracts/schemas/canonical.schema.json",
+        "contracts/schemas/ontology-package.schema.json"
+      ],
+      "controls": [
+        "CTRL-DAT-001",
+        "CTRL-DAT-002",
+        "CTRL-DAT-003"
+      ],
+      "decisions": [
+        "ADR-008",
+        "ADR-009",
+        "ADR-010"
+      ],
+      "horizon": "H1",
+      "id": "REQ-DATA-005",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-DATA-001"
+      ],
+      "title": "Versioned ontology"
+    },
+    {
+      "acceptance": [
+        "AC-DATA-001",
+        "AC-DATA-002",
+        "AC-DATA-003",
+        "AC-PRV-001"
+      ],
+      "artifacts": [
+        "chapters/05-data-knowledge-graph.md",
+        "catalogs/ontology.yaml"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-POSTGRES",
+        "CMP-OBJECT",
+        "CMP-GRAPH",
+        "CMP-PROJECTION"
+      ],
+      "contracts": [
+        "contracts/schemas/canonical.schema.json",
+        "contracts/schemas/ontology-package.schema.json"
+      ],
+      "controls": [
+        "CTRL-DAT-001",
+        "CTRL-DAT-002",
+        "CTRL-DAT-003"
+      ],
+      "decisions": [
+        "ADR-008",
+        "ADR-009",
+        "ADR-010"
+      ],
+      "horizon": "H2",
+      "id": "REQ-DATA-006",
+      "kind": "requirement",
+      "roadmap": [
+        "H2"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-DATA-001"
+      ],
+      "title": "Core domain coverage"
+    },
+    {
+      "acceptance": [
+        "AC-DATA-001",
+        "AC-DATA-002",
+        "AC-DATA-003",
+        "AC-PRV-001"
+      ],
+      "artifacts": [
+        "chapters/05-data-knowledge-graph.md",
+        "catalogs/ontology.yaml"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-POSTGRES",
+        "CMP-OBJECT",
+        "CMP-GRAPH",
+        "CMP-PROJECTION"
+      ],
+      "contracts": [
+        "contracts/schemas/canonical.schema.json",
+        "contracts/schemas/ontology-package.schema.json"
+      ],
+      "controls": [
+        "CTRL-DAT-001",
+        "CTRL-DAT-002",
+        "CTRL-DAT-003"
+      ],
+      "decisions": [
+        "ADR-008",
+        "ADR-009",
+        "ADR-010"
+      ],
+      "horizon": "H2",
+      "id": "REQ-DATA-007",
+      "kind": "requirement",
+      "roadmap": [
+        "H2"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-DATA-001"
+      ],
+      "title": "Lifecycle completeness"
+    },
+    {
+      "acceptance": [
+        "AC-DATA-001",
+        "AC-DATA-002",
+        "AC-DATA-003",
+        "AC-PRV-001"
+      ],
+      "artifacts": [
+        "chapters/05-data-knowledge-graph.md",
+        "catalogs/ontology.yaml"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-POSTGRES",
+        "CMP-OBJECT",
+        "CMP-GRAPH",
+        "CMP-PROJECTION"
+      ],
+      "contracts": [
+        "contracts/schemas/canonical.schema.json",
+        "contracts/schemas/ontology-package.schema.json"
+      ],
+      "controls": [
+        "CTRL-DAT-001",
+        "CTRL-DAT-002",
+        "CTRL-DAT-003"
+      ],
+      "decisions": [
+        "ADR-008",
+        "ADR-009",
+        "ADR-010"
+      ],
+      "horizon": "H2",
+      "id": "REQ-DATA-008",
+      "kind": "requirement",
+      "roadmap": [
+        "H2"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-DATA-001"
+      ],
+      "title": "Object integrity"
+    },
+    {
+      "acceptance": [
+        "AC-DATA-001",
+        "AC-DATA-002",
+        "AC-DATA-003",
+        "AC-PRV-001"
+      ],
+      "artifacts": [
+        "chapters/05-data-knowledge-graph.md",
+        "catalogs/ontology.yaml"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-POSTGRES",
+        "CMP-OBJECT",
+        "CMP-GRAPH",
+        "CMP-PROJECTION"
+      ],
+      "contracts": [
+        "contracts/schemas/canonical.schema.json",
+        "contracts/schemas/ontology-package.schema.json"
+      ],
+      "controls": [
+        "CTRL-DAT-001",
+        "CTRL-DAT-002",
+        "CTRL-DAT-003"
+      ],
+      "decisions": [
+        "ADR-008",
+        "ADR-009",
+        "ADR-010"
+      ],
+      "horizon": "H2",
+      "id": "REQ-DATA-009",
+      "kind": "requirement",
+      "roadmap": [
+        "H2"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-DATA-001"
+      ],
+      "title": "Deletion propagation"
+    },
+    {
+      "acceptance": [
+        "AC-DOC-003",
+        "AC-SUP-001"
+      ],
+      "artifacts": [
+        "chapters/12-apis-developer-platform.md",
+        "chapters/13-deployment-operations.md",
+        "chapters/14-testing-evaluation-dx.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-DEVELOPER",
+        "CMP-DOCS",
+        "CMP-API",
+        "CMP-CONNECTOR",
+        "CMP-AI",
+        "CMP-PLATFORM"
+      ],
+      "contracts": [
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml",
+        "contracts/asyncapi/events.asyncapi.yaml",
+        "contracts/graphql/schema.graphql",
+        "contracts/proto/digital_twin.proto",
+        "contracts/mcp-manifest.json"
+      ],
+      "controls": [
+        "CTRL-SUP-001",
+        "CTRL-OPS-002"
+      ],
+      "decisions": [
+        "ADR-004",
+        "ADR-015"
+      ],
+      "horizon": "H2",
+      "id": "REQ-DEV-001",
+      "kind": "requirement",
+      "roadmap": [
+        "H2"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-DEV-001"
+      ],
+      "title": "Contract-first developer platform"
+    },
+    {
+      "acceptance": [
+        "AC-DOC-003",
+        "AC-SUP-001"
+      ],
+      "artifacts": [
+        "chapters/12-apis-developer-platform.md",
+        "chapters/13-deployment-operations.md",
+        "chapters/14-testing-evaluation-dx.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-DEVELOPER",
+        "CMP-DOCS",
+        "CMP-API",
+        "CMP-CONNECTOR",
+        "CMP-AI",
+        "CMP-PLATFORM"
+      ],
+      "contracts": [
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml",
+        "contracts/asyncapi/events.asyncapi.yaml",
+        "contracts/graphql/schema.graphql",
+        "contracts/proto/digital_twin.proto",
+        "contracts/mcp-manifest.json"
+      ],
+      "controls": [
+        "CTRL-SUP-001",
+        "CTRL-OPS-002"
+      ],
+      "decisions": [
+        "ADR-004",
+        "ADR-015"
+      ],
+      "horizon": "H1",
+      "id": "REQ-DEV-002",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-DEV-001"
+      ],
+      "title": "Reproducible local development"
+    },
+    {
+      "acceptance": [
+        "AC-DOC-003",
+        "AC-SUP-001"
+      ],
+      "artifacts": [
+        "chapters/12-apis-developer-platform.md",
+        "chapters/13-deployment-operations.md",
+        "chapters/14-testing-evaluation-dx.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-DEVELOPER",
+        "CMP-DOCS",
+        "CMP-API",
+        "CMP-CONNECTOR",
+        "CMP-AI",
+        "CMP-PLATFORM"
+      ],
+      "contracts": [
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml",
+        "contracts/asyncapi/events.asyncapi.yaml",
+        "contracts/graphql/schema.graphql",
+        "contracts/proto/digital_twin.proto",
+        "contracts/mcp-manifest.json"
+      ],
+      "controls": [
+        "CTRL-SUP-001",
+        "CTRL-OPS-002"
+      ],
+      "decisions": [
+        "ADR-004",
+        "ADR-015"
+      ],
+      "horizon": "H2",
+      "id": "REQ-DEV-003",
+      "kind": "requirement",
+      "roadmap": [
+        "H2"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-DEV-001"
+      ],
+      "title": "Deployment safety"
+    },
+    {
+      "acceptance": [
+        "AC-DOC-001",
+        "AC-DOC-002",
+        "AC-DOC-003",
+        "AC-REV-002"
+      ],
+      "artifacts": [
+        "README.md",
+        "decision-precedence.md",
+        "manifest.yaml",
+        "chapters/16-architecture-audit.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-DOCS"
+      ],
+      "contracts": [
+        "manifest.yaml",
+        "catalogs/requirements.yaml",
+        "catalogs/traceability.yaml"
+      ],
+      "controls": [
+        "CTRL-AUD-001"
+      ],
+      "decisions": [
+        "ADR-001",
+        "ADR-016"
+      ],
+      "horizon": "H1",
+      "id": "REQ-GOV-001",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-GOV-001"
+      ],
+      "title": "Versioned documentation product"
+    },
+    {
+      "acceptance": [
+        "AC-DOC-001",
+        "AC-DOC-002",
+        "AC-DOC-003",
+        "AC-REV-002"
+      ],
+      "artifacts": [
+        "README.md",
+        "decision-precedence.md",
+        "manifest.yaml",
+        "chapters/16-architecture-audit.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-DOCS"
+      ],
+      "contracts": [
+        "manifest.yaml",
+        "catalogs/requirements.yaml",
+        "catalogs/traceability.yaml"
+      ],
+      "controls": [
+        "CTRL-AUD-001"
+      ],
+      "decisions": [
+        "ADR-001",
+        "ADR-016"
+      ],
+      "horizon": "H1",
+      "id": "REQ-GOV-002",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-GOV-001"
+      ],
+      "title": "Stable traceability"
+    },
+    {
+      "acceptance": [
+        "AC-DOC-001",
+        "AC-DOC-002",
+        "AC-DOC-003",
+        "AC-REV-002"
+      ],
+      "artifacts": [
+        "README.md",
+        "decision-precedence.md",
+        "manifest.yaml",
+        "chapters/16-architecture-audit.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-DOCS"
+      ],
+      "contracts": [
+        "manifest.yaml",
+        "catalogs/requirements.yaml",
+        "catalogs/traceability.yaml"
+      ],
+      "controls": [
+        "CTRL-AUD-001"
+      ],
+      "decisions": [
+        "ADR-001",
+        "ADR-016"
+      ],
+      "horizon": "H1",
+      "id": "REQ-GOV-003",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-GOV-001"
+      ],
+      "title": "Finite review gate"
+    },
+    {
+      "acceptance": [
+        "AC-DOC-001",
+        "AC-DOC-002",
+        "AC-DOC-003",
+        "AC-REV-002"
+      ],
+      "artifacts": [
+        "README.md",
+        "decision-precedence.md",
+        "manifest.yaml",
+        "chapters/16-architecture-audit.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-DOCS"
+      ],
+      "contracts": [
+        "manifest.yaml",
+        "catalogs/requirements.yaml",
+        "catalogs/traceability.yaml"
+      ],
+      "controls": [
+        "CTRL-AUD-001"
+      ],
+      "decisions": [
+        "ADR-001",
+        "ADR-016"
+      ],
+      "horizon": "H1",
+      "id": "REQ-GOV-004",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-GOV-001"
+      ],
+      "title": "Explicit decision status"
+    },
+    {
+      "acceptance": [
+        "AC-PROD-001",
+        "AC-AI-001"
+      ],
+      "artifacts": [
+        "chapters/01-product-vision.md",
+        "chapters/02-reference-workload.md",
+        "chapters/11-ux-visualizations.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-WEB",
+        "CMP-API"
+      ],
+      "contracts": [
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml",
+        "contracts/schemas/scenario.schema.json"
+      ],
+      "controls": [
+        "CTRL-DAT-001",
+        "CTRL-IAM-003"
+      ],
+      "decisions": [
+        "ADR-002"
+      ],
+      "horizon": "H2",
+      "id": "REQ-PROD-001",
+      "kind": "requirement",
+      "roadmap": [
+        "H2"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-PROD-001"
+      ],
+      "title": "Living organizational model"
+    },
+    {
+      "acceptance": [
+        "AC-PROD-001",
+        "AC-AI-001"
+      ],
+      "artifacts": [
+        "chapters/01-product-vision.md",
+        "chapters/02-reference-workload.md",
+        "chapters/11-ux-visualizations.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-WEB",
+        "CMP-API"
+      ],
+      "contracts": [
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml",
+        "contracts/schemas/scenario.schema.json"
+      ],
+      "controls": [
+        "CTRL-DAT-001",
+        "CTRL-IAM-003"
+      ],
+      "decisions": [
+        "ADR-002"
+      ],
+      "horizon": "H1",
+      "id": "REQ-PROD-002",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-PROD-001"
+      ],
+      "title": "Grounded organizational answers"
+    },
+    {
+      "acceptance": [
+        "AC-PROD-001",
+        "AC-AI-001"
+      ],
+      "artifacts": [
+        "chapters/01-product-vision.md",
+        "chapters/02-reference-workload.md",
+        "chapters/11-ux-visualizations.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-WEB",
+        "CMP-API"
+      ],
+      "contracts": [
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml",
+        "contracts/schemas/scenario.schema.json"
+      ],
+      "controls": [
+        "CTRL-DAT-001",
+        "CTRL-IAM-003"
+      ],
+      "decisions": [
+        "ADR-002"
+      ],
+      "horizon": "H1",
+      "id": "REQ-PROD-003",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-PROD-001"
+      ],
+      "title": "Graph simulation wedge"
+    },
+    {
+      "acceptance": [
+        "AC-PROD-001",
+        "AC-AI-001"
+      ],
+      "artifacts": [
+        "chapters/01-product-vision.md",
+        "chapters/02-reference-workload.md",
+        "chapters/11-ux-visualizations.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-WEB",
+        "CMP-API"
+      ],
+      "contracts": [
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml",
+        "contracts/schemas/scenario.schema.json"
+      ],
+      "controls": [
+        "CTRL-DAT-001",
+        "CTRL-IAM-003"
+      ],
+      "decisions": [
+        "ADR-002"
+      ],
+      "horizon": "H1",
+      "id": "REQ-PROD-004",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-PROD-001"
+      ],
+      "title": "Governed action wedge"
+    },
+    {
+      "acceptance": [
+        "AC-PROD-001",
+        "AC-AI-001"
+      ],
+      "artifacts": [
+        "chapters/01-product-vision.md",
+        "chapters/02-reference-workload.md",
+        "chapters/11-ux-visualizations.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-WEB",
+        "CMP-API"
+      ],
+      "contracts": [
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml",
+        "contracts/schemas/scenario.schema.json"
+      ],
+      "controls": [
+        "CTRL-DAT-001",
+        "CTRL-IAM-003"
+      ],
+      "decisions": [
+        "ADR-002"
+      ],
+      "horizon": "H2",
+      "id": "REQ-PROD-005",
+      "kind": "requirement",
+      "roadmap": [
+        "H2"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-PROD-001"
+      ],
+      "title": "Cross-industry extensibility"
+    },
+    {
+      "acceptance": [
+        "AC-REL-001",
+        "AC-REL-002",
+        "AC-REL-003",
+        "AC-OBS-001"
+      ],
+      "artifacts": [
+        "chapters/10-scalability-reliability-observability.md",
+        "chapters/13-deployment-operations.md",
+        "reviews/fmea.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-WORKFLOW",
+        "CMP-POSTGRES",
+        "CMP-PROJECTION",
+        "CMP-OBS",
+        "CMP-PLATFORM"
+      ],
+      "contracts": [
+        "contracts/asyncapi/events.asyncapi.yaml",
+        "contracts/proto/digital_twin.proto"
+      ],
+      "controls": [
+        "CTRL-OPS-001",
+        "CTRL-OPS-002"
+      ],
+      "decisions": [
+        "ADR-003",
+        "ADR-005",
+        "ADR-015"
+      ],
+      "horizon": "H1",
+      "id": "REQ-REL-001",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-REL-001"
+      ],
+      "title": "H1 performance envelope"
+    },
+    {
+      "acceptance": [
+        "AC-REL-001",
+        "AC-REL-002",
+        "AC-REL-003",
+        "AC-OBS-001"
+      ],
+      "artifacts": [
+        "chapters/10-scalability-reliability-observability.md",
+        "chapters/13-deployment-operations.md",
+        "reviews/fmea.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-WORKFLOW",
+        "CMP-POSTGRES",
+        "CMP-PROJECTION",
+        "CMP-OBS",
+        "CMP-PLATFORM"
+      ],
+      "contracts": [
+        "contracts/asyncapi/events.asyncapi.yaml",
+        "contracts/proto/digital_twin.proto"
+      ],
+      "controls": [
+        "CTRL-OPS-001",
+        "CTRL-OPS-002"
+      ],
+      "decisions": [
+        "ADR-003",
+        "ADR-005",
+        "ADR-015"
+      ],
+      "horizon": "H2",
+      "id": "REQ-REL-002",
+      "kind": "requirement",
+      "roadmap": [
+        "H2"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-REL-001"
+      ],
+      "title": "H2 service objectives"
+    },
+    {
+      "acceptance": [
+        "AC-REL-001",
+        "AC-REL-002",
+        "AC-REL-003",
+        "AC-OBS-001"
+      ],
+      "artifacts": [
+        "chapters/10-scalability-reliability-observability.md",
+        "chapters/13-deployment-operations.md",
+        "reviews/fmea.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-WORKFLOW",
+        "CMP-POSTGRES",
+        "CMP-PROJECTION",
+        "CMP-OBS",
+        "CMP-PLATFORM"
+      ],
+      "contracts": [
+        "contracts/asyncapi/events.asyncapi.yaml",
+        "contracts/proto/digital_twin.proto"
+      ],
+      "controls": [
+        "CTRL-OPS-001",
+        "CTRL-OPS-002"
+      ],
+      "decisions": [
+        "ADR-003",
+        "ADR-005",
+        "ADR-015"
+      ],
+      "horizon": "H1",
+      "id": "REQ-REL-003",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-REL-001"
+      ],
+      "title": "Distributed correctness"
+    },
+    {
+      "acceptance": [
+        "AC-REL-001",
+        "AC-REL-002",
+        "AC-REL-003",
+        "AC-OBS-001"
+      ],
+      "artifacts": [
+        "chapters/10-scalability-reliability-observability.md",
+        "chapters/13-deployment-operations.md",
+        "reviews/fmea.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-WORKFLOW",
+        "CMP-POSTGRES",
+        "CMP-PROJECTION",
+        "CMP-OBS",
+        "CMP-PLATFORM"
+      ],
+      "contracts": [
+        "contracts/asyncapi/events.asyncapi.yaml",
+        "contracts/proto/digital_twin.proto"
+      ],
+      "controls": [
+        "CTRL-OPS-001",
+        "CTRL-OPS-002"
+      ],
+      "decisions": [
+        "ADR-003",
+        "ADR-005",
+        "ADR-015"
+      ],
+      "horizon": "H1",
+      "id": "REQ-REL-004",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-REL-001"
+      ],
+      "title": "Graceful degradation"
+    },
+    {
+      "acceptance": [
+        "AC-REL-001",
+        "AC-REL-002",
+        "AC-REL-003",
+        "AC-OBS-001"
+      ],
+      "artifacts": [
+        "chapters/10-scalability-reliability-observability.md",
+        "chapters/13-deployment-operations.md",
+        "reviews/fmea.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-WORKFLOW",
+        "CMP-POSTGRES",
+        "CMP-PROJECTION",
+        "CMP-OBS",
+        "CMP-PLATFORM"
+      ],
+      "contracts": [
+        "contracts/asyncapi/events.asyncapi.yaml",
+        "contracts/proto/digital_twin.proto"
+      ],
+      "controls": [
+        "CTRL-OPS-001",
+        "CTRL-OPS-002"
+      ],
+      "decisions": [
+        "ADR-003",
+        "ADR-005",
+        "ADR-015"
+      ],
+      "horizon": "H1",
+      "id": "REQ-REL-005",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-REL-001"
+      ],
+      "title": "Full observability"
+    },
+    {
+      "acceptance": [
+        "AC-REL-001",
+        "AC-REL-002",
+        "AC-REL-003",
+        "AC-OBS-001"
+      ],
+      "artifacts": [
+        "chapters/10-scalability-reliability-observability.md",
+        "chapters/13-deployment-operations.md",
+        "reviews/fmea.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-WORKFLOW",
+        "CMP-POSTGRES",
+        "CMP-PROJECTION",
+        "CMP-OBS",
+        "CMP-PLATFORM"
+      ],
+      "contracts": [
+        "contracts/asyncapi/events.asyncapi.yaml",
+        "contracts/proto/digital_twin.proto"
+      ],
+      "controls": [
+        "CTRL-OPS-001",
+        "CTRL-OPS-002"
+      ],
+      "decisions": [
+        "ADR-003",
+        "ADR-005",
+        "ADR-015"
+      ],
+      "horizon": "H5",
+      "id": "REQ-REL-006",
+      "kind": "requirement",
+      "roadmap": [
+        "H5"
+      ],
+      "status": "research",
+      "tests_evaluations": [
+        "TST-REL-001"
+      ],
+      "title": "Evidence-gated hyperscale"
+    },
+    {
+      "acceptance": [
+        "AC-TEN-001",
+        "AC-SEC-001",
+        "AC-SEC-002",
+        "AC-PRV-001",
+        "AC-SUP-001"
+      ],
+      "artifacts": [
+        "chapters/09-security-privacy-compliance.md",
+        "reviews/threat-model.md",
+        "reviews/privacy-impact-assessment.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-POLICY",
+        "CMP-API",
+        "CMP-CONNECTOR",
+        "CMP-AI",
+        "CMP-POSTGRES",
+        "CMP-OBJECT",
+        "CMP-GRAPH",
+        "CMP-OBS"
+      ],
+      "contracts": [
+        "contracts/schemas/canonical.schema.json",
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml",
+        "contracts/asyncapi/events.asyncapi.yaml"
+      ],
+      "controls": [
+        "CTRL-IAM-001",
+        "CTRL-IAM-003",
+        "CTRL-CRY-001",
+        "CTRL-CRY-002",
+        "CTRL-AUD-001",
+        "CTRL-PRV-001",
+        "CTRL-SUP-001",
+        "CTRL-INC-001"
+      ],
+      "decisions": [
+        "ADR-006",
+        "ADR-007",
+        "ADR-013"
+      ],
+      "horizon": "H1",
+      "id": "REQ-SEC-001",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-SEC-001"
+      ],
+      "title": "Zero-trust authorization"
+    },
+    {
+      "acceptance": [
+        "AC-TEN-001",
+        "AC-SEC-001",
+        "AC-SEC-002",
+        "AC-PRV-001",
+        "AC-SUP-001"
+      ],
+      "artifacts": [
+        "chapters/09-security-privacy-compliance.md",
+        "reviews/threat-model.md",
+        "reviews/privacy-impact-assessment.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-POLICY",
+        "CMP-API",
+        "CMP-CONNECTOR",
+        "CMP-AI",
+        "CMP-POSTGRES",
+        "CMP-OBJECT",
+        "CMP-GRAPH",
+        "CMP-OBS"
+      ],
+      "contracts": [
+        "contracts/schemas/canonical.schema.json",
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml",
+        "contracts/asyncapi/events.asyncapi.yaml"
+      ],
+      "controls": [
+        "CTRL-IAM-001",
+        "CTRL-IAM-003",
+        "CTRL-CRY-001",
+        "CTRL-CRY-002",
+        "CTRL-AUD-001",
+        "CTRL-PRV-001",
+        "CTRL-SUP-001",
+        "CTRL-INC-001"
+      ],
+      "decisions": [
+        "ADR-006",
+        "ADR-007",
+        "ADR-013"
+      ],
+      "horizon": "H1",
+      "id": "REQ-SEC-002",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-SEC-001"
+      ],
+      "title": "Source ACL propagation"
+    },
+    {
+      "acceptance": [
+        "AC-TEN-001",
+        "AC-SEC-001",
+        "AC-SEC-002",
+        "AC-PRV-001",
+        "AC-SUP-001"
+      ],
+      "artifacts": [
+        "chapters/09-security-privacy-compliance.md",
+        "reviews/threat-model.md",
+        "reviews/privacy-impact-assessment.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-POLICY",
+        "CMP-API",
+        "CMP-CONNECTOR",
+        "CMP-AI",
+        "CMP-POSTGRES",
+        "CMP-OBJECT",
+        "CMP-GRAPH",
+        "CMP-OBS"
+      ],
+      "contracts": [
+        "contracts/schemas/canonical.schema.json",
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml",
+        "contracts/asyncapi/events.asyncapi.yaml"
+      ],
+      "controls": [
+        "CTRL-IAM-001",
+        "CTRL-IAM-003",
+        "CTRL-CRY-001",
+        "CTRL-CRY-002",
+        "CTRL-AUD-001",
+        "CTRL-PRV-001",
+        "CTRL-SUP-001",
+        "CTRL-INC-001"
+      ],
+      "decisions": [
+        "ADR-006",
+        "ADR-007",
+        "ADR-013"
+      ],
+      "horizon": "H1",
+      "id": "REQ-SEC-003",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-SEC-001"
+      ],
+      "title": "Secret and key isolation"
+    },
+    {
+      "acceptance": [
+        "AC-TEN-001",
+        "AC-SEC-001",
+        "AC-SEC-002",
+        "AC-PRV-001",
+        "AC-SUP-001"
+      ],
+      "artifacts": [
+        "chapters/09-security-privacy-compliance.md",
+        "reviews/threat-model.md",
+        "reviews/privacy-impact-assessment.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-POLICY",
+        "CMP-API",
+        "CMP-CONNECTOR",
+        "CMP-AI",
+        "CMP-POSTGRES",
+        "CMP-OBJECT",
+        "CMP-GRAPH",
+        "CMP-OBS"
+      ],
+      "contracts": [
+        "contracts/schemas/canonical.schema.json",
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml",
+        "contracts/asyncapi/events.asyncapi.yaml"
+      ],
+      "controls": [
+        "CTRL-IAM-001",
+        "CTRL-IAM-003",
+        "CTRL-CRY-001",
+        "CTRL-CRY-002",
+        "CTRL-AUD-001",
+        "CTRL-PRV-001",
+        "CTRL-SUP-001",
+        "CTRL-INC-001"
+      ],
+      "decisions": [
+        "ADR-006",
+        "ADR-007",
+        "ADR-013"
+      ],
+      "horizon": "H1",
+      "id": "REQ-SEC-004",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-SEC-001"
+      ],
+      "title": "Audit integrity"
+    },
+    {
+      "acceptance": [
+        "AC-TEN-001",
+        "AC-SEC-001",
+        "AC-SEC-002",
+        "AC-PRV-001",
+        "AC-SUP-001"
+      ],
+      "artifacts": [
+        "chapters/09-security-privacy-compliance.md",
+        "reviews/threat-model.md",
+        "reviews/privacy-impact-assessment.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-POLICY",
+        "CMP-API",
+        "CMP-CONNECTOR",
+        "CMP-AI",
+        "CMP-POSTGRES",
+        "CMP-OBJECT",
+        "CMP-GRAPH",
+        "CMP-OBS"
+      ],
+      "contracts": [
+        "contracts/schemas/canonical.schema.json",
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml",
+        "contracts/asyncapi/events.asyncapi.yaml"
+      ],
+      "controls": [
+        "CTRL-IAM-001",
+        "CTRL-IAM-003",
+        "CTRL-CRY-001",
+        "CTRL-CRY-002",
+        "CTRL-AUD-001",
+        "CTRL-PRV-001",
+        "CTRL-SUP-001",
+        "CTRL-INC-001"
+      ],
+      "decisions": [
+        "ADR-006",
+        "ADR-007",
+        "ADR-013"
+      ],
+      "horizon": "H2",
+      "id": "REQ-SEC-005",
+      "kind": "requirement",
+      "roadmap": [
+        "H2"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-SEC-001"
+      ],
+      "title": "Privacy lifecycle"
+    },
+    {
+      "acceptance": [
+        "AC-TEN-001",
+        "AC-SEC-001",
+        "AC-SEC-002",
+        "AC-PRV-001",
+        "AC-SUP-001"
+      ],
+      "artifacts": [
+        "chapters/09-security-privacy-compliance.md",
+        "reviews/threat-model.md",
+        "reviews/privacy-impact-assessment.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-POLICY",
+        "CMP-API",
+        "CMP-CONNECTOR",
+        "CMP-AI",
+        "CMP-POSTGRES",
+        "CMP-OBJECT",
+        "CMP-GRAPH",
+        "CMP-OBS"
+      ],
+      "contracts": [
+        "contracts/schemas/canonical.schema.json",
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml",
+        "contracts/asyncapi/events.asyncapi.yaml"
+      ],
+      "controls": [
+        "CTRL-IAM-001",
+        "CTRL-IAM-003",
+        "CTRL-CRY-001",
+        "CTRL-CRY-002",
+        "CTRL-AUD-001",
+        "CTRL-PRV-001",
+        "CTRL-SUP-001",
+        "CTRL-INC-001"
+      ],
+      "decisions": [
+        "ADR-006",
+        "ADR-007",
+        "ADR-013"
+      ],
+      "horizon": "H2",
+      "id": "REQ-SEC-006",
+      "kind": "requirement",
+      "roadmap": [
+        "H2"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-SEC-001"
+      ],
+      "title": "Control readiness"
+    },
+    {
+      "acceptance": [
+        "AC-TEN-001",
+        "AC-SEC-001",
+        "AC-SEC-002",
+        "AC-PRV-001",
+        "AC-SUP-001"
+      ],
+      "artifacts": [
+        "chapters/09-security-privacy-compliance.md",
+        "reviews/threat-model.md",
+        "reviews/privacy-impact-assessment.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-POLICY",
+        "CMP-API",
+        "CMP-CONNECTOR",
+        "CMP-AI",
+        "CMP-POSTGRES",
+        "CMP-OBJECT",
+        "CMP-GRAPH",
+        "CMP-OBS"
+      ],
+      "contracts": [
+        "contracts/schemas/canonical.schema.json",
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml",
+        "contracts/asyncapi/events.asyncapi.yaml"
+      ],
+      "controls": [
+        "CTRL-IAM-001",
+        "CTRL-IAM-003",
+        "CTRL-CRY-001",
+        "CTRL-CRY-002",
+        "CTRL-AUD-001",
+        "CTRL-PRV-001",
+        "CTRL-SUP-001",
+        "CTRL-INC-001"
+      ],
+      "decisions": [
+        "ADR-006",
+        "ADR-007",
+        "ADR-013"
+      ],
+      "horizon": "H2",
+      "id": "REQ-SEC-007",
+      "kind": "requirement",
+      "roadmap": [
+        "H2"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-SEC-001"
+      ],
+      "title": "Supply-chain security"
+    },
+    {
+      "acceptance": [
+        "AC-TEN-001",
+        "AC-SEC-001",
+        "AC-SEC-002",
+        "AC-PRV-001",
+        "AC-SUP-001"
+      ],
+      "artifacts": [
+        "chapters/09-security-privacy-compliance.md",
+        "reviews/threat-model.md",
+        "reviews/privacy-impact-assessment.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-POLICY",
+        "CMP-API",
+        "CMP-CONNECTOR",
+        "CMP-AI",
+        "CMP-POSTGRES",
+        "CMP-OBJECT",
+        "CMP-GRAPH",
+        "CMP-OBS"
+      ],
+      "contracts": [
+        "contracts/schemas/canonical.schema.json",
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml",
+        "contracts/asyncapi/events.asyncapi.yaml"
+      ],
+      "controls": [
+        "CTRL-IAM-001",
+        "CTRL-IAM-003",
+        "CTRL-CRY-001",
+        "CTRL-CRY-002",
+        "CTRL-AUD-001",
+        "CTRL-PRV-001",
+        "CTRL-SUP-001",
+        "CTRL-INC-001"
+      ],
+      "decisions": [
+        "ADR-006",
+        "ADR-007",
+        "ADR-013"
+      ],
+      "horizon": "H2",
+      "id": "REQ-SEC-008",
+      "kind": "requirement",
+      "roadmap": [
+        "H2"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-SEC-001"
+      ],
+      "title": "Incident response"
+    },
+    {
+      "acceptance": [
+        "AC-SIM-001",
+        "AC-SIM-002"
+      ],
+      "artifacts": [
+        "chapters/08-simulation-prediction.md",
+        "catalogs/simulations.yaml"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-AI",
+        "CMP-WORKFLOW",
+        "CMP-POSTGRES"
+      ],
+      "contracts": [
+        "contracts/schemas/scenario.schema.json",
+        "contracts/schemas/simulation-snapshot.schema.json",
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml"
+      ],
+      "controls": [
+        "CTRL-DAT-001",
+        "CTRL-PRV-002"
+      ],
+      "decisions": [
+        "ADR-014"
+      ],
+      "horizon": "H1",
+      "id": "REQ-SIM-001",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-SIM-001"
+      ],
+      "title": "Reproducible scheduler"
+    },
+    {
+      "acceptance": [
+        "AC-SIM-001",
+        "AC-SIM-002"
+      ],
+      "artifacts": [
+        "chapters/08-simulation-prediction.md",
+        "catalogs/simulations.yaml"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-AI",
+        "CMP-WORKFLOW",
+        "CMP-POSTGRES"
+      ],
+      "contracts": [
+        "contracts/schemas/scenario.schema.json",
+        "contracts/schemas/simulation-snapshot.schema.json",
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml"
+      ],
+      "controls": [
+        "CTRL-DAT-001",
+        "CTRL-PRV-002"
+      ],
+      "decisions": [
+        "ADR-014"
+      ],
+      "horizon": "H1",
+      "id": "REQ-SIM-002",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-SIM-001"
+      ],
+      "title": "Typed scenario"
+    },
+    {
+      "acceptance": [
+        "AC-SIM-001",
+        "AC-SIM-002"
+      ],
+      "artifacts": [
+        "chapters/08-simulation-prediction.md",
+        "catalogs/simulations.yaml"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-AI",
+        "CMP-WORKFLOW",
+        "CMP-POSTGRES"
+      ],
+      "contracts": [
+        "contracts/schemas/scenario.schema.json",
+        "contracts/schemas/simulation-snapshot.schema.json",
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml"
+      ],
+      "controls": [
+        "CTRL-DAT-001",
+        "CTRL-PRV-002"
+      ],
+      "decisions": [
+        "ADR-014"
+      ],
+      "horizon": "H1",
+      "id": "REQ-SIM-003",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-SIM-001"
+      ],
+      "title": "Uncertainty output"
+    },
+    {
+      "acceptance": [
+        "AC-SIM-001",
+        "AC-SIM-002"
+      ],
+      "artifacts": [
+        "chapters/08-simulation-prediction.md",
+        "catalogs/simulations.yaml"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-AI",
+        "CMP-WORKFLOW",
+        "CMP-POSTGRES"
+      ],
+      "contracts": [
+        "contracts/schemas/scenario.schema.json",
+        "contracts/schemas/simulation-snapshot.schema.json",
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml"
+      ],
+      "controls": [
+        "CTRL-DAT-001",
+        "CTRL-PRV-002"
+      ],
+      "decisions": [
+        "ADR-014"
+      ],
+      "horizon": "H1",
+      "id": "REQ-SIM-004",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-SIM-001"
+      ],
+      "title": "Honest claims"
+    },
+    {
+      "acceptance": [
+        "AC-SIM-001",
+        "AC-SIM-002"
+      ],
+      "artifacts": [
+        "chapters/08-simulation-prediction.md",
+        "catalogs/simulations.yaml"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-AI",
+        "CMP-WORKFLOW",
+        "CMP-POSTGRES"
+      ],
+      "contracts": [
+        "contracts/schemas/scenario.schema.json",
+        "contracts/schemas/simulation-snapshot.schema.json",
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml"
+      ],
+      "controls": [
+        "CTRL-DAT-001",
+        "CTRL-PRV-002"
+      ],
+      "decisions": [
+        "ADR-014"
+      ],
+      "horizon": "H3",
+      "id": "REQ-SIM-005",
+      "kind": "requirement",
+      "roadmap": [
+        "H3"
+      ],
+      "status": "provisional",
+      "tests_evaluations": [
+        "TST-SIM-001"
+      ],
+      "title": "Prediction governance"
+    },
+    {
+      "acceptance": [
+        "AC-TEN-001"
+      ],
+      "artifacts": [
+        "chapters/03-system-architecture.md",
+        "chapters/05-data-knowledge-graph.md",
+        "chapters/09-security-privacy-compliance.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-API",
+        "CMP-POLICY",
+        "CMP-POSTGRES",
+        "CMP-PROJECTION"
+      ],
+      "contracts": [
+        "contracts/schemas/canonical.schema.json",
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml"
+      ],
+      "controls": [
+        "CTRL-IAM-002",
+        "CTRL-TEN-001",
+        "CTRL-TEN-002",
+        "CTRL-TEN-003"
+      ],
+      "decisions": [
+        "ADR-006",
+        "ADR-007"
+      ],
+      "horizon": "H1",
+      "id": "REQ-TEN-001",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-TEN-001"
+      ],
+      "title": "Server-derived tenant context"
+    },
+    {
+      "acceptance": [
+        "AC-TEN-001"
+      ],
+      "artifacts": [
+        "chapters/03-system-architecture.md",
+        "chapters/05-data-knowledge-graph.md",
+        "chapters/09-security-privacy-compliance.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-API",
+        "CMP-POLICY",
+        "CMP-POSTGRES",
+        "CMP-PROJECTION"
+      ],
+      "contracts": [
+        "contracts/schemas/canonical.schema.json",
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml"
+      ],
+      "controls": [
+        "CTRL-IAM-002",
+        "CTRL-TEN-001",
+        "CTRL-TEN-002",
+        "CTRL-TEN-003"
+      ],
+      "decisions": [
+        "ADR-006",
+        "ADR-007"
+      ],
+      "horizon": "H1",
+      "id": "REQ-TEN-002",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-TEN-001"
+      ],
+      "title": "Tenant-scoped storage"
+    },
+    {
+      "acceptance": [
+        "AC-TEN-001"
+      ],
+      "artifacts": [
+        "chapters/03-system-architecture.md",
+        "chapters/05-data-knowledge-graph.md",
+        "chapters/09-security-privacy-compliance.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-API",
+        "CMP-POLICY",
+        "CMP-POSTGRES",
+        "CMP-PROJECTION"
+      ],
+      "contracts": [
+        "contracts/schemas/canonical.schema.json",
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml"
+      ],
+      "controls": [
+        "CTRL-IAM-002",
+        "CTRL-TEN-001",
+        "CTRL-TEN-002",
+        "CTRL-TEN-003"
+      ],
+      "decisions": [
+        "ADR-006",
+        "ADR-007"
+      ],
+      "horizon": "H1",
+      "id": "REQ-TEN-003",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-TEN-001"
+      ],
+      "title": "Database tenant fence"
+    },
+    {
+      "acceptance": [
+        "AC-TEN-001"
+      ],
+      "artifacts": [
+        "chapters/03-system-architecture.md",
+        "chapters/05-data-knowledge-graph.md",
+        "chapters/09-security-privacy-compliance.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-API",
+        "CMP-POLICY",
+        "CMP-POSTGRES",
+        "CMP-PROJECTION"
+      ],
+      "contracts": [
+        "contracts/schemas/canonical.schema.json",
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml"
+      ],
+      "controls": [
+        "CTRL-IAM-002",
+        "CTRL-TEN-001",
+        "CTRL-TEN-002",
+        "CTRL-TEN-003"
+      ],
+      "decisions": [
+        "ADR-006",
+        "ADR-007"
+      ],
+      "horizon": "H1",
+      "id": "REQ-TEN-004",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-TEN-001"
+      ],
+      "title": "Derived-store isolation"
+    },
+    {
+      "acceptance": [
+        "AC-TEN-001"
+      ],
+      "artifacts": [
+        "chapters/03-system-architecture.md",
+        "chapters/05-data-knowledge-graph.md",
+        "chapters/09-security-privacy-compliance.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-API",
+        "CMP-POLICY",
+        "CMP-POSTGRES",
+        "CMP-PROJECTION"
+      ],
+      "contracts": [
+        "contracts/schemas/canonical.schema.json",
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml"
+      ],
+      "controls": [
+        "CTRL-IAM-002",
+        "CTRL-TEN-001",
+        "CTRL-TEN-002",
+        "CTRL-TEN-003"
+      ],
+      "decisions": [
+        "ADR-006",
+        "ADR-007"
+      ],
+      "horizon": "H1",
+      "id": "REQ-TEN-005",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-TEN-001"
+      ],
+      "title": "No implicit cross-tenant learning"
+    },
+    {
+      "acceptance": [
+        "AC-UX-001"
+      ],
+      "artifacts": [
+        "chapters/11-ux-visualizations.md",
+        "catalogs/screens.yaml"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-WEB",
+        "CMP-API"
+      ],
+      "contracts": [
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml",
+        "contracts/graphql/schema.graphql"
+      ],
+      "controls": [
+        "CTRL-DAT-002",
+        "CTRL-PRV-001"
+      ],
+      "decisions": [
+        "ADR-002"
+      ],
+      "horizon": "H1",
+      "id": "REQ-UX-001",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-UX-001"
+      ],
+      "title": "Complete H1 surfaces"
+    },
+    {
+      "acceptance": [
+        "AC-UX-001"
+      ],
+      "artifacts": [
+        "chapters/11-ux-visualizations.md",
+        "catalogs/screens.yaml"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-WEB",
+        "CMP-API"
+      ],
+      "contracts": [
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml",
+        "contracts/graphql/schema.graphql"
+      ],
+      "controls": [
+        "CTRL-DAT-002",
+        "CTRL-PRV-001"
+      ],
+      "decisions": [
+        "ADR-002"
+      ],
+      "horizon": "H1",
+      "id": "REQ-UX-002",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-UX-001"
+      ],
+      "title": "State completeness"
+    },
+    {
+      "acceptance": [
+        "AC-UX-001"
+      ],
+      "artifacts": [
+        "chapters/11-ux-visualizations.md",
+        "catalogs/screens.yaml"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-WEB",
+        "CMP-API"
+      ],
+      "contracts": [
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml",
+        "contracts/graphql/schema.graphql"
+      ],
+      "controls": [
+        "CTRL-DAT-002",
+        "CTRL-PRV-001"
+      ],
+      "decisions": [
+        "ADR-002"
+      ],
+      "horizon": "H1",
+      "id": "REQ-UX-003",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-UX-001"
+      ],
+      "title": "Accessible operation"
+    },
+    {
+      "acceptance": [
+        "AC-UX-001"
+      ],
+      "artifacts": [
+        "chapters/11-ux-visualizations.md",
+        "catalogs/screens.yaml"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-WEB",
+        "CMP-API"
+      ],
+      "contracts": [
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml",
+        "contracts/graphql/schema.graphql"
+      ],
+      "controls": [
+        "CTRL-DAT-002",
+        "CTRL-PRV-001"
+      ],
+      "decisions": [
+        "ADR-002"
+      ],
+      "horizon": "H1",
+      "id": "REQ-UX-004",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-UX-001"
+      ],
+      "title": "Evidence-first visualizations"
+    },
+    {
+      "acceptance": [
+        "AC-DOC-001",
+        "AC-DOC-002",
+        "AC-REV-001",
+        "AC-REV-002"
+      ],
+      "artifacts": [
+        "chapters/14-testing-evaluation-dx.md",
+        "chapters/16-architecture-audit.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-DOCS",
+        "CMP-OBS",
+        "CMP-PLATFORM"
+      ],
+      "contracts": [
+        "catalogs/acceptance.yaml",
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml",
+        "contracts/schemas/canonical.schema.json"
+      ],
+      "controls": [
+        "CTRL-AI-003",
+        "CTRL-SUP-001"
+      ],
+      "decisions": [
+        "ADR-016"
+      ],
+      "horizon": "H1",
+      "id": "REQ-VER-001",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-VER-001"
+      ],
+      "title": "Comprehensive verification"
+    },
+    {
+      "acceptance": [
+        "AC-DOC-001",
+        "AC-DOC-002",
+        "AC-REV-001",
+        "AC-REV-002",
+        "AC-PROD-001",
+        "AC-TEN-001",
+        "AC-DATA-001",
+        "AC-DATA-002",
+        "AC-DATA-003",
+        "AC-AI-001",
+        "AC-AI-002",
+        "AC-ACT-001",
+        "AC-ACT-002",
+        "AC-ACT-003",
+        "AC-SIM-001",
+        "AC-SIM-002"
+      ],
+      "artifacts": [
+        "chapters/14-testing-evaluation-dx.md",
+        "chapters/16-architecture-audit.md",
+        "fixtures/h1/README.md",
+        "fixtures/h1/seed-manifest.yaml",
+        "fixtures/h1/source-fixtures.yaml",
+        "fixtures/h1/identity-mappings.yaml",
+        "fixtures/h1/permission-matrix.yaml",
+        "fixtures/h1/ground-truth-oracle.yaml"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-DOCS",
+        "CMP-OBS",
+        "CMP-PLATFORM",
+        "CMP-CONNECTOR",
+        "CMP-POSTGRES",
+        "CMP-PROJECTION",
+        "CMP-AI",
+        "CMP-WORKFLOW"
+      ],
+      "contracts": [
+        "catalogs/acceptance.yaml",
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml",
+        "contracts/schemas/canonical.schema.json",
+        "contracts/schemas/scenario.schema.json",
+        "contracts/schemas/simulation-snapshot.schema.json"
+      ],
+      "controls": [
+        "CTRL-AI-003",
+        "CTRL-SUP-001",
+        "CTRL-TEN-003",
+        "CTRL-DAT-001",
+        "CTRL-DAT-002",
+        "CTRL-ACT-001",
+        "CTRL-ACT-002",
+        "CTRL-ACT-003"
+      ],
+      "decisions": [
+        "ADR-016",
+        "ADR-002",
+        "ADR-014"
+      ],
+      "horizon": "H1",
+      "id": "REQ-VER-002",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-VER-001"
+      ],
+      "title": "Synthetic golden organization"
+    },
+    {
+      "acceptance": [
+        "AC-DOC-001",
+        "AC-DOC-002",
+        "AC-REV-001",
+        "AC-REV-002"
+      ],
+      "artifacts": [
+        "chapters/14-testing-evaluation-dx.md",
+        "chapters/16-architecture-audit.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-DOCS",
+        "CMP-OBS",
+        "CMP-PLATFORM"
+      ],
+      "contracts": [
+        "catalogs/acceptance.yaml",
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml",
+        "contracts/schemas/canonical.schema.json"
+      ],
+      "controls": [
+        "CTRL-AI-003",
+        "CTRL-SUP-001"
+      ],
+      "decisions": [
+        "ADR-016"
+      ],
+      "horizon": "H1",
+      "id": "REQ-VER-003",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-VER-001"
+      ],
+      "title": "Continuous AI evaluation"
+    },
+    {
+      "acceptance": [
+        "AC-DOC-001",
+        "AC-DOC-002",
+        "AC-REV-001",
+        "AC-REV-002"
+      ],
+      "artifacts": [
+        "chapters/14-testing-evaluation-dx.md",
+        "chapters/16-architecture-audit.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-DOCS",
+        "CMP-OBS",
+        "CMP-PLATFORM"
+      ],
+      "contracts": [
+        "catalogs/acceptance.yaml",
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml",
+        "contracts/schemas/canonical.schema.json"
+      ],
+      "controls": [
+        "CTRL-AI-003",
+        "CTRL-SUP-001"
+      ],
+      "decisions": [
+        "ADR-016"
+      ],
+      "horizon": "H1",
+      "id": "REQ-VER-004",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-VER-001"
+      ],
+      "title": "Independent build readiness"
+    },
+    {
+      "acceptance": [
+        "AC-DOC-001",
+        "AC-DOC-002",
+        "AC-REV-001",
+        "AC-REV-002"
+      ],
+      "artifacts": [
+        "chapters/14-testing-evaluation-dx.md",
+        "chapters/16-architecture-audit.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-DOCS",
+        "CMP-OBS",
+        "CMP-PLATFORM"
+      ],
+      "contracts": [
+        "catalogs/acceptance.yaml",
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml",
+        "contracts/schemas/canonical.schema.json"
+      ],
+      "controls": [
+        "CTRL-AI-003",
+        "CTRL-SUP-001"
+      ],
+      "decisions": [
+        "ADR-016"
+      ],
+      "horizon": "H1",
+      "id": "REQ-VER-005",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-VER-001"
+      ],
+      "title": "Zero blocking findings"
+    },
+    {
+      "acceptance": [
+        "AC-UX-001"
+      ],
+      "artifacts": [
+        "chapters/11-ux-visualizations.md",
+        "catalogs/screens.yaml"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-WEB",
+        "CMP-API"
+      ],
+      "contracts": [
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml"
+      ],
+      "controls": [
+        "CTRL-DAT-002",
+        "CTRL-PRV-001"
+      ],
+      "decisions": [
+        "ADR-002"
+      ],
+      "horizon": "H1",
+      "id": "QAR-ACC-001",
+      "kind": "quality_attribute",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-UX-001"
+      ],
+      "title": "accessibility"
+    },
+    {
+      "acceptance": [
+        "AC-AI-001",
+        "AC-AI-002",
+        "AC-AI-003",
+        "AC-AI-004"
+      ],
+      "artifacts": [
+        "chapters/07-ai-agents-reasoning.md",
+        "chapters/14-testing-evaluation-dx.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-AI",
+        "CMP-MODEL-GATEWAY",
+        "CMP-POLICY"
+      ],
+      "contracts": [
+        "contracts/mcp-manifest.json",
+        "contracts/schemas/canonical.schema.json"
+      ],
+      "controls": [
+        "CTRL-AI-001",
+        "CTRL-AI-002",
+        "CTRL-AI-003",
+        "CTRL-AI-004"
+      ],
+      "decisions": [
+        "ADR-012",
+        "ADR-013"
+      ],
+      "horizon": "H1",
+      "id": "QAR-AI-001",
+      "kind": "quality_attribute",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-AI-001"
+      ],
+      "title": "grounding"
+    },
+    {
+      "acceptance": [
+        "AC-AI-001",
+        "AC-AI-002",
+        "AC-AI-003",
+        "AC-AI-004"
+      ],
+      "artifacts": [
+        "chapters/07-ai-agents-reasoning.md",
+        "chapters/14-testing-evaluation-dx.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-AI",
+        "CMP-MODEL-GATEWAY",
+        "CMP-POLICY"
+      ],
+      "contracts": [
+        "contracts/mcp-manifest.json",
+        "contracts/schemas/canonical.schema.json"
+      ],
+      "controls": [
+        "CTRL-AI-001",
+        "CTRL-AI-002",
+        "CTRL-AI-003",
+        "CTRL-AI-004"
+      ],
+      "decisions": [
+        "ADR-012",
+        "ADR-013"
+      ],
+      "horizon": "H1",
+      "id": "QAR-AI-002",
+      "kind": "quality_attribute",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-AI-001"
+      ],
+      "title": "prompt-injection-resistance"
+    },
+    {
+      "acceptance": [
+        "AC-REL-002",
+        "AC-REL-003"
+      ],
+      "artifacts": [
+        "chapters/10-scalability-reliability-observability.md",
+        "chapters/13-deployment-operations.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-API",
+        "CMP-WORKFLOW",
+        "CMP-POSTGRES",
+        "CMP-PLATFORM"
+      ],
+      "contracts": [
+        "contracts/asyncapi/events.asyncapi.yaml"
+      ],
+      "controls": [
+        "CTRL-OPS-001",
+        "CTRL-OPS-002"
+      ],
+      "decisions": [
+        "ADR-003",
+        "ADR-005",
+        "ADR-015"
+      ],
+      "horizon": "H2",
+      "id": "QAR-AVL-001",
+      "kind": "quality_attribute",
+      "roadmap": [
+        "H2"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-REL-001"
+      ],
+      "title": "availability"
+    },
+    {
+      "acceptance": [
+        "AC-DATA-001",
+        "AC-CON-002",
+        "AC-ACT-002"
+      ],
+      "artifacts": [
+        "chapters/06-ingestion-connectors-sync.md",
+        "chapters/10-scalability-reliability-observability.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-CONNECTOR",
+        "CMP-WORKFLOW",
+        "CMP-POSTGRES",
+        "CMP-PROJECTION"
+      ],
+      "contracts": [
+        "contracts/asyncapi/events.asyncapi.yaml",
+        "contracts/connectors/github/schemas/raw-envelope.schema.json",
+        "contracts/connectors/github/schemas/normalized-observation.schema.json",
+        "contracts/connectors/jira-cloud/schemas/raw-envelope.schema.json",
+        "contracts/connectors/jira-cloud/schemas/normalized-observation.schema.json"
+      ],
+      "controls": [
+        "CTRL-CON-002",
+        "CTRL-OPS-002"
+      ],
+      "decisions": [
+        "ADR-005",
+        "ADR-011"
+      ],
+      "horizon": "H1",
+      "id": "QAR-COR-001",
+      "kind": "quality_attribute",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-CON-001"
+      ],
+      "title": "replay-correctness"
+    },
+    {
+      "acceptance": [
+        "AC-AI-004",
+        "AC-REL-003"
+      ],
+      "artifacts": [
+        "chapters/07-ai-agents-reasoning.md",
+        "chapters/10-scalability-reliability-observability.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-AI",
+        "CMP-MODEL-GATEWAY",
+        "CMP-WORKFLOW"
+      ],
+      "contracts": [
+        "contracts/schemas/canonical.schema.json",
+        "contracts/mcp-manifest.json"
+      ],
+      "controls": [
+        "CTRL-AI-003",
+        "CTRL-AI-004"
+      ],
+      "decisions": [
+        "ADR-012",
+        "ADR-013"
+      ],
+      "horizon": "H1",
+      "id": "QAR-COST-001",
+      "kind": "quality_attribute",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-AI-001"
+      ],
+      "title": "cost-control"
+    },
+    {
+      "acceptance": [
+        "AC-REL-002"
+      ],
+      "artifacts": [
+        "chapters/10-scalability-reliability-observability.md",
+        "chapters/13-deployment-operations.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-POSTGRES",
+        "CMP-OBJECT",
+        "CMP-PROJECTION",
+        "CMP-PLATFORM"
+      ],
+      "contracts": [
+        "contracts/asyncapi/events.asyncapi.yaml"
+      ],
+      "controls": [
+        "CTRL-OPS-001"
+      ],
+      "decisions": [
+        "ADR-009",
+        "ADR-015"
+      ],
+      "horizon": "H2",
+      "id": "QAR-DR-001",
+      "kind": "quality_attribute",
+      "roadmap": [
+        "H2"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-REL-001"
+      ],
+      "title": "disaster-recovery"
+    },
+    {
+      "acceptance": [
+        "AC-OBS-001"
+      ],
+      "artifacts": [
+        "chapters/10-scalability-reliability-observability.md",
+        "chapters/13-deployment-operations.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-OBS",
+        "CMP-API",
+        "CMP-WORKFLOW",
+        "CMP-CONNECTOR",
+        "CMP-AI"
+      ],
+      "contracts": [
+        "contracts/asyncapi/events.asyncapi.yaml",
+        "contracts/schemas/canonical.schema.json"
+      ],
+      "controls": [
+        "CTRL-AUD-001",
+        "CTRL-OPS-002"
+      ],
+      "decisions": [
+        "ADR-005",
+        "ADR-015"
+      ],
+      "horizon": "H1",
+      "id": "QAR-OBS-001",
+      "kind": "quality_attribute",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-REL-001"
+      ],
+      "title": "diagnosability"
+    },
+    {
+      "acceptance": [
+        "AC-REL-001"
+      ],
+      "artifacts": [
+        "chapters/02-reference-workload.md",
+        "chapters/10-scalability-reliability-observability.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-API",
+        "CMP-AI",
+        "CMP-GRAPH",
+        "CMP-MODEL-GATEWAY"
+      ],
+      "contracts": [
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml",
+        "contracts/schemas/scenario.schema.json"
+      ],
+      "controls": [
+        "CTRL-AI-004",
+        "CTRL-OPS-002"
+      ],
+      "decisions": [
+        "ADR-003",
+        "ADR-009",
+        "ADR-014"
+      ],
+      "horizon": "H1",
+      "id": "QAR-PERF-001",
+      "kind": "quality_attribute",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-REL-001"
+      ],
+      "title": "graph-query-latency"
+    },
+    {
+      "acceptance": [
+        "AC-REL-001"
+      ],
+      "artifacts": [
+        "chapters/02-reference-workload.md",
+        "chapters/10-scalability-reliability-observability.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-API",
+        "CMP-AI",
+        "CMP-GRAPH",
+        "CMP-MODEL-GATEWAY"
+      ],
+      "contracts": [
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml",
+        "contracts/schemas/scenario.schema.json"
+      ],
+      "controls": [
+        "CTRL-AI-004",
+        "CTRL-OPS-002"
+      ],
+      "decisions": [
+        "ADR-003",
+        "ADR-009",
+        "ADR-014"
+      ],
+      "horizon": "H1",
+      "id": "QAR-PERF-002",
+      "kind": "quality_attribute",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-REL-001"
+      ],
+      "title": "simulation-latency"
+    },
+    {
+      "acceptance": [
+        "AC-REL-001"
+      ],
+      "artifacts": [
+        "chapters/02-reference-workload.md",
+        "chapters/10-scalability-reliability-observability.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-API",
+        "CMP-AI",
+        "CMP-GRAPH",
+        "CMP-MODEL-GATEWAY"
+      ],
+      "contracts": [
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml",
+        "contracts/schemas/scenario.schema.json"
+      ],
+      "controls": [
+        "CTRL-AI-004",
+        "CTRL-OPS-002"
+      ],
+      "decisions": [
+        "ADR-003",
+        "ADR-009",
+        "ADR-014"
+      ],
+      "horizon": "H1",
+      "id": "QAR-PERF-003",
+      "kind": "quality_attribute",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-REL-001"
+      ],
+      "title": "cited-answer-latency"
+    },
+    {
+      "acceptance": [
+        "AC-DOC-003",
+        "AC-SUP-001"
+      ],
+      "artifacts": [
+        "chapters/04-technology-stack.md",
+        "chapters/13-deployment-operations.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-PLATFORM",
+        "CMP-DEVELOPER"
+      ],
+      "contracts": [
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml",
+        "contracts/asyncapi/events.asyncapi.yaml",
+        "contracts/proto/digital_twin.proto"
+      ],
+      "controls": [
+        "CTRL-SUP-001",
+        "CTRL-OPS-002"
+      ],
+      "decisions": [
+        "ADR-004",
+        "ADR-015",
+        "ADR-017"
+      ],
+      "horizon": "H2",
+      "id": "QAR-PORT-001",
+      "kind": "quality_attribute",
+      "roadmap": [
+        "H2"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-DEV-001"
+      ],
+      "title": "portability"
+    },
+    {
+      "acceptance": [
+        "AC-PRV-001"
+      ],
+      "artifacts": [
+        "chapters/09-security-privacy-compliance.md",
+        "reviews/privacy-impact-assessment.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-POSTGRES",
+        "CMP-OBJECT",
+        "CMP-GRAPH",
+        "CMP-PROJECTION"
+      ],
+      "contracts": [
+        "contracts/schemas/canonical.schema.json"
+      ],
+      "controls": [
+        "CTRL-DAT-003",
+        "CTRL-PRV-001"
+      ],
+      "decisions": [
+        "ADR-008",
+        "ADR-009",
+        "ADR-010"
+      ],
+      "horizon": "H2",
+      "id": "QAR-PRV-001",
+      "kind": "quality_attribute",
+      "roadmap": [
+        "H2"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-DATA-001"
+      ],
+      "title": "deletion"
+    },
+    {
+      "acceptance": [
+        "AC-TEN-001",
+        "AC-SEC-002",
+        "AC-ACT-001",
+        "AC-ACT-002"
+      ],
+      "artifacts": [
+        "chapters/09-security-privacy-compliance.md",
+        "reviews/threat-model.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-POLICY",
+        "CMP-API",
+        "CMP-PROJECTION",
+        "CMP-WORKFLOW"
+      ],
+      "contracts": [
+        "contracts/schemas/canonical.schema.json",
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml"
+      ],
+      "controls": [
+        "CTRL-IAM-002",
+        "CTRL-TEN-001",
+        "CTRL-TEN-002",
+        "CTRL-DAT-002",
+        "CTRL-ACT-001"
+      ],
+      "decisions": [
+        "ADR-006",
+        "ADR-007",
+        "ADR-013"
+      ],
+      "horizon": "H1",
+      "id": "QAR-SEC-001",
+      "kind": "quality_attribute",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-SEC-001"
+      ],
+      "title": "tenant-isolation"
+    },
+    {
+      "acceptance": [
+        "AC-TEN-001",
+        "AC-SEC-002",
+        "AC-ACT-001",
+        "AC-ACT-002"
+      ],
+      "artifacts": [
+        "chapters/09-security-privacy-compliance.md",
+        "reviews/threat-model.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-POLICY",
+        "CMP-API",
+        "CMP-PROJECTION",
+        "CMP-WORKFLOW"
+      ],
+      "contracts": [
+        "contracts/schemas/canonical.schema.json",
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml"
+      ],
+      "controls": [
+        "CTRL-IAM-002",
+        "CTRL-TEN-001",
+        "CTRL-TEN-002",
+        "CTRL-DAT-002",
+        "CTRL-ACT-001"
+      ],
+      "decisions": [
+        "ADR-006",
+        "ADR-007",
+        "ADR-013"
+      ],
+      "horizon": "H1",
+      "id": "QAR-SEC-002",
+      "kind": "quality_attribute",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-SEC-001"
+      ],
+      "title": "permission-revocation"
+    },
+    {
+      "acceptance": [
+        "AC-TEN-001",
+        "AC-SEC-002",
+        "AC-ACT-001",
+        "AC-ACT-002"
+      ],
+      "artifacts": [
+        "chapters/09-security-privacy-compliance.md",
+        "reviews/threat-model.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-POLICY",
+        "CMP-API",
+        "CMP-PROJECTION",
+        "CMP-WORKFLOW"
+      ],
+      "contracts": [
+        "contracts/schemas/canonical.schema.json",
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml"
+      ],
+      "controls": [
+        "CTRL-IAM-002",
+        "CTRL-TEN-001",
+        "CTRL-TEN-002",
+        "CTRL-DAT-002",
+        "CTRL-ACT-001"
+      ],
+      "decisions": [
+        "ADR-006",
+        "ADR-007",
+        "ADR-013"
+      ],
+      "horizon": "H1",
+      "id": "QAR-SEC-003",
+      "kind": "quality_attribute",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-SEC-001"
+      ],
+      "title": "action-integrity"
+    },
+    {
+      "acceptance": [
+        "AC-SIM-001",
+        "AC-SIM-002"
+      ],
+      "artifacts": [
+        "chapters/08-simulation-prediction.md",
+        "chapters/14-testing-evaluation-dx.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-AI",
+        "CMP-WORKFLOW",
+        "CMP-POSTGRES"
+      ],
+      "contracts": [
+        "contracts/schemas/scenario.schema.json",
+        "contracts/schemas/simulation-snapshot.schema.json"
+      ],
+      "controls": [
+        "CTRL-DAT-001",
+        "CTRL-OPS-002"
+      ],
+      "decisions": [
+        "ADR-014"
+      ],
+      "horizon": "H1",
+      "id": "QAR-SIM-001",
+      "kind": "quality_attribute",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-SIM-001"
+      ],
+      "title": "reproducibility"
+    },
+    {
+      "acceptance": [
+        "AC-CON-001",
+        "AC-CON-002"
+      ],
+      "artifacts": [
+        "chapters/06-ingestion-connectors-sync.md",
+        "chapters/10-scalability-reliability-observability.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-CONNECTOR",
+        "CMP-WORKFLOW",
+        "CMP-PROJECTION"
+      ],
+      "contracts": [
+        "contracts/asyncapi/events.asyncapi.yaml",
+        "contracts/schemas/connector-manifest.schema.json",
+        "contracts/connectors/github/manifest.json",
+        "contracts/connectors/jira-cloud/manifest.json"
+      ],
+      "controls": [
+        "CTRL-CON-001",
+        "CTRL-CON-002",
+        "CTRL-OPS-002"
+      ],
+      "decisions": [
+        "ADR-005",
+        "ADR-011"
+      ],
+      "horizon": "H1",
+      "id": "QAR-SYNC-001",
+      "kind": "quality_attribute",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-CON-001"
+      ],
+      "title": "freshness"
+    }
+  ]
+}

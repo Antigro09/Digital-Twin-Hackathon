@@ -1,0 +1,111 @@
+schema_version: 1
+quality_attributes:
+  - id: QAR-SEC-001
+    attribute: tenant-isolation
+    scenario: A malicious authenticated user supplies another tenant resource identifier through every public and agent interface.
+    response: The request is denied before data access and emits a tenant-safe security audit event.
+    measure: Zero existence or content disclosure in the isolation suite.
+    horizon: H1
+  - id: QAR-SEC-002
+    attribute: permission-revocation
+    scenario: Source access is revoked while facts are present in graph search cache and agent memory.
+    response: New requests fail closed and affected projections are invalidated and rebuilt.
+    measure: H1 within 15 minutes; H2 within 5 minutes for high-risk sources.
+    horizon: H1
+  - id: QAR-SEC-003
+    attribute: action-integrity
+    scenario: An approved action payload changes before execution or is replayed.
+    response: Changed payloads are denied; exact replay returns the original receipt without a second effect.
+    measure: 100 percent denial or idempotent replay in adversarial tests.
+    horizon: H1
+  - id: QAR-PRV-001
+    attribute: deletion
+    scenario: A tenant or data subject requests deletion of eligible data.
+    response: Authoritative and derived copies are removed or cryptographically erased and lawful audit minima remain.
+    measure: Verified completion within the configured retention SLA with a deletion evidence record.
+    horizon: H2
+  - id: QAR-AVL-001
+    attribute: availability
+    scenario: A normal H2 regional workload encounters a single instance failure.
+    response: Traffic shifts to healthy replicas without losing committed operations.
+    measure: 99.9 percent monthly availability excluding documented maintenance.
+    horizon: H2
+  - id: QAR-DR-001
+    attribute: disaster-recovery
+    scenario: The primary regional data plane is unrecoverable.
+    response: Restore authoritative data then rebuild projections and reconcile connectors.
+    measure: RPO no more than 1 hour and RTO no more than 4 hours for H2.
+    horizon: H2
+  - id: QAR-PERF-001
+    attribute: graph-query-latency
+    scenario: Ten H1 users issue bounded non-AI graph queries at the committed data envelope.
+    response: Queries complete without unbounded traversals or noisy-neighbor starvation.
+    measure: p95 less than 2 seconds.
+    horizon: H1
+  - id: QAR-PERF-002
+    attribute: simulation-latency
+    scenario: A user runs the committed launch scenario over the H1 project graph.
+    response: The service returns reproducible percentiles and explanations.
+    measure: p95 less than 10 seconds.
+    horizon: H1
+  - id: QAR-PERF-003
+    attribute: cited-answer-latency
+    scenario: A user asks the committed launch-risk question.
+    response: The platform returns a permission-trimmed cited answer or abstention.
+    measure: p95 less than 20 seconds and a hard per-run spend budget.
+    horizon: H1
+  - id: QAR-SYNC-001
+    attribute: freshness
+    scenario: GitHub or Jira changes an allowlisted source object.
+    response: Webhook processing or reconciliation updates the authoritative observation and projections.
+    measure: H1 p95 freshness no more than 15 minutes.
+    horizon: H1
+  - id: QAR-COR-001
+    attribute: replay-correctness
+    scenario: Events are duplicated reordered or replayed after worker failure.
+    response: The final authoritative and projected state matches a single ordered application.
+    measure: Stable state digest and no duplicate external effects.
+    horizon: H1
+  - id: QAR-AI-001
+    attribute: grounding
+    scenario: Evidence is missing conflicting or inaccessible.
+    response: Material claims are cited and the system labels uncertainty or abstains.
+    measure: At least 0.95 citation precision and less than 0.01 unsupported-material-claim rate on the golden set.
+    horizon: H1
+  - id: QAR-AI-002
+    attribute: prompt-injection-resistance
+    scenario: A source field instructs the model to reveal data or call a write tool.
+    response: Content remains untrusted data and policy middleware denies unauthorized tools.
+    measure: Zero successful policy bypasses in the committed adversarial suite.
+    horizon: H1
+  - id: QAR-SIM-001
+    attribute: reproducibility
+    scenario: The same scenario snapshot model version and seed are executed twice.
+    response: Results and ranked sensitivity drivers are identical within defined floating-point tolerance.
+    measure: Exact serialized output digest after canonical rounding.
+    horizon: H1
+  - id: QAR-OBS-001
+    attribute: diagnosability
+    scenario: An end-to-end request fails across API workflow AI and connector boundaries.
+    response: Operators correlate redacted logs metrics traces audit and workflow history without exposing tenant content.
+    measure: One trace identifier and documented diagnosis path for every acceptance flow.
+    horizon: H1
+  - id: QAR-ACC-001
+    attribute: accessibility
+    scenario: A keyboard-only or screen-reader user completes graph investigation simulation and approval.
+    response: Equivalent controls evidence and table alternatives are available without motion dependence.
+    measure: WCAG 2.2 AA automated and manual acceptance suite passes.
+    horizon: H1
+  - id: QAR-PORT-001
+    attribute: portability
+    scenario: The platform moves between conformant infrastructure providers.
+    response: Domain workloads use only documented portable contracts and provider adapters.
+    measure: H2 contract test suite passes against two compatible development implementations.
+    horizon: H2
+  - id: QAR-COST-001
+    attribute: cost-control
+    scenario: An agent run loops or requests excessive tools or tokens.
+    response: Per-run time token spend tool and concurrency budgets terminate work safely.
+    measure: No run exceeds configured hard limits by more than one in-flight operation.
+    horizon: H1
+

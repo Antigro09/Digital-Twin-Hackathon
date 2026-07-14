@@ -1,0 +1,213 @@
+asyncapi: 3.0.0
+info:
+  title: Enterprise Digital Twin Events
+  version: 1.0.0
+  description: Logical CloudEvents 1.0 contracts persisted through the PostgreSQL transactional outbox. H1 transport is outbox plus Temporal activities; no Kafka deployment is implied.
+defaultContentType: application/cloudevents+json
+channels:
+  observationAccepted:
+    address: edt.v1.observation.accepted
+    messages: {observationAccepted: {$ref: '#/components/messages/ObservationAccepted'}}
+  claimsChanged:
+    address: edt.v1.claims.changed
+    messages: {claimsChanged: {$ref: '#/components/messages/ClaimsChanged'}}
+  projectionCheckpointed:
+    address: edt.v1.projection.checkpointed
+    messages: {projectionCheckpointed: {$ref: '#/components/messages/ProjectionCheckpointed'}}
+  agentRunChanged:
+    address: edt.v1.agent-run.changed
+    messages: {agentRunChanged: {$ref: '#/components/messages/AgentRunChanged'}}
+  simulationRunChanged:
+    address: edt.v1.simulation-run.changed
+    messages: {simulationRunChanged: {$ref: '#/components/messages/SimulationRunChanged'}}
+  approvalChanged:
+    address: edt.v1.approval.changed
+    messages: {approvalChanged: {$ref: '#/components/messages/ApprovalChanged'}}
+  actionReceiptRecorded:
+    address: edt.v1.action-receipt.recorded
+    messages: {actionReceiptRecorded: {$ref: '#/components/messages/ActionReceiptRecorded'}}
+operations:
+  consumeObservationAccepted: {action: receive, channel: {$ref: '#/channels/observationAccepted'}}
+  consumeClaimsChanged: {action: receive, channel: {$ref: '#/channels/claimsChanged'}}
+  consumeProjectionCheckpointed: {action: receive, channel: {$ref: '#/channels/projectionCheckpointed'}}
+  consumeAgentRunChanged: {action: receive, channel: {$ref: '#/channels/agentRunChanged'}}
+  consumeSimulationRunChanged: {action: receive, channel: {$ref: '#/channels/simulationRunChanged'}}
+  consumeApprovalChanged: {action: receive, channel: {$ref: '#/channels/approvalChanged'}}
+  consumeActionReceiptRecorded: {action: receive, channel: {$ref: '#/channels/actionReceiptRecorded'}}
+components:
+  messages:
+    ObservationAccepted: {name: ObservationAccepted, payload: {$ref: '#/components/schemas/ObservationAcceptedEvent'}}
+    ClaimsChanged: {name: ClaimsChanged, payload: {$ref: '#/components/schemas/ClaimsChangedEvent'}}
+    ProjectionCheckpointed: {name: ProjectionCheckpointed, payload: {$ref: '#/components/schemas/ProjectionCheckpointedEvent'}}
+    AgentRunChanged: {name: AgentRunChanged, payload: {$ref: '#/components/schemas/AgentRunChangedEvent'}}
+    SimulationRunChanged: {name: SimulationRunChanged, payload: {$ref: '#/components/schemas/SimulationRunChangedEvent'}}
+    ApprovalChanged: {name: ApprovalChanged, payload: {$ref: '#/components/schemas/ApprovalChangedEvent'}}
+    ActionReceiptRecorded: {name: ActionReceiptRecorded, payload: {$ref: '#/components/schemas/ActionReceiptRecordedEvent'}}
+  schemas:
+    EventEnvelope:
+      type: object
+      required: [specversion, id, source, type, subject, time, datacontenttype, dataschema, tenant_id, partition_key, aggregate_type, aggregate_id, aggregate_version, causation_id, correlation_id, traceparent, schema_version, schema_hash, data_classification]
+      properties:
+        specversion: {const: '1.0'}
+        id: {type: string, format: uuid}
+        source: {type: string, format: uri-reference}
+        type: {type: string, pattern: '^com\.enterprisedigitaltwin\.[a-z0-9.]+\.v1$'}
+        subject: {type: string, minLength: 1, maxLength: 500}
+        time: {type: string, format: date-time}
+        datacontenttype: {const: application/json}
+        dataschema: {type: string, format: uri-reference}
+        tenant_id: {type: string, format: uuid, description: Internal consistency and partition assertion; consumers bind authorization independently.}
+        partition_key: {type: string, pattern: '^tenant/[0-9a-f-]{36}/.+$', description: Always tenant-qualified.}
+        aggregate_type: {type: string, minLength: 1, maxLength: 100}
+        aggregate_id: {type: string, format: uuid}
+        aggregate_version: {type: integer, minimum: 1}
+        causation_id: {type: [string, 'null'], format: uuid}
+        correlation_id: {type: [string, 'null'], format: uuid}
+        traceparent: {type: string, pattern: '^00-[a-f0-9]{32}-[a-f0-9]{16}-[a-f0-9]{2}$'}
+        schema_version: {const: 1}
+        schema_hash: {type: string, pattern: '^[a-f0-9]{64}$'}
+        data_classification: {enum: [public, internal, confidential, restricted]}
+        idempotency_key: {type: string, minLength: 16, maxLength: 128}
+    ObservationAcceptedEvent:
+      allOf:
+        - {$ref: '#/components/schemas/EventEnvelope'}
+        - type: object
+          required: [data]
+          properties:
+            type: {const: com.enterprisedigitaltwin.ingestion.observation-accepted.v1}
+            data: {$ref: '#/components/schemas/ObservationAcceptedData'}
+      unevaluatedProperties: false
+    ObservationAcceptedData:
+      type: object
+      additionalProperties: false
+      required: [observation_id, installation_id, source_object_id, provider_revision, mapping_version, status, payload_hash, acl_id]
+      properties:
+        observation_id: {type: string, format: uuid}
+        installation_id: {type: string, format: uuid}
+        source_object_id: {type: string}
+        provider_revision: {type: string}
+        mapping_version: {type: string}
+        status: {enum: [active, tombstone, quarantined, superseded]}
+        payload_hash: {type: string, pattern: '^[a-f0-9]{64}$'}
+        acl_id: {type: string, format: uuid}
+    ClaimsChangedEvent:
+      allOf:
+        - {$ref: '#/components/schemas/EventEnvelope'}
+        - type: object
+          required: [data]
+          properties:
+            type: {const: com.enterprisedigitaltwin.knowledge.claims-changed.v1}
+            data: {$ref: '#/components/schemas/ClaimsChangedData'}
+      unevaluatedProperties: false
+    ClaimsChangedData:
+      type: object
+      additionalProperties: false
+      required: [entity_id, claim_ids, change_kind, outbox_position]
+      properties:
+        entity_id: {type: string, format: uuid}
+        claim_ids: {type: array, minItems: 1, uniqueItems: true, items: {type: string, format: uuid}}
+        change_kind: {enum: [accepted, superseded, retracted, acl_changed, deleted]}
+        outbox_position: {type: integer, minimum: 0}
+    ProjectionCheckpointedEvent:
+      allOf:
+        - {$ref: '#/components/schemas/EventEnvelope'}
+        - type: object
+          required: [data]
+          properties:
+            type: {const: com.enterprisedigitaltwin.projection.checkpointed.v1}
+            data: {$ref: '#/components/schemas/ProjectionCheckpointData'}
+      unevaluatedProperties: false
+    ProjectionCheckpointData:
+      type: object
+      additionalProperties: false
+      required: [checkpoint_id, projection, generation, outbox_position, ontology_version, completed_at]
+      properties:
+        checkpoint_id: {type: string, format: uuid}
+        projection: {enum: [neo4j, pgvector, search, cache]}
+        generation: {type: integer, minimum: 1}
+        outbox_position: {type: integer, minimum: 0}
+        ontology_version: {type: string}
+        completed_at: {type: string, format: date-time}
+    AgentRunChangedEvent:
+      allOf:
+        - {$ref: '#/components/schemas/EventEnvelope'}
+        - type: object
+          required: [data]
+          properties:
+            type: {const: com.enterprisedigitaltwin.ai.agent-run-changed.v1}
+            data: {$ref: '#/components/schemas/AgentRunChangedData'}
+      unevaluatedProperties: false
+    AgentRunChangedData:
+      type: object
+      additionalProperties: false
+      required: [run_id, profile_id, status, model_config_version, policy_version]
+      properties:
+        run_id: {type: string, format: uuid}
+        profile_id: {type: string}
+        status: {enum: [queued, running, awaiting_input, awaiting_approval, succeeded, failed, cancelled, budget_exhausted]}
+        model_config_version: {type: string}
+        policy_version: {type: string}
+        result_ref: {type: string, format: uri-reference}
+    SimulationRunChangedEvent:
+      allOf:
+        - {$ref: '#/components/schemas/EventEnvelope'}
+        - type: object
+          required: [data]
+          properties:
+            type: {const: com.enterprisedigitaltwin.simulation.run-changed.v1}
+            data: {$ref: '#/components/schemas/SimulationRunChangedData'}
+      unevaluatedProperties: false
+    SimulationRunChangedData:
+      type: object
+      additionalProperties: false
+      required: [simulation_id, snapshot_id, scenario_id, engine_version, status]
+      properties:
+        simulation_id: {type: string, format: uuid}
+        snapshot_id: {type: string, format: uuid}
+        scenario_id: {type: [string, 'null'], format: uuid}
+        engine_version: {type: string}
+        status: {enum: [queued, running, succeeded, failed, cancelled]}
+        result_sha256: {type: string, pattern: '^[a-f0-9]{64}$'}
+    ApprovalChangedEvent:
+      allOf:
+        - {$ref: '#/components/schemas/EventEnvelope'}
+        - type: object
+          required: [data]
+          properties:
+            type: {const: com.enterprisedigitaltwin.action.approval-changed.v1}
+            data: {$ref: '#/components/schemas/ApprovalChangedData'}
+      unevaluatedProperties: false
+    ApprovalChangedData:
+      type: object
+      additionalProperties: false
+      required: [approval_id, approved_payload_id, payload_hash, status, required_approvals, recorded_approvals, expires_at]
+      properties:
+        approval_id: {type: string, format: uuid}
+        approved_payload_id: {type: string, format: uuid}
+        payload_hash: {type: string, pattern: '^[a-f0-9]{64}$'}
+        status: {enum: [pending, approved, denied, expired, cancelled, executed, compensated]}
+        required_approvals: {const: 2}
+        recorded_approvals: {type: integer, minimum: 0, maximum: 2}
+        expires_at: {type: string, format: date-time}
+    ActionReceiptRecordedEvent:
+      allOf:
+        - {$ref: '#/components/schemas/EventEnvelope'}
+        - type: object
+          required: [data]
+          properties:
+            type: {const: com.enterprisedigitaltwin.action.receipt-recorded.v1}
+            data: {$ref: '#/components/schemas/ActionReceiptRecordedData'}
+      unevaluatedProperties: false
+    ActionReceiptRecordedData:
+      type: object
+      additionalProperties: false
+      required: [receipt_id, approval_id, approved_payload_id, provider, provider_resource_id, status]
+      properties:
+        receipt_id: {type: string, format: uuid}
+        approval_id: {type: string, format: uuid}
+        approved_payload_id: {type: string, format: uuid}
+        provider: {const: jira}
+        provider_resource_id: {type: string}
+        status: {enum: [succeeded, failed, verification_required, compensated, compensation_conflict, manual_intervention_required]}
+        before_hash: {type: string, pattern: '^[a-f0-9]{64}$'}
+        after_hash: {type: string, pattern: '^[a-f0-9]{64}$'}

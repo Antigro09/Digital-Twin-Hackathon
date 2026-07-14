@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0",
+  "mapping_id": "github.pull-request.h1",
+  "version": "1.0.0",
+  "provider": "github",
+  "object_type": "pull_request",
+  "input_schema_id": "https://enterprise-digital-twin.example/connectors/github/1.0.0/raw-envelope.schema.json",
+  "output_schema_id": "https://enterprise-digital-twin.example/connectors/github/1.0.0/normalized-observation.schema.json",
+  "source_key": {"source_pointer": "/external_object_id", "transform": "github_pr_key"},
+  "source_revision": {"source_pointer": "/external_version", "transform": "identity"},
+  "ontology_type": "edt.engineering.PullRequest",
+  "attributes": [
+    {"source_pointer": "/payload/title", "predicate": "edt.engineering.title", "transform": "identity", "classification": "confidential", "authority": "source", "required": true},
+    {"source_pointer": "/payload/state", "predicate": "edt.engineering.state", "transform": "lowercase", "classification": "internal", "authority": "source", "required": true},
+    {"source_pointer": "/payload/updated_at", "predicate": "edt.engineering.updated_at", "transform": "rfc3339", "classification": "internal", "authority": "source", "required": true}
+  ],
+  "relationships": [
+    {"source_pointer": "/payload/linked_issue", "predicate": "edt.engineering.implements", "target_transform": "jira_key", "classification": "confidential", "confidence": 1.0}
+  ],
+  "acl": {"behavior": "source_visibility_intersection", "visibility_source": "installation_repository_acl", "principal_source": "server_resolved_installation_permissions", "default_classification": "confidential"},
+  "effective_time": {"valid_from_pointer": "/payload/updated_at", "valid_to": null},
+  "source_locator": {"application_route": "/evidence/{evidence_id}", "provider_template": "https://github.com/{repository}/pull/{number}"},
+  "excluded_source_pointers": ["/payload/body", "/payload/patch", "/payload/diff", "/payload/commits_url", "/payload/comments_url"],
+  "canonicalization": "RFC8785_UTF8_LF_SORTED_ARRAYS_WHERE_DECLARED"
+}

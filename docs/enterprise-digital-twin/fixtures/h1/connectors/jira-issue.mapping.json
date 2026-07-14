@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0",
+  "mapping_id": "jira.issue.h1",
+  "version": "1.0.0",
+  "provider": "jira",
+  "object_type": "issue",
+  "input_schema_id": "https://enterprise-digital-twin.example/connectors/jira-cloud/1.0.0/raw-envelope.schema.json",
+  "output_schema_id": "https://enterprise-digital-twin.example/connectors/jira-cloud/1.0.0/normalized-observation.schema.json",
+  "source_key": {"source_pointer": "/payload/key", "transform": "jira_key"},
+  "source_revision": {"source_pointer": "/external_version", "transform": "identity"},
+  "ontology_type": "edt.work.WorkItem",
+  "attributes": [
+    {"source_pointer": "/payload/fields/summary", "predicate": "edt.work.summary", "transform": "identity", "classification": "confidential", "authority": "source", "required": true},
+    {"source_pointer": "/payload/fields/status/name", "predicate": "edt.work.status", "transform": "identity", "classification": "internal", "authority": "source", "required": true},
+    {"source_pointer": "/payload/fields/duedate", "predicate": "edt.work.due_date", "transform": "date", "classification": "confidential", "authority": "source", "required": false}
+  ],
+  "relationships": [
+    {"source_pointer": "/payload/fields/project/key", "predicate": "edt.work.belongstoproject", "target_transform": "jira_project_key", "classification": "internal", "confidence": 1.0}
+  ],
+  "acl": {"behavior": "source_visibility_intersection", "visibility_source": "project_and_issue_security", "principal_source": "server_resolved_jira_permissions", "default_classification": "confidential"},
+  "effective_time": {"valid_from_pointer": "/payload/fields/updated", "valid_to": null},
+  "source_locator": {"application_route": "/evidence/{evidence_id}", "provider_template": "/browse/{key}"},
+  "excluded_source_pointers": ["/payload/fields/attachment/content", "/payload/fields/comment/body", "/payload/fields/worklog", "/payload/fields/environment"],
+  "canonicalization": "RFC8785_UTF8_LF_SORTED_ARRAYS_WHERE_DECLARED"
+}

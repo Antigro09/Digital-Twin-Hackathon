@@ -1,0 +1,75 @@
+schema_version: 1
+oracle_version: 1.0.0
+fixture_version: 1.0.0
+ingestion:
+  duplicate_and_reorder_result: identical_canonical_state_digest
+  cursor_replay_external_effect_count: 0
+  missed_webhook_recovery: reconciliation_restores_expected_state
+  tombstone_behavior: source_deletion_closes_claim_and_removes_projection_without_erasing_history
+identity_resolution:
+  expected_merges: [aster-jordan-lee, beacon-jordan-lee]
+  expected_non_merges: [cross-tenant-jordan-lee]
+  reversible_case: split_preserves_aliases_evidence_history_and_unrelated_edges
+graph:
+  required_path: [AST-142, AST-173, AST-201, Orion 2.0 General Availability]
+  required_evidence_link: [aster-labs/identity-service#184, AST-142]
+  scheduler_path: [AST-142, AST-173, AST-201, Orion 2.0 General Availability]
+  forbidden_cross_tenant_path: [AST-142, BCN-142]
+  rebuild_result: identical_authorized_projection_digest
+cited_answer:
+  question: What is most likely to delay Orion 2.0 what evidence supports that conclusion and what information is still missing?
+  strongest_blocker: AST-142
+  required_claims:
+    - AST-142 blocks AST-173 which blocks AST-201 and Orion 2.0 General Availability.
+    - aster-labs/identity-service#184 implements AST-142 and is missing one required security review.
+  required_citation_source_objects: [aster-jira-AST-142-v7, aster-jira-AST-173-v4, aster-jira-AST-201-v3, aster-github-identity-service-pr-184]
+  required_secondary_risks: [OPS-61, PROD-88]
+  required_missing_data:
+    - future security review completion time
+    - unrecorded work
+    - external validity of synthetic duration distributions
+  prohibited_claims:
+    - individual productivity inference
+    - causal or production predictive validity
+  restricted_actor_behavior: usr_aster_limited_abstains_on_identity_review_claim_and_emits_no_restricted_locator
+simulation:
+  snapshot_work_item_id: 116ab4b3-b108-5f91-ab7e-111f7fba1d45
+  model_version: pert-monte-carlo/1.0.0
+  seed: "20260713"
+  sample_count: 50000
+  intervention: {type: shift_completion_distribution, work_item_id: 116ab4b3-b108-5f91-ab7e-111f7fba1d45, delta_workdays: -5}
+  baseline: {p50: 2026-08-20, p80: 2026-08-24, p95: 2026-08-27}
+  scenario: {p50: 2026-08-13, p80: 2026-08-17, p95: 2026-08-20}
+  tolerance: {quantile_calendar_days: 1, probability_percentage_points: 0.5}
+  reproducibility: identical_canonical_result_for_same_snapshot_scenario_engine_calendar_and_seed
+action:
+  requester_actor_id: 20000000-0000-4000-8000-000000000001
+  operations_approver_actor_id: 20000000-0000-4000-8000-000000000003
+  security_approver_actor_id: 20000000-0000-4000-8000-000000000004
+  approval_ttl_seconds: 900
+  exact_internal_payload:
+    action: jira.issue.update
+    connectorInstallationId: 30000000-0000-4000-8000-000000000001
+    expectedIssueVersion: 7
+    issueKey: AST-142
+    projectKey: AST
+    set:
+      duedate: 2026-07-31
+      labels: [digital-twin-remediation, identity, orion]
+      priorityId: "2"
+    tenantId: 10000000-0000-4000-8000-000000000001
+  before: {version: 7, duedate: 2026-08-07, priorityId: "3", labels: [identity, orion]}
+  expected_after: {duedate: 2026-07-31, priorityId: "2", labels: [digital-twin-remediation, identity, orion]}
+  concurrent_execution_jira_put_count: 1
+  exact_replay: original_receipt_and_zero_additional_puts
+  changed_payload: denied_and_zero_puts
+  expired_or_duplicate_approver: denied_and_zero_puts
+  ambiguous_timeout: verification_required_and_no_blind_retry
+  rollback:
+    expiry_seconds: 86400
+    unchanged_after_state: restores_before_snapshot_once
+    later_human_change: compensation_conflict_and_zero_overwrites
+tenant_isolation:
+  canary: BEACON-CANARY-7Q9K
+  expected_aster_occurrences: 0
+  checked_surfaces: [REST, GraphQL, MCP, graph, vector, cache, object, event, answer, citation, prompt, memory, trace, log, metric, audit_detail, export, error]

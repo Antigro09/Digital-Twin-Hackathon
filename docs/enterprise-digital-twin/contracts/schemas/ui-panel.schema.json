@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://enterprise-digital-twin.example/schemas/ui-panel.schema.json",
+  "title": "Sandboxed Plugin UI Panel",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "id", "version", "route", "origin", "bundle_sha256", "capabilities", "input_schema", "output_schema", "content_security_policy", "accessibility", "budgets", "states", "telemetry"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "id": {"type": "string", "pattern": "^ui\\.[a-z0-9_.-]+$"},
+    "version": {"type": "string", "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z.-]+)?$"},
+    "route": {"type": "string", "pattern": "^/plugins/[a-z0-9/_-]+$"},
+    "origin": {"type": "string", "format": "uri", "pattern": "^https://[^*]+$"},
+    "bundle_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "capabilities": {"type": "array", "uniqueItems": true, "items": {"type": "string"}},
+    "input_schema": {"type": "object"},
+    "output_schema": {"type": "object"},
+    "content_security_policy": {"type": "string", "minLength": 1},
+    "accessibility": {"type": "object", "required": ["standard", "keyboard", "reduced_motion", "non_visual_alternative"], "properties": {"standard": {"const": "WCAG 2.2 AA"}, "keyboard": {"const": true}, "reduced_motion": {"const": true}, "non_visual_alternative": {"const": true}}, "additionalProperties": false},
+    "budgets": {"type": "object", "required": ["bundle_kib", "first_render_ms", "memory_mib"], "properties": {"bundle_kib": {"type": "integer", "minimum": 1}, "first_render_ms": {"type": "integer", "minimum": 1}, "memory_mib": {"type": "integer", "minimum": 1}}, "additionalProperties": false},
+    "states": {"type": "array", "minItems": 4, "uniqueItems": true, "contains": {"const": "error"}, "items": {"enum": ["loading", "ready", "empty", "partial", "stale", "permission_denied", "error"]}},
+    "telemetry": {"type": "object", "required": ["trace_context", "redacted", "tenant_id_exposed"], "properties": {"trace_context": {"const": true}, "redacted": {"const": true}, "tenant_id_exposed": {"const": false}}, "additionalProperties": false}
+  }
+}

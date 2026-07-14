@@ -1,0 +1,85 @@
+syntax = "proto3";
+
+package edt.v1;
+
+import "google/protobuf/timestamp.proto";
+
+// Provisional H3 internal boundary. External clients use REST/OpenAPI.
+// A mutually authenticated server interceptor derives tenant_id and actor_id
+// from the verified workload/user credential, overwrites RequestContext with
+// those values, and rejects any metadata or message mismatch before dispatch.
+// RequestContext is correlation data and never an authorization selector.
+service KnowledgeProjectionService {
+  rpc ApplyClaims(ApplyClaimsRequest) returns (ApplyClaimsResponse);
+  rpc RebuildTenant(RebuildTenantRequest) returns (ProjectionJob);
+}
+
+service SimulationService {
+  rpc RunLaunchScenario(RunLaunchScenarioRequest) returns (SimulationRun);
+  rpc GetSimulation(GetSimulationRequest) returns (SimulationRun);
+}
+
+message RequestContext {
+  string tenant_id = 1;
+  string actor_id = 2;
+  string trace_id = 3;
+  string policy_version = 4;
+}
+
+message ClaimRef {
+  string tenant_id = 1;
+  string claim_id = 2;
+  int64 version = 3;
+}
+
+message ApplyClaimsRequest {
+  RequestContext context = 1;
+  repeated ClaimRef claims = 2;
+  int64 outbox_position = 3;
+  string ontology_version = 4;
+  string idempotency_key = 5;
+}
+
+message ApplyClaimsResponse {
+  int64 accepted = 1;
+  int64 rejected = 2;
+  int64 checkpoint = 3;
+}
+
+message RebuildTenantRequest {
+  RequestContext context = 1;
+  string projection = 2;
+  string ontology_version = 3;
+  string idempotency_key = 4;
+}
+
+message ProjectionJob {
+  string job_id = 1;
+  string status = 2;
+  google.protobuf.Timestamp created_at = 3;
+}
+
+message RunLaunchScenarioRequest {
+  RequestContext context = 1;
+  string scenario_id = 2;
+  string idempotency_key = 3;
+}
+
+message GetSimulationRequest {
+  RequestContext context = 1;
+  string simulation_id = 2;
+}
+
+message SimulationRun {
+  string simulation_id = 1;
+  string status = 2;
+  string model_version = 3;
+  string seed_uint64_decimal = 4;
+  string p50_date = 5;
+  string p80_date = 6;
+  string p95_date = 7;
+  double miss_probability = 8;
+  repeated string critical_path = 9;
+  repeated string assumptions = 10;
+  repeated string warnings = 11;
+}

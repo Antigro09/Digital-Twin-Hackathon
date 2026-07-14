@@ -1,0 +1,39 @@
+schema_version: 1
+acl_classes:
+  aster-orion-full:
+    allowed_actors: [usr_aster_analyst, usr_aster_ops_approver, usr_aster_security_approver, usr_aster_admin]
+    denied_actors: [usr_aster_limited, usr_beacon_analyst, usr_platform_operator]
+  aster-identity-restricted:
+    allowed_actors: [usr_aster_analyst, usr_aster_ops_approver, usr_aster_security_approver, usr_aster_admin]
+    denied_actors: [usr_aster_limited, usr_beacon_analyst, usr_platform_operator]
+  beacon-private:
+    allowed_actors: [usr_beacon_analyst]
+    denied_actors: [usr_aster_analyst, usr_aster_limited, usr_aster_ops_approver, usr_aster_security_approver, usr_aster_admin, usr_platform_operator]
+roles:
+  usr_aster_analyst:
+    grants: [evidence.read.aster_orion, scenario.create, simulation.run, jira_remediation.preview]
+    denials: [action.approve, action.execute, connector.admin]
+  usr_aster_limited:
+    grants: [evidence.read.aster_public]
+    denials: [evidence.read.aster_identity_restricted, action.approve, action.execute]
+  usr_aster_ops_approver:
+    grants: [evidence.read.aster_orion, action.approve.operations]
+    denials: [action.approve.security, action.approve.duplicate_slot, action.payload.modify]
+  usr_aster_security_approver:
+    grants: [evidence.read.aster_orion, action.approve.security]
+    denials: [action.approve.operations, action.approve.duplicate_slot, action.payload.modify]
+  usr_aster_admin:
+    grants: [connector.admin, policy.admin, fixture.reset]
+    denials: [action.approve.unless_separately_granted]
+  usr_beacon_analyst:
+    grants: [evidence.read.beacon, scenario.create, simulation.run]
+    denials: [tenant.aster.any, action.execute]
+  usr_platform_operator:
+    grants: [service_health.read, telemetry.redacted.read]
+    denials: [tenant_content.read, source_payload.read, prompt.read, action_payload.read]
+expected_denial_semantics:
+  existence_disclosure: indistinguishable_not_found
+  audit: tenant-safe reason code with no resource label
+  cache: deny barrier before cache lookup
+  graph: current policy recheck before serialization
+  agent: inaccessible evidence absent from context citations memory and trace

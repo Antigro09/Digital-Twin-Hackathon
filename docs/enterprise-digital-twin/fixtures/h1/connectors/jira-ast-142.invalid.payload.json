@@ -1,0 +1,16 @@
+{
+  "id": "10142",
+  "key": "AST-142",
+  "refresh_token": "must-be-rejected",
+  "fields": {
+    "summary": "Complete SSO cutover",
+    "status": {"id": "3", "name": "In Progress"},
+    "priority": {"id": "3", "name": "Medium"},
+    "labels": ["identity", "orion"],
+    "duedate": "2026-08-07",
+    "updated": "2026-07-13T15:45:00Z",
+    "project": {"id": "10000", "key": "AST"},
+    "issuetype": {"id": "10001", "name": "Task"},
+    "issuelinks": []
+  }
+}

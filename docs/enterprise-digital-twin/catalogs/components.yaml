@@ -1,0 +1,98 @@
+schema_version: 1
+components:
+  - id: CMP-DOCS
+    name: Specification build system
+    workload: repository-tooling
+    owner: enterprise-architecture
+    authority: Normative sources, validation results, and generated editions.
+    interfaces: [manifest, catalogs, contracts, diagrams, publication]
+  - id: CMP-WEB
+    name: Web application
+    workload: web
+    owner: product-engineering
+    authority: Non-authoritative interaction state only.
+    interfaces: [REST, SSE, OIDC]
+  - id: CMP-API
+    name: Application API
+    workload: api
+    owner: platform-api
+    authority: Command validation, tenant binding, authorization orchestration, and query composition.
+    interfaces: [OpenAPI, SSE, OIDC, Temporal-client]
+  - id: CMP-CONNECTOR
+    name: Connector and synchronization workers
+    workload: connector-worker
+    owner: integrations
+    authority: Provider credentials, source cursors, immutable source capture, and normalized observations.
+    interfaces: [signed-webhooks, provider-APIs, AsyncAPI, S3, PostgreSQL, Temporal]
+  - id: CMP-AI
+    name: AI, extraction, graph-analysis, and simulation workers
+    workload: ai-simulation-worker
+    owner: ai-platform
+    authority: Typed proposals and derived analytical results; never policy or external authority.
+    interfaces: [Temporal-activities, model-gateway, PostgreSQL, Neo4j, S3]
+  - id: CMP-WORKFLOW
+    name: Durable workflow control plane
+    workload: Temporal
+    owner: workflow-platform
+    authority: Durable timers, retries, signals, cancellation, approvals, and action state machines.
+    interfaces: [Temporal-API, workflow-history]
+  - id: CMP-POSTGRES
+    name: Authoritative relational and claim store
+    workload: PostgreSQL
+    owner: data-platform
+    authority: Tenancy, identity, connector state, observations, claims, provenance, resolution, scenarios, approvals, receipts, outbox, and audit indexes.
+    interfaces: [PostgreSQL-compatible-SQL, RLS, transactional-outbox]
+  - id: CMP-OBJECT
+    name: Immutable object and artifact store
+    workload: S3-compatible-storage
+    owner: data-platform
+    authority: Content-addressed source payloads, evidence artifacts, snapshots, and generated reports.
+    interfaces: [S3-compatible-API]
+  - id: CMP-GRAPH
+    name: Graph projection
+    workload: Neo4j
+    owner: knowledge-graph
+    authority: Rebuildable, tenant-scoped traversal projection only.
+    interfaces: [bounded-query-templates, projection-writes]
+  - id: CMP-CACHE
+    name: Cache and rate-limit store
+    workload: Valkey
+    owner: platform-api
+    authority: Non-authoritative tenant-namespaced cache, rate-limit, and short-lived coordination state.
+    interfaces: [Redis-compatible-protocol]
+  - id: CMP-PROJECTION
+    name: Projection and outbox relay
+    workload: connector-worker
+    owner: data-platform
+    authority: Ordered checkpoints and rebuildable graph, vector, search, cache, and event projections.
+    interfaces: [transactional-outbox, AsyncAPI, CloudEvents]
+  - id: CMP-POLICY
+    name: Identity and policy enforcement
+    workload: api-and-worker-middleware
+    owner: security-architecture
+    authority: Server-derived tenant context and execution-time authorization decisions.
+    interfaces: [OIDC, SAML, SCIM, policy-decision-contract]
+  - id: CMP-MODEL-GATEWAY
+    name: Capability-oriented model gateway
+    workload: ai-simulation-worker
+    owner: ai-platform
+    authority: Approved model snapshots, budgets, structured schemas, fallbacks, and evaluation gates.
+    interfaces: [OpenAI-Responses-API, OpenAI-Agents-SDK]
+  - id: CMP-OBS
+    name: Observability and audit pipeline
+    workload: platform-services
+    owner: reliability-engineering
+    authority: Redacted telemetry, SLOs, trace correlation, and tamper-evident audit envelopes.
+    interfaces: [OpenTelemetry, audit-event-schema]
+  - id: CMP-PLATFORM
+    name: Deployment platform
+    workload: infrastructure
+    owner: platform-engineering
+    authority: OCI packaging, configuration, keys, networking, deployment profiles, backup, and recovery.
+    interfaces: [Docker-Compose, Kubernetes, Helm, OpenTofu, OCI]
+  - id: CMP-DEVELOPER
+    name: Developer and extension platform
+    workload: repository-tooling-and-api
+    owner: developer-platform
+    authority: Versioned SDK, CLI, connector, plugin, MCP, ontology, and compatibility contracts.
+    interfaces: [OpenAPI, AsyncAPI, JSON-Schema, GraphQL, Protobuf, MCP]

@@ -1,0 +1,80 @@
+"""Read-only H2 graph exploration schema. Tenant context is server-derived."""
+schema {
+  query: Query
+}
+
+scalar DateTime
+scalar JSON
+
+type Query {
+  entity(id: ID!, validAt: DateTime): Entity
+  search(query: String!, first: Int = 25, after: String): EntityConnection!
+  deliveryDependencies(startId: ID!, maxDepth: Int = 4, maxNodes: Int = 200, validAt: DateTime): GraphResult!
+  simulation(id: ID!): SimulationRun
+}
+
+type Entity {
+  id: ID!
+  type: String!
+  version: Int!
+  lifecycleState: String!
+  properties: JSON!
+  claims(first: Int = 25, after: String): ClaimConnection!
+  evidence(first: Int = 25, after: String): EvidenceConnection!
+}
+
+type Claim {
+  id: ID!
+  predicate: String!
+  value: JSON
+  confidence: Float!
+  validFrom: DateTime!
+  validTo: DateTime
+  evidence: [Evidence!]!
+}
+
+type Evidence {
+  id: ID!
+  sourceSystem: String!
+  sourceObjectId: String!
+  sourceRevision: String!
+  location: String
+  classification: String!
+}
+
+type Relationship {
+  id: ID!
+  type: String!
+  from: Entity!
+  to: Entity!
+  confidence: Float!
+  evidence: [Evidence!]!
+}
+
+type GraphResult {
+  nodes: [Entity!]!
+  relationships: [Relationship!]!
+  truncated: Boolean!
+}
+
+type SimulationRun {
+  id: ID!
+  status: String!
+  p50Date: String
+  p80Date: String
+  p95Date: String
+  missProbability: Float
+  criticalPath: [Entity!]!
+  sensitivity: JSON
+  assumptions: [String!]!
+  warnings: [String!]!
+}
+
+type PageInfo { endCursor: String, hasNextPage: Boolean! }
+type EntityEdge { cursor: String!, node: Entity! }
+type EntityConnection { edges: [EntityEdge!]!, pageInfo: PageInfo! }
+type ClaimEdge { cursor: String!, node: Claim! }
+type ClaimConnection { edges: [ClaimEdge!]!, pageInfo: PageInfo! }
+type EvidenceEdge { cursor: String!, node: Evidence! }
+type EvidenceConnection { edges: [EvidenceEdge!]!, pageInfo: PageInfo! }
+

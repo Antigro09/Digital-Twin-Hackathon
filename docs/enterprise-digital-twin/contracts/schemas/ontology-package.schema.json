@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://enterprise-digital-twin.example/schemas/ontology-package.schema.json",
+  "title": "Ontology Package",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["namespace", "version", "compatibility", "entity_types", "relationship_types", "migrations", "signature"],
+  "properties": {
+    "namespace": {"type": "string", "pattern": "^[a-z][a-z0-9.-]+$"},
+    "version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+    "compatibility": {"type": "string"},
+    "entity_types": {"type": "array", "items": {"$ref": "#/$defs/EntityType"}},
+    "relationship_types": {"type": "array", "items": {"$ref": "#/$defs/RelationshipType"}},
+    "migrations": {"type": "array", "items": {"type": "object", "required": ["from", "to", "reversible", "steps"], "properties": {"from": {"type": "string"}, "to": {"type": "string"}, "reversible": {"type": "boolean"}, "steps": {"type": "array", "items": {"type": "object"}}}}},
+    "signature": {"type": "object", "required": ["algorithm", "digest", "signer"], "properties": {"algorithm": {"type": "string"}, "digest": {"type": "string"}, "signer": {"type": "string"}}}
+  },
+  "$defs": {
+    "EntityType": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "purpose", "properties", "lifecycle", "permissions", "retention"],
+      "properties": {
+        "name": {"type": "string"},
+        "purpose": {"type": "string"},
+        "properties": {"type": "object"},
+        "lifecycle": {"type": "object"},
+        "permissions": {"type": "object"},
+        "retention": {"type": "object"}
+      }
+    },
+    "RelationshipType": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "meaning", "from", "to", "cardinality", "temporal", "permissions"],
+      "properties": {
+        "name": {"type": "string"},
+        "meaning": {"type": "string"},
+        "from": {"type": "array", "items": {"type": "string"}},
+        "to": {"type": "array", "items": {"type": "string"}},
+        "cardinality": {"type": "string"},
+        "temporal": {"type": "boolean"},
+        "permissions": {"type": "object"}
+      }
+    }
+  }
+}
+

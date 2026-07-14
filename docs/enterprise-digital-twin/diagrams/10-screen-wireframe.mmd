@@ -1,0 +1,21 @@
+flowchart TB
+  Header[Global header: tenant search freshness command palette profile]
+  Header --> Nav[Navigation: Cockpit Graph Timeline Scenarios Agents Connectors Audit]
+  Nav --> Main[Primary workspace]
+  subgraph EvidenceWorkspace[Evidence and exploration region]
+    direction TB
+    Summary[Launch status evidence and uncertainty summary]
+    Graph[2D bounded graph or accessible relationship table]
+    Evidence[Evidence detail source ACL confidence valid time]
+    Scenario[Baseline and scenario p50 p80 p95 sensitivity]
+  end
+  subgraph GovernedWorkspace[Action and operational region]
+    direction TB
+    Action[Exact Jira preview approvals expiry and rollback]
+    Inspector[Run trace budgets policy decisions and audit]
+    Status[Loading empty denied stale partial offline and recovery states]
+  end
+  Main --> Summary
+  Main --> Action
+  Summary --> Graph --> Evidence --> Scenario
+  Action --> Inspector --> Status

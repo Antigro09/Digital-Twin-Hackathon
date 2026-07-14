@@ -1,0 +1,297 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://enterprise-digital-twin.example/schemas/connector-manifest.schema.json",
+  "title": "Closed Connector Package Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "id", "version", "publisher", "provider", "deployment", "auth", "capabilities", "schemas", "rate_limits", "cursor", "data_policy", "network_policy", "health", "support"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "id": {"type": "string", "pattern": "^com\\.enterprise-digital-twin\\.connector\\.[a-z][a-z0-9-]+$"},
+    "version": {"$ref": "#/$defs/SemVer"},
+    "publisher": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "display_name", "owning_team", "support_uri", "security_contact"],
+      "properties": {
+        "id": {"const": "com.enterprise-digital-twin"},
+        "display_name": {"const": "Enterprise Digital Twin"},
+        "owning_team": {"const": "connector-platform"},
+        "support_uri": {"type": "string", "format": "uri"},
+        "security_contact": {"type": "string", "format": "email"}
+      }
+    },
+    "provider": {"enum": ["github", "jira"]},
+    "deployment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["supported_variants", "runtime_mode", "oci_image_digest", "minimum_worker_version", "installation_isolation"],
+      "properties": {
+        "supported_variants": {"type": "array", "minItems": 1, "maxItems": 1, "uniqueItems": true, "items": {"enum": ["github_cloud", "jira_cloud"]}},
+        "runtime_mode": {"const": "network_restricted_connector_worker"},
+        "oci_image_digest": {"type": "string", "pattern": "^sha256:[a-f0-9]{64}$"},
+        "minimum_worker_version": {"$ref": "#/$defs/SemVer"},
+        "installation_isolation": {"const": "tenant_scoped_credentials_queues_cursors_and_egress"}
+      }
+    },
+    "auth": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "required_permissions", "forbidden_permissions", "credential_lifetime_seconds", "refresh_behavior", "secret_storage", "effective_grant_policy"],
+      "properties": {
+        "type": {"enum": ["github_app_installation", "oauth2_authorization_code_confidential"]},
+        "required_permissions": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "access"],
+            "properties": {"name": {"type": "string", "minLength": 1}, "access": {"enum": ["read", "write", "manage", "offline"]}}
+          }
+        },
+        "forbidden_permissions": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+        "credential_lifetime_seconds": {"type": "integer", "minimum": 300, "maximum": 86400},
+        "refresh_behavior": {"enum": ["mint_short_lived_installation_token", "single_flight_rotating_refresh_token"]},
+        "secret_storage": {"const": "tenant_scoped_envelope_encrypted_reference"},
+        "effective_grant_policy": {"const": "reject_missing_required_or_any_forbidden_permission"}
+      }
+    },
+    "capabilities": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reads", "events", "mutations"],
+      "properties": {
+        "reads": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/ReadCapability"}},
+        "events": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/EventCapability"}},
+        "mutations": {"type": "array", "maxItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/MutationCapability"}}
+      }
+    },
+    "schemas": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["raw_envelope", "raw_payload", "normalized_observation", "cursor", "ontology_mapping"],
+      "properties": {
+        "raw_envelope": {"$ref": "#/$defs/SchemaReference"},
+        "raw_payload": {"$ref": "#/$defs/SchemaReference"},
+        "normalized_observation": {"$ref": "#/$defs/SchemaReference"},
+        "cursor": {"$ref": "#/$defs/SchemaReference"},
+        "ontology_mapping": {"$ref": "#/$defs/SchemaReference"}
+      }
+    },
+    "rate_limits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["buckets", "quota_scope", "max_concurrency_per_installation", "tenant_fairness_weight", "request_timeout_seconds", "retry_classes", "backoff"],
+      "properties": {
+        "buckets": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/RateBucket"}},
+        "quota_scope": {"enum": ["installation", "cloud_account"]},
+        "max_concurrency_per_installation": {"type": "integer", "minimum": 1, "maximum": 16},
+        "tenant_fairness_weight": {"type": "integer", "minimum": 1, "maximum": 100},
+        "request_timeout_seconds": {"type": "integer", "minimum": 1, "maximum": 60},
+        "retry_classes": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"enum": ["rate_limit", "provider_5xx", "network_timeout"]}},
+        "backoff": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["minimum_seconds", "maximum_seconds", "jitter", "honor_retry_after", "maximum_attempts"],
+          "properties": {
+            "minimum_seconds": {"type": "number", "minimum": 0.1},
+            "maximum_seconds": {"type": "number", "minimum": 1, "maximum": 900},
+            "jitter": {"const": "full"},
+            "honor_retry_after": {"const": true},
+            "maximum_attempts": {"type": "integer", "minimum": 1, "maximum": 12}
+          }
+        }
+      }
+    },
+    "cursor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_ref", "commit_granularity", "overlap_seconds", "lookback_days", "reset_modes", "reset_authorization", "last_good_checkpoint"],
+      "properties": {
+        "schema_ref": {"const": "schemas/cursor.schema.json"},
+        "commit_granularity": {"const": "same_transaction_as_observations_and_outbox"},
+        "overlap_seconds": {"const": 600},
+        "lookback_days": {"type": "integer", "minimum": 1, "maximum": 365},
+        "reset_modes": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"enum": ["resume", "rewind_overlap", "authorized_full_reconcile"]}},
+        "reset_authorization": {"const": "connector_admin_and_audited_preview"},
+        "last_good_checkpoint": {"const": "preserve_until_replacement_commits"}
+      }
+    },
+    "data_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["included_fields", "excluded_fields", "classifications", "raw_retention_class", "normalized_retention_class", "limits", "redaction_policy", "untrusted_content", "training_use"],
+      "properties": {
+        "included_fields": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+        "excluded_fields": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+        "classifications": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"enum": ["internal", "confidential", "restricted"]}},
+        "raw_retention_class": {"const": "connector_raw_h1"},
+        "normalized_retention_class": {"const": "connector_observation_h1"},
+        "limits": {"$ref": "#/$defs/DataLimits"},
+        "redaction_policy": {"const": "secrets_tokens_authorization_headers_and_disallowed_bodies"},
+        "untrusted_content": {"const": true},
+        "training_use": {"const": "prohibited"}
+      }
+    },
+    "network_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rules", "tls_minimum", "dns_revalidation", "deny_private_link_local_metadata", "redirect_limit", "response_size_limit_bytes", "connect_deadline_seconds", "read_deadline_seconds", "manifest_proxy_allowed"],
+      "properties": {
+        "rules": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/NetworkRule"}},
+        "tls_minimum": {"enum": ["1.2", "1.3"]},
+        "dns_revalidation": {"const": "each_connection_and_redirect"},
+        "deny_private_link_local_metadata": {"const": true},
+        "redirect_limit": {"type": "integer", "minimum": 0, "maximum": 2},
+        "response_size_limit_bytes": {"const": 10485760},
+        "connect_deadline_seconds": {"type": "integer", "minimum": 1, "maximum": 10},
+        "read_deadline_seconds": {"type": "integer", "minimum": 1, "maximum": 30},
+        "manifest_proxy_allowed": {"const": false}
+      }
+    },
+    "health": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["checks", "freshness_slo_seconds", "webhook_ack_p95_seconds"],
+      "properties": {
+        "checks": {"type": "array", "minItems": 5, "uniqueItems": true, "items": {"$ref": "#/$defs/HealthCheck"}},
+        "freshness_slo_seconds": {"const": 900},
+        "webhook_ack_p95_seconds": {"const": 2}
+      }
+    },
+    "support": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["compatibility", "deprecation_state", "sunset_at", "owning_service", "runbook_uri", "security_escalation"],
+      "properties": {
+        "compatibility": {"type": "string", "pattern": "^>=1\\.0\\.0 <2\\.0\\.0$"},
+        "deprecation_state": {"enum": ["active", "deprecated"]},
+        "sunset_at": {"type": ["string", "null"], "format": "date-time"},
+        "owning_service": {"const": "connector-worker"},
+        "runbook_uri": {"type": "string", "format": "uri"},
+        "security_escalation": {"type": "string", "format": "email"}
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"provider": {"const": "github"}}, "required": ["provider"]},
+      "then": {
+        "properties": {
+          "id": {"const": "com.enterprise-digital-twin.connector.github"},
+          "deployment": {"properties": {"supported_variants": {"prefixItems": [{"const": "github_cloud"}], "items": false}}},
+          "auth": {"properties": {"type": {"const": "github_app_installation"}, "refresh_behavior": {"const": "mint_short_lived_installation_token"}}},
+          "capabilities": {"properties": {"mutations": {"maxItems": 0}}}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"provider": {"const": "jira"}}, "required": ["provider"]},
+      "then": {
+        "properties": {
+          "id": {"const": "com.enterprise-digital-twin.connector.jira-cloud"},
+          "deployment": {"properties": {"supported_variants": {"prefixItems": [{"const": "jira_cloud"}], "items": false}}},
+          "auth": {"properties": {"type": {"const": "oauth2_authorization_code_confidential"}, "refresh_behavior": {"const": "single_flight_rotating_refresh_token"}}},
+          "capabilities": {"properties": {"mutations": {"minItems": 1, "maxItems": 1}}}
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "SemVer": {"type": "string", "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$"},
+    "SchemaReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["uri", "id", "version", "sha256"],
+      "properties": {
+        "uri": {"type": "string", "pattern": "^schemas/(?:raw-envelope|raw-payload|normalized-observation|cursor|ontology-mapping)\\.schema\\.json$"},
+        "id": {"type": "string", "format": "uri"},
+        "version": {"$ref": "#/$defs/SemVer"},
+        "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+      }
+    },
+    "ReadCapability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["resource", "operations", "pagination", "deletion_behavior", "required_permission", "reconciliation_fetch"],
+      "properties": {
+        "resource": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+        "operations": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"enum": ["discover", "backfill", "incremental", "reconcile", "acl_sync"]}},
+        "pagination": {"enum": ["link_header", "page_number", "cursor", "ordered_jql"]},
+        "deletion_behavior": {"enum": ["webhook_then_authenticated_get", "scope_check_then_two_scan_confirmation"]},
+        "required_permission": {"type": "string", "minLength": 1},
+        "reconciliation_fetch": {"type": "string", "minLength": 1}
+      }
+    },
+    "EventCapability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["event", "delivery_id_source", "verification_profile", "max_body_bytes", "authoritative", "reconciliation_resource"],
+      "properties": {
+        "event": {"type": "string", "minLength": 1},
+        "delivery_id_source": {"type": "string", "minLength": 1},
+        "verification_profile": {"enum": ["github_hmac_sha256_before_parse", "jira_bearer_path_and_webhook_binding_before_parse"]},
+        "max_body_bytes": {"const": 10485760},
+        "authoritative": {"const": false},
+        "reconciliation_resource": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"}
+      }
+    },
+    "MutationCapability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["command", "target_resource", "operation", "default_enabled", "approval_class", "idempotency_class", "compensation_command"],
+      "properties": {
+        "command": {"const": "jira_issue_remediation_v1"},
+        "target_resource": {"const": "issue"},
+        "operation": {"const": "PUT /rest/api/3/issue/{issueIdOrKey}"},
+        "default_enabled": {"const": false},
+        "approval_class": {"const": "two_person_exact_payload_15_minutes"},
+        "idempotency_class": {"const": "workflow_receipt_provider_verification"},
+        "compensation_command": {"const": "jira_issue_remediation_restore_v1"}
+      }
+    },
+    "RateBucket": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "limit", "window_seconds"],
+      "properties": {"name": {"type": "string", "minLength": 1}, "limit": {"type": "integer", "minimum": 1}, "window_seconds": {"type": "integer", "minimum": 1}}
+    },
+    "DataLimits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["max_payload_bytes", "max_nesting_depth", "max_string_bytes", "max_decompression_ratio", "parse_deadline_seconds"],
+      "properties": {
+        "max_payload_bytes": {"const": 10485760},
+        "max_nesting_depth": {"const": 64},
+        "max_string_bytes": {"const": 1048576},
+        "max_decompression_ratio": {"const": 20},
+        "parse_deadline_seconds": {"const": 30}
+      }
+    },
+    "NetworkRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["host", "port", "path_prefixes"],
+      "properties": {
+        "host": {"type": "string", "pattern": "^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z]{2,63}$"},
+        "port": {"const": 443},
+        "path_prefixes": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "pattern": "^/[^*]*$"}}
+      }
+    },
+    "HealthCheck": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "interval_seconds", "timeout_seconds", "failure_threshold", "transition", "diagnostic_code"],
+      "properties": {
+        "type": {"enum": ["credential", "webhook", "freshness", "quota", "reconciliation"]},
+        "interval_seconds": {"type": "integer", "minimum": 30, "maximum": 86400},
+        "timeout_seconds": {"type": "integer", "minimum": 1, "maximum": 30},
+        "failure_threshold": {"type": "integer", "minimum": 1, "maximum": 10},
+        "transition": {"enum": ["degraded", "suspended"]},
+        "diagnostic_code": {"type": "string", "pattern": "^CONN_[A-Z0-9_]+$"}
+      }
+    }
+  }
+}

@@ -1,0 +1,183 @@
+schema_version: 1
+namespace: edt.core
+version: 1.0.0
+type_defaults:
+  identity: UUIDv7 canonical identifier plus tenant-scoped provider aliases.
+  lifecycle: proposed active inactive archived deleted with versioned transitions.
+  versioning: Bitemporal immutable versions with optimistic concurrency.
+  permissions: Source ACL intersection plus platform policy; derived visibility never broadens source visibility.
+  metadata: tenant classification owner stewardship provenance confidence and tags.
+  embeddings: Optional tenant-scoped embedding of authorized text; model and input hash recorded.
+  history: Append-only version and resolution history with reversible canonical merges.
+  searchability: Explicit field allowlist and security-trimmed indexes.
+  deletion: Tombstone then projection purge object erasure and minimum lawful audit receipt.
+  update_frequency: Event-driven where supported plus periodic reconciliation.
+entity_types:
+  - {id: TYPE-PERSON, name: Person, category: organization, purpose: Canonical natural person identity without inferring sensitive attributes.}
+  - {id: TYPE-EMPLOYEE, name: Employee, category: organization, purpose: Employment role projection governed by workforce restrictions.}
+  - {id: TYPE-MANAGER, name: Manager, category: organization, purpose: Time-bounded management responsibility.}
+  - {id: TYPE-CONTRACTOR, name: Contractor, category: organization, purpose: External worker role and engagement.}
+  - {id: TYPE-TEAM, name: Team, category: organization, purpose: Working group with membership and ownership.}
+  - {id: TYPE-DEPARTMENT, name: Department, category: organization, purpose: Formal organizational unit.}
+  - {id: TYPE-BUSINESSUNIT, name: BusinessUnit, category: organization, purpose: Governed operating unit between organization and department.}
+  - {id: TYPE-ORG, name: Organization, category: organization, purpose: Tenant or external legal organizational entity.}
+  - {id: TYPE-OFFICE, name: Office, category: organization, purpose: Organizational workplace.}
+  - {id: TYPE-ROLE, name: Role, category: organization, purpose: Named responsibility and capability assignment.}
+  - {id: TYPE-POSITION, name: Position, category: organization, purpose: Time-bounded organizational seat filled by an engagement.}
+  - {id: TYPE-VENDOR, name: Vendor, category: commercial, purpose: Supplier organization and dependency.}
+  - {id: TYPE-CUSTOMER, name: Customer, category: commercial, purpose: Customer account without exposing unauthorized personal data.}
+  - {id: TYPE-PROJECT, name: Project, category: work, purpose: Coordinated outcome with scope schedule and ownership.}
+  - {id: TYPE-PORTFOLIO, name: Portfolio, category: work, purpose: Governed collection of programs projects and investments.}
+  - {id: TYPE-PROGRAM, name: Program, category: work, purpose: Portfolio of related projects.}
+  - {id: TYPE-GOAL, name: Goal, category: work, purpose: Measurable desired organizational outcome.}
+  - {id: TYPE-REQUIREMENT, name: Requirement, category: work, purpose: Verifiable product or operational need.}
+  - {id: TYPE-EPIC, name: Epic, category: work, purpose: Large source-managed body of related work.}
+  - {id: TYPE-WORKITEM, name: WorkItem, category: work, purpose: Generic unit of planned or completed work.}
+  - {id: TYPE-TASK, name: Task, category: work, purpose: Assignable unit of work.}
+  - {id: TYPE-TICKET, name: Ticket, category: work, purpose: Source-system issue or service request.}
+  - {id: TYPE-BUG, name: Bug, category: work, purpose: Defect with impact and remediation state.}
+  - {id: TYPE-FEATURE, name: Feature, category: product, purpose: User-facing product capability.}
+  - {id: TYPE-SPRINT, name: Sprint, category: work, purpose: Time-boxed work interval.}
+  - {id: TYPE-MILESTONE, name: Milestone, category: work, purpose: Dated delivery checkpoint.}
+  - {id: TYPE-PRODUCT, name: Product, category: product, purpose: Marketed offering and lifecycle.}
+  - {id: TYPE-MEETING, name: Meeting, category: knowledge, purpose: Consented collaborative event and derived decisions.}
+  - {id: TYPE-CALENDAR, name: CalendarEvent, category: knowledge, purpose: Scheduled event and participants.}
+  - {id: TYPE-EMAIL, name: Email, category: knowledge, purpose: Permission-preserving communication artifact.}
+  - {id: TYPE-CHAT, name: ChatMessage, category: knowledge, purpose: Permission-preserving channel message.}
+  - {id: TYPE-DOCUMENT, name: Document, category: knowledge, purpose: Versioned knowledge artifact.}
+  - {id: TYPE-FILE, name: File, category: knowledge, purpose: Source file metadata and authorized content reference.}
+  - {id: TYPE-PRESENTATION, name: Presentation, category: knowledge, purpose: Slide-based knowledge artifact.}
+  - {id: TYPE-SPREADSHEET, name: Spreadsheet, category: knowledge, purpose: Tabular knowledge artifact and lineage.}
+  - {id: TYPE-DECISION, name: Decision, category: governance, purpose: Evidence-backed choice with owner status and consequences.}
+  - {id: TYPE-APPROVAL, name: Approval, category: governance, purpose: Exact-payload authorization record.}
+  - {id: TYPE-POLICY, name: Policy, category: governance, purpose: Versioned organizational rule and applicability.}
+  - {id: TYPE-RISK, name: Risk, category: governance, purpose: Uncertain event with likelihood impact controls and owner.}
+  - {id: TYPE-CONTROL, name: Control, category: governance, purpose: Preventive detective or corrective safeguard.}
+  - {id: TYPE-CONTRACT, name: Contract, category: legal, purpose: Restricted agreement metadata and lifecycle; no autonomous legal judgment.}
+  - {id: TYPE-PATENT, name: Patent, category: legal, purpose: Intellectual-property record and references.}
+  - {id: TYPE-PAPER, name: ResearchPaper, category: research, purpose: Research artifact evidence and citations.}
+  - {id: TYPE-REPOSITORY, name: Repository, category: engineering, purpose: Version-control repository and ownership.}
+  - {id: TYPE-COMMIT, name: Commit, category: engineering, purpose: Source change metadata without mandatory source-body ingestion.}
+  - {id: TYPE-BRANCH, name: Branch, category: engineering, purpose: Version-control line of development and protection metadata.}
+  - {id: TYPE-PULLREQUEST, name: PullRequest, category: engineering, purpose: Proposed source change review and delivery evidence.}
+  - {id: TYPE-API, name: API, category: engineering, purpose: Versioned software interface and consumers.}
+  - {id: TYPE-SERVICE, name: Service, category: engineering, purpose: Owned deployable capability and dependency.}
+  - {id: TYPE-MICROSERVICE, name: Microservice, category: engineering, purpose: Independently operated service classification.}
+  - {id: TYPE-DATABASE, name: Database, category: engineering, purpose: Data system with ownership classification and dependencies.}
+  - {id: TYPE-PIPELINE, name: Pipeline, category: engineering, purpose: Ordered data or delivery processing stages.}
+  - {id: TYPE-BUILD, name: Build, category: engineering, purpose: Immutable software build and provenance metadata.}
+  - {id: TYPE-WORKFLOW, name: Workflow, category: process, purpose: Versioned stateful business or technical process.}
+  - {id: TYPE-DEPLOYMENT, name: Deployment, category: engineering, purpose: Versioned release into an environment.}
+  - {id: TYPE-ENVIRONMENT, name: Environment, category: engineering, purpose: Named deployment target and control boundary.}
+  - {id: TYPE-INCIDENT, name: Incident, category: operations, purpose: Operational disruption timeline impact and response.}
+  - {id: TYPE-INFRA, name: InfrastructureResource, category: operations, purpose: Cloud on-prem or network resource.}
+  - {id: TYPE-ASSET, name: Asset, category: asset, purpose: Generic owned leased or managed asset.}
+  - {id: TYPE-COMPUTER, name: Computer, category: asset, purpose: End-user computing asset.}
+  - {id: TYPE-SERVER, name: Server, category: asset, purpose: Compute asset and hosting relationships.}
+  - {id: TYPE-BUILDING, name: Building, category: physical, purpose: Physical facility.}
+  - {id: TYPE-MACHINE, name: Machine, category: physical, purpose: Physical operational equipment.}
+  - {id: TYPE-SENSOR, name: Sensor, category: physical, purpose: Measurement source with calibration and safety metadata.}
+  - {id: TYPE-LOCATION, name: Location, category: physical, purpose: Geographic or logical location.}
+  - {id: TYPE-KPI, name: KPI, category: analytics, purpose: Governed key performance indicator definition.}
+  - {id: TYPE-METRIC, name: Metric, category: analytics, purpose: Time-indexed measured value and definition.}
+  - {id: TYPE-ALERT, name: Alert, category: operations, purpose: Threshold or anomaly notification and disposition.}
+  - {id: TYPE-NETWORK, name: Network, category: operations, purpose: Governed network segment or connectivity boundary.}
+  - {id: TYPE-CLOUDACCOUNT, name: CloudAccount, category: operations, purpose: Cloud tenancy or subscription metadata without credentials.}
+  - {id: TYPE-CLUSTER, name: Cluster, category: operations, purpose: Orchestrated compute or data cluster and ownership.}
+  - {id: TYPE-QUEUE, name: Queue, category: operations, purpose: Messaging or workflow queue metadata and health.}
+  - {id: TYPE-SECRETREF, name: SecretReference, category: operations, purpose: Non-secret locator and rotation metadata for protected credentials.}
+  - {id: TYPE-IDP, name: IdentityProvider, category: operations, purpose: Authentication authority metadata and integration state.}
+  - {id: TYPE-INVOICE, name: Invoice, category: finance, purpose: Restricted billing obligation metadata.}
+  - {id: TYPE-COSTCENTER, name: CostCenter, category: finance, purpose: Restricted allocation unit for aggregate costs.}
+  - {id: TYPE-PO, name: PurchaseOrder, category: finance, purpose: Restricted procurement authorization metadata.}
+  - {id: TYPE-BUDGET, name: Budget, category: finance, purpose: Approved aggregate spending envelope.}
+  - {id: TYPE-EXPENSE, name: Expense, category: finance, purpose: Restricted expense record metadata and approval state.}
+  - {id: TYPE-PAYMENT, name: Payment, category: finance, purpose: Restricted payment status metadata without transaction authority.}
+  - {id: TYPE-ACCOUNT, name: FinancialAccount, category: finance, purpose: Restricted financial account metadata; no autonomous transaction authority.}
+  - {id: TYPE-CUSTOMERACCOUNT, name: Account, category: commercial, purpose: Customer relationship account distinct from financial ledger accounts.}
+  - {id: TYPE-OPPORTUNITY, name: Opportunity, category: commercial, purpose: Governed revenue opportunity stage and ownership.}
+  - {id: TYPE-SUBSCRIPTION, name: Subscription, category: commercial, purpose: Customer product subscription terms and lifecycle metadata.}
+  - {id: TYPE-ORDER, name: Order, category: commercial, purpose: Customer order state and product references.}
+  - {id: TYPE-SUPPORTCASE, name: SupportCase, category: commercial, purpose: Customer support case state impact and ownership.}
+  - {id: TYPE-TRANSCRIPT, name: Transcript, category: knowledge, purpose: Consented communication transcript with source ACL and retention.}
+  - {id: TYPE-FINDING, name: Finding, category: governance, purpose: Assessed control risk or compliance finding and disposition.}
+  - {id: TYPE-EXCEPTION, name: Exception, category: governance, purpose: Time-bounded approved policy exception with owner and expiry.}
+  - {id: TYPE-AUDIT, name: Audit, category: governance, purpose: Governed assessment scope period evidence and conclusion.}
+  - {id: TYPE-REGULATION, name: Regulation, category: governance, purpose: External obligation reference and applicability metadata.}
+  - {id: TYPE-DATASET, name: DataSet, category: governance, purpose: Governed logical dataset inventory and lineage.}
+  - {id: TYPE-DATACLASS, name: DataClassification, category: governance, purpose: Versioned classification rule and handling requirements.}
+  - {id: TYPE-ROOM, name: Room, category: physical, purpose: Physical sublocation within a facility.}
+  - {id: TYPE-TIMESERIES, name: TimeSeries, category: physical, purpose: Governed series definition and storage reference for measurements.}
+  - {id: TYPE-ACTOR, name: Actor, category: platform-control, purpose: Human service or bounded-agent principal used for authorization and audit lineage.}
+  - {id: TYPE-SOURCEOBJECT, name: SourceObject, category: platform-control, purpose: Immutable provider object revision projected only with tenant ACL and content digest metadata.}
+  - {id: TYPE-CLAIM, name: Claim, category: platform-control, purpose: Bitemporal evidence-backed assertion that remains authoritative in PostgreSQL.}
+  - {id: TYPE-EVIDENCE, name: Evidence, category: platform-control, purpose: Permission-bearing source locator revision and content digest supporting a claim.}
+  - {id: TYPE-POLICYDECISION, name: PolicyDecision, category: platform-control, purpose: Versioned execution-time allow deny or indeterminate authorization result.}
+  - {id: TYPE-TOOLINVOCATION, name: ToolInvocation, category: platform-control, purpose: Governed agent tool proposal policy decision arguments digest and outcome.}
+  - {id: TYPE-SCENARIO, name: Scenario, category: simulation, purpose: User-confirmed interventions assumptions and constraints.}
+  - {id: TYPE-SIMRUN, name: SimulationRun, category: simulation, purpose: Reproducible model execution and uncertainty output.}
+  - {id: TYPE-FORECAST, name: Forecast, category: prediction, purpose: Versioned prediction with calibration evidence and prohibited uses.}
+  - {id: TYPE-AGENTRUN, name: AgentRun, category: ai, purpose: Governed model workflow execution and trace metadata.}
+  - {id: TYPE-APPROVALREQUEST, name: ApprovalRequest, category: platform-control, purpose: Pending or terminal dual-role exact-payload approval state.}
+  - {id: TYPE-ACTIONRECEIPT, name: ActionReceipt, category: platform-control, purpose: Idempotent external-effect record with before and after snapshots.}
+  - {id: TYPE-CONNECTOR, name: ConnectorInstallation, category: integration, purpose: Tenant-scoped external-system installation and sync health.}
+relationship_defaults:
+  cardinality: Declared by ontology constraint; violations are quarantined rather than silently repaired.
+  directionality: Directed canonical edge with an optional declared inverse.
+  strength: Optional normalized 0-to-1 score with method and version.
+  confidence: Required for inferred edges and fixed at 1.0 only for authoritative deterministic mappings.
+  temporal: Valid-from valid-to observed-at and system version.
+  provenance: One or more supporting claims and evidence references.
+  permissions: Visible only when edge policy endpoints and qualifying evidence are all visible.
+  creation: Deterministic mapping model proposal or authorized manual assertion with method recorded.
+  deletion: Tombstone and projection removal; source claim history retained per policy.
+  merge: Duplicate edges combine evidence but never broaden ACLs; conflicting semantics remain separate claims.
+relationship_types:
+  - {id: EDGE-PART-OF, name: PART_OF, meaning: Subject belongs structurally to object.}
+  - {id: EDGE-REPORTS-TO, name: REPORTS_TO, meaning: Person has a time-bounded reporting relationship to manager.}
+  - {id: EDGE-SUPERVISES, name: SUPERVISES, meaning: Role oversees a person team process or asset.}
+  - {id: EDGE-MEMBER-OF, name: MEMBER_OF, meaning: Person or team is a member of an organizational unit.}
+  - {id: EDGE-WORKS-ON, name: WORKS_ON, meaning: Person or team contributes to a project or work item.}
+  - {id: EDGE-OWNS, name: OWNS, meaning: Subject is accountable for object lifecycle.}
+  - {id: EDGE-CREATED, name: CREATED, meaning: Subject created object.}
+  - {id: EDGE-ASSIGNED, name: ASSIGNED_TO, meaning: Work is assigned to a person team or role.}
+  - {id: EDGE-RESPONSIBLE, name: RESPONSIBLE_FOR, meaning: Actor team or role is accountable for a resource or outcome.}
+  - {id: EDGE-DEPENDS, name: DEPENDS_ON, meaning: Subject requires object before or during successful operation.}
+  - {id: EDGE-REQUIRES, name: REQUIRES, meaning: Subject has an explicit requirement for object.}
+  - {id: EDGE-BLOCKS, name: BLOCKS, meaning: Subject prevents progress of object.}
+  - {id: EDGE-USES, name: USES, meaning: Subject consumes or operates object.}
+  - {id: EDGE-CALLS, name: CALLS, meaning: Software component invokes an API or service.}
+  - {id: EDGE-HOSTED, name: HOSTED_ON, meaning: Software or data object runs on infrastructure.}
+  - {id: EDGE-CONNECTED, name: CONNECTED_TO, meaning: Assets or systems have a declared connection.}
+  - {id: EDGE-IMPLEMENTS, name: IMPLEMENTS, meaning: Subject realizes a requirement policy feature or interface.}
+  - {id: EDGE-PRODUCES, name: PRODUCES, meaning: Process service or person emits an artifact or outcome.}
+  - {id: EDGE-DEPLOYED, name: DEPLOYED, meaning: Artifact or service was released by a deployment.}
+  - {id: EDGE-APPROVED, name: APPROVED, meaning: Actor granted an exact scoped approval.}
+  - {id: EDGE-MENTIONS, name: MENTIONS, meaning: Content explicitly mentions an entity candidate.}
+  - {id: EDGE-REFERENCES, name: REFERENCES, meaning: Artifact intentionally cites or links another object.}
+  - {id: EDGE-LINKED, name: LINKED_TO, meaning: Source system declares a generic link pending stronger semantics.}
+  - {id: EDGE-GENERATED, name: GENERATED, meaning: Process model or agent produced object.}
+  - {id: EDGE-OBSERVES, name: OBSERVES, meaning: Sensor metric or analysis observes object.}
+  - {id: EDGE-LOCATED, name: LOCATED_IN, meaning: Entity has a time-bounded physical or logical location.}
+  - {id: EDGE-AFFECTS, name: AFFECTS, meaning: Event risk or change has evidence-backed impact on object.}
+  - {id: EDGE-INFLUENCES, name: INFLUENCES, meaning: Subject is modeled as a non-causal influence with explicit method.}
+  - {id: EDGE-RELATES, name: RELATES_TO, meaning: Weak generic association used only when no stronger type is justified.}
+  - {id: EDGE-FORECASTS, name: FORECASTS, meaning: Forecast predicts a typed outcome for object.}
+  - {id: EDGE-SERVES, name: SERVES, meaning: Team product or service supports a customer or account.}
+  - {id: EDGE-SOLD, name: SOLD_TO, meaning: Offering order or subscription is sold to a customer account.}
+  - {id: EDGE-BILLED, name: BILLED_TO, meaning: Invoice or charge is billed to an authorized account.}
+  - {id: EDGE-SUPPLIED, name: SUPPLIED_BY, meaning: Item service or asset is supplied by a vendor.}
+  - {id: EDGE-EVIDENCE, name: EVIDENCED_BY, meaning: Claim relationship answer or decision is supported by evidence.}
+  - {id: EDGE-DERIVED, name: DERIVED_FROM, meaning: Object or claim was deterministically or probabilistically derived from source.}
+  - {id: EDGE-COMPENSATES, name: COMPENSATES, meaning: Action reverses or mitigates an earlier action.}
+domain_packages:
+  - {namespace: edt.core.organization, horizon: H1, types: [Person, Employee, Contractor, Team, BusinessUnit, Department, Organization, Role, Position, Office]}
+  - {namespace: edt.core.work, horizon: H1, types: [Portfolio, Program, Project, Goal, Requirement, Epic, WorkItem, Task, Ticket, Sprint, Milestone, Workflow, Decision, Approval, Risk]}
+  - {namespace: edt.pack.engineering, horizon: H1, types: [Product, Feature, Bug, Repository, Branch, Commit, PullRequest, File, API, Service, Microservice, Database, Pipeline, Build, Deployment, Environment, Incident, Alert]}
+  - {namespace: edt.pack.knowledge, horizon: H2, types: [Meeting, CalendarEvent, Email, ChatMessage, Transcript, Document, File, Presentation, Spreadsheet, ResearchPaper, Patent, Policy]}
+  - {namespace: edt.pack.commercial, horizon: H3, types: [Vendor, Customer, Account, Opportunity, Subscription, Order, SupportCase, Contract]}
+  - {namespace: edt.pack.finance, horizon: H3, types: [Invoice, PurchaseOrder, Budget, CostCenter, Expense, Payment, FinancialAccount]}
+  - {namespace: edt.pack.infrastructure, horizon: H3, types: [InfrastructureResource, Asset, Computer, Server, Network, CloudAccount, Cluster, Queue, SecretReference, IdentityProvider]}
+  - {namespace: edt.pack.governance, horizon: H2, types: [Control, Finding, Exception, Audit, Regulation, DataSet, DataClassification]}
+  - {namespace: edt.pack.physical, horizon: H4, types: [Building, Room, Machine, Sensor, Location, TimeSeries, Metric, KPI, Asset]}
+  - {namespace: edt.platform.control, horizon: H1, types: [Actor, ConnectorInstallation, SourceObject, Claim, Evidence, PolicyDecision, ToolInvocation, Scenario, SimulationRun, Forecast, AgentRun, ApprovalRequest, ActionReceipt]}

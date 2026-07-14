@@ -1,0 +1,79 @@
+schema_version: 1
+authority_invariant: A delegated agent receives the intersection of initiating user tenant workflow caller and tool policy authority and can never widen it.
+profiles:
+  - id: AGENT-QUERY
+    name: Query and research orchestrator
+    horizon: H1
+    purpose: Decompose organizational questions into authorized retrieval graph and evidence operations.
+    tools: [search_evidence, traverse_graph, fetch_evidence, run_readonly_analysis]
+    memory: Explicit conversation state plus permission-trimmed evidence references.
+    output: CitedAnswer
+    termination: Answer with citations or abstain when evidence or budget is insufficient.
+  - id: AGENT-EXTRACT
+    name: Knowledge extractor and resolver
+    horizon: H1
+    purpose: Convert normalized observations into typed candidate claims and resolution decisions.
+    tools: [read_observation, propose_claims, propose_resolution]
+    memory: None beyond the immutable extraction run input.
+    output: ClaimCandidateBatch
+    termination: Schema-valid candidates or quarantined failure.
+  - id: AGENT-GRAPH-VERIFY
+    name: Graph verifier
+    horizon: H1
+    purpose: Check ontology constraints evidence lineage ACL monotonicity and conflicting claims.
+    tools: [read_claims, validate_ontology, open_review_case]
+    memory: Run-local verification state.
+    output: VerificationReport
+    termination: Verified rejected or routed to human review.
+  - id: AGENT-SCENARIO
+    name: Scenario planner
+    horizon: H1
+    purpose: Compile natural-language intent into a typed user-confirmed simulation scenario.
+    tools: [read_project_snapshot, validate_scenario, request_missing_assumption]
+    memory: Current scenario draft only.
+    output: Scenario
+    termination: Confirmed typed scenario or explicit cancellation.
+  - id: AGENT-MITIGATION
+    name: Mitigation drafter
+    horizon: H1
+    purpose: Convert cited graph and simulation findings into a bounded Jira remediation draft.
+    tools: [read_simulation, read_jira_schema, draft_jira_action]
+    memory: Evidence and draft references only.
+    output: ActionPreview
+    termination: Immutable preview or abstention.
+  - id: AGENT-ACTION
+    name: Approval-gated action executor
+    horizon: H1
+    purpose: Execute exactly one approved Jira mutation through deterministic middleware.
+    tools: [verify_approval, create_or_update_remediation_issue, compensate_jira_action]
+    memory: Durable workflow state and receipts; no conversational memory.
+    output: ActionReceipt
+    termination: Executed once denied expired cancelled or compensated.
+  - id: AGENT-RISK
+    name: Risk analysis specialist
+    horizon: H2
+    purpose: Synthesize operational project vendor and security risks without employment scoring.
+    tools: [search_evidence, traverse_graph, run_approved_model]
+    memory: Tenant-scoped approved risk cases.
+    output: RiskAssessment
+    termination: Evidence-backed assessment with uncertainty or abstention.
+  - id: AGENT-WORKFLOW-OPT
+    name: Workflow optimization specialist
+    horizon: H3
+    purpose: Recommend process changes and simulate effects before any approved execution.
+    tools: [read_workflow, simulate_scenario, draft_change]
+    memory: Versioned optimization studies.
+    output: OptimizationProposal
+    termination: Proposal and evaluation record; never direct high-impact execution.
+prohibited_personas:
+  - Autonomous CEO CTO legal HR finance or security principal with implicit organizational authority.
+  - Agent that can mint credentials change policy expand its toolset or delegate broader authority.
+  - Agent that makes individual employment legal financial production identity or security-control decisions.
+common_runtime:
+  retries: Exponential backoff only for classified transient errors; model retries never repeat external effects.
+  budgets: Per-run time tokens spend tools recursion concurrency and data-volume limits.
+  confidence: Calibrated task-specific score plus explicit abstention; not a self-reported probability alone.
+  verification: Schema validation deterministic authorization evidence checks and task-specific evaluations.
+  communication: Typed handoff envelopes containing purpose evidence references allowed tools budget and expiry.
+  audit: Model prompt tool schema policy and dataset versions plus redacted action trace and outcome.
+

@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://enterprise-digital-twin.example/connectors/jira-cloud/1.0.0/raw-payload.schema.json",
+  "title": "Jira Cloud H1 Issue Raw Payload",
+  "description": "A bounded, untrusted provider payload. Additive provider fields are permitted only at this payload boundary; secret-like property names are rejected.",
+  "type": "object",
+  "required": ["id", "key", "fields"],
+  "propertyNames": {"not": {"pattern": "(?:[Tt][Oo][Kk][Ee][Nn]|[Ss][Ee][Cc][Rr][Ee][Tt]|[Aa][Uu][Tt][Hh][Oo][Rr][Ii][Zz][Aa][Tt][Ii][Oo][Nn]|[Pp][Aa][Ss][Ss][Ww][Oo][Rr][Dd])"}},
+  "properties": {
+    "id": {"type": "string", "pattern": "^[0-9]+$"},
+    "key": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{1,19}-[1-9][0-9]*$"},
+    "fields": {
+      "type": "object",
+      "required": ["summary", "status", "priority", "labels", "duedate", "updated", "project", "issuetype", "issuelinks"],
+      "properties": {
+        "summary": {"type": "string", "maxLength": 1048576},
+        "status": {"type": "object"},
+        "priority": {"type": ["object", "null"]},
+        "labels": {"type": "array", "uniqueItems": true, "items": {"type": "string"}},
+        "duedate": {"type": ["string", "null"], "format": "date"},
+        "updated": {"type": "string", "format": "date-time"},
+        "project": {"type": "object"},
+        "issuetype": {"type": "object"},
+        "issuelinks": {"type": "array"},
+        "description": {"type": ["object", "null"]}
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

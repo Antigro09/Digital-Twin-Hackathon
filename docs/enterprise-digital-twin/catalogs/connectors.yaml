@@ -1,0 +1,55 @@
+schema_version: 1
+connector_defaults:
+  isolation: Tenant-scoped credential egress allowlist quotas sandboxed parsing and independent revocation.
+  synchronization: Signed webhook plus periodic reconciliation cursor checkpoints idempotency tombstones and dead-letter review.
+  security: Least scopes envelope-encrypted secrets no secret in model context and source ACL propagation.
+  certification: Contract tests synthetic fixture permission tests replay tests failure tests and security review.
+connectors:
+  - id: CON-GITHUB
+    name: GitHub
+    status: committed
+    horizon: H1
+    auth: GitHub App installation scoped to allowlisted sandbox repositories.
+    reads: [repositories, teams, commits_metadata, pull_requests, reviews, issues, milestones, labels, dependency_links]
+    excludes: [source_file_bodies, secrets, actions_logs, private_messages, unrestricted_organization_data]
+    writes: []
+  - id: CON-JIRA
+    name: Jira Cloud
+    status: committed
+    horizon: H1
+    auth: OAuth installation scoped to allowlisted sandbox projects.
+    reads: [projects, issues, sprints, versions, links, comments, status_history, users]
+    writes: [dual_approved_remediation_issue_only]
+    approval: Two distinct approvers exact payload 15-minute expiry and idempotency receipt.
+  - {id: CON-GOOGLE, name: Google Workspace, status: provisional, horizon: H2, capabilities: [Drive, Gmail, Calendar, Meet]}
+  - {id: CON-M365, name: Microsoft 365, status: provisional, horizon: H2, capabilities: [SharePoint, OneDrive, Outlook, Calendar, Teams]}
+  - {id: CON-SLACK, name: Slack, status: provisional, horizon: H2, capabilities: [channels, threads, huddles_metadata]}
+  - {id: CON-GITLAB, name: GitLab, status: provisional, horizon: H2, capabilities: [repositories, merge_requests, issues, pipelines]}
+  - {id: CON-LINEAR, name: Linear, status: provisional, horizon: H2, capabilities: [teams, projects, issues, cycles]}
+  - {id: CON-NOTION, name: Notion, status: provisional, horizon: H2, capabilities: [pages, databases, comments]}
+  - {id: CON-CONFLUENCE, name: Confluence, status: provisional, horizon: H2, capabilities: [spaces, pages, comments]}
+  - {id: CON-SALESFORCE, name: Salesforce, status: provisional, horizon: H3, capabilities: [accounts, opportunities, cases, activities]}
+  - {id: CON-HUBSPOT, name: HubSpot, status: provisional, horizon: H3, capabilities: [companies, contacts, deals, tickets]}
+  - {id: CON-SERVICENOW, name: ServiceNow, status: provisional, horizon: H3, capabilities: [incidents, changes, assets, service_catalog]}
+  - {id: CON-AWS, name: AWS, status: provisional, horizon: H3, capabilities: [organizations, resources, cloudtrail_metadata, cost]}
+  - {id: CON-AZURE, name: Azure, status: provisional, horizon: H3, capabilities: [tenants, resources, activity_metadata, cost]}
+  - {id: CON-GCP, name: GCP, status: provisional, horizon: H3, capabilities: [organizations, projects, resources, audit_metadata, cost]}
+  - {id: CON-DATADOG, name: Datadog, status: provisional, horizon: H3, capabilities: [services, metrics, monitors, incidents]}
+  - {id: CON-SPLUNK, name: Splunk, status: provisional, horizon: H3, capabilities: [saved_searches, alerts, incident_metadata]}
+  - {id: CON-GRAFANA, name: Grafana, status: provisional, horizon: H3, capabilities: [dashboards, alerts, data_source_metadata]}
+  - {id: CON-SNOWFLAKE, name: Snowflake, status: provisional, horizon: H3, capabilities: [databases, schemas, lineage, query_metadata]}
+  - {id: CON-SAP, name: SAP, status: provisional, horizon: H4, capabilities: [finance, procurement, supply_chain, assets]}
+  - {id: CON-ORACLE, name: Oracle, status: provisional, horizon: H4, capabilities: [erp, finance, procurement, human_resources_metadata]}
+  - {id: CON-STRIPE, name: Stripe, status: provisional, horizon: H3, capabilities: [customers, subscriptions, invoices, payments_metadata]}
+  - {id: CON-QUICKBOOKS, name: QuickBooks, status: provisional, horizon: H3, capabilities: [customers, invoices, bills, accounts]}
+  - {id: CON-ZOOM, name: Zoom, status: provisional, horizon: H3, capabilities: [meetings, participants, transcripts_with_consent]}
+  - {id: CON-DROPBOX, name: Dropbox, status: provisional, horizon: H3, capabilities: [files, folders, permissions]}
+  - {id: CON-DISCORD, name: Discord, status: provisional, horizon: H4, capabilities: [servers, channels, messages_with_policy]}
+  - {id: CON-MATTERMOST, name: Mattermost, status: provisional, horizon: H4, capabilities: [teams, channels, posts]}
+  - {id: CON-FILESYSTEM, name: Filesystem and local documents, status: provisional, horizon: H3, capabilities: [allowlisted_files, metadata, text_extraction]}
+  - {id: CON-EMAIL, name: Standards-based email, status: provisional, horizon: H3, capabilities: [messages, threads, attachments, permissions]}
+  - {id: CON-OCR, name: OCR pipeline, status: provisional, horizon: H3, capabilities: [images, scanned_documents, layout]}
+  - {id: CON-STT, name: Speech-to-text pipeline, status: provisional, horizon: H3, capabilities: [consented_audio, transcripts, speaker_labels]}
+  - {id: CON-IOT, name: IoT and telemetry, status: research, horizon: H4, capabilities: [devices, sensors, observations, commands_with_safety_policy]}
+  - {id: CON-CUSTOM, name: Custom REST GraphQL gRPC and event APIs, status: committed, horizon: H2, capabilities: [connector_sdk, manifest, mappings, webhooks]}
+

@@ -1,0 +1,36 @@
+schema_version: 1
+screen_defaults:
+  states: [loading, empty, error, denied, stale, partial, offline, destructive_confirmation, recovery]
+  accessibility: WCAG 2.2 AA keyboard navigation visible focus semantic structure reduced motion and non-visual alternative.
+  evidence: Source provenance time confidence classification and permission explanation where applicable.
+screens:
+  - {id: UX-COCKPIT, name: Organizational cockpit, horizon: H1, purpose: Launch posture risks changes connector health and next actions.}
+  - {id: UX-SEARCH, name: Search and Copilot, horizon: H1, purpose: Permission-aware questions answers citations abstention and run inspection.}
+  - {id: UX-GRAPH, name: Graph explorer, horizon: H1, purpose: Bounded 2D traversal filters evidence and accessible path table.}
+  - {id: UX-ENTITY, name: Entity and evidence detail, horizon: H1, purpose: Properties ownership claims conflict history ACL explanation and corrections.}
+  - {id: UX-TIMELINE, name: Timeline, horizon: H1, purpose: Valid-time and system-time organizational change inspection.}
+  - {id: UX-SCENARIO, name: Scenario builder, horizon: H1, purpose: Typed assumptions interventions validation and confirmation.}
+  - {id: UX-SIM-COMPARE, name: Simulation comparison, horizon: H1, purpose: Baseline versus scenario percentiles sensitivity critical path and caveats.}
+  - {id: UX-AGENT-RUN, name: Agent run inspector, horizon: H1, purpose: Plan evidence tools budgets handoffs approvals and outcome without private chain of thought.}
+  - {id: UX-APPROVAL, name: Action approval, horizon: H1, purpose: Exact immutable diff risk scope expiry two-person control and rollback preview.}
+  - {id: UX-CONNECTORS, name: Connector administration, horizon: H1, purpose: Scope freshness cursors errors revocation and reconciliation.}
+  - {id: UX-AUDIT, name: Audit explorer, horizon: H1, purpose: Filter export verify and correlate security and action evidence.}
+  - {id: UX-ADMIN, name: Tenant administration, horizon: H2, purpose: SSO SCIM membership policy retention residency keys and break-glass.}
+  - {id: UX-ONTOLOGY, name: Ontology studio, horizon: H2, purpose: Versioned domain packages constraints mappings migrations and impact preview.}
+  - {id: UX-WORKFLOW, name: Workflow builder, horizon: H3, purpose: Typed steps policies approvals budgets simulation and test fixtures.}
+  - {id: UX-MARKETPLACE, name: Extension marketplace, horizon: H4, purpose: Signed connector agent ontology visualization and workflow packages.}
+  - {id: UX-MOBILE, name: Responsive mobile review, horizon: H2, purpose: Search evidence alerts and approvals; graph authoring remains desktop-first.}
+visualizations:
+  - {id: VIS-KNOWLEDGE, name: Knowledge graph, purpose: Typed evidence-backed relationships with bounded expansion.}
+  - {id: VIS-ORG, name: Organization graph, purpose: Time-bounded structure membership and ownership without individual scoring.}
+  - {id: VIS-DEPENDENCY, name: Dependency graph, purpose: Project service and work critical paths.}
+  - {id: VIS-COMMS, name: Communication graph, purpose: Aggregate consented collaboration patterns with minimum cohorts.}
+  - {id: VIS-RISK, name: Risk heatmap, purpose: Likelihood impact confidence controls and ownership.}
+  - {id: VIS-TIMELINE, name: Timeline, purpose: Valid-time system-time and event sequence.}
+  - {id: VIS-CALENDAR, name: Calendar, purpose: Milestones windows incidents and scheduled work.}
+  - {id: VIS-FLOW, name: Project flow, purpose: Work queues blockers throughput and dependencies.}
+  - {id: VIS-FINANCE, name: Financial flow, purpose: Authorized aggregate budget procurement invoice and dependency relationships.}
+  - {id: VIS-GEO, name: Geographic view, purpose: Residency facilities assets and service regions.}
+  - {id: VIS-PLAYBACK, name: Simulation playback, purpose: Reproducible scenario progression distributions and intervention points.}
+  - {id: VIS-3D, name: 3D organizational view, purpose: Optional storytelling view with no exclusive information., horizon: H4}
+

@@ -1,0 +1,109 @@
+schema_version: 1
+semantics: Each committed requirement and quality attribute appears in exactly one horizon matching its source-catalog horizon. A trace may resolve only to that exact entry.
+horizons:
+  - id: H1
+    title: Production-shaped hackathon demonstrator
+    status: committed
+    owner: hackathon-delivery-lead
+    exit_evidence: output/test-evidence/H1-release.json
+    requirements:
+      - REQ-GOV-001
+      - REQ-GOV-002
+      - REQ-GOV-003
+      - REQ-GOV-004
+      - REQ-PROD-002
+      - REQ-PROD-003
+      - REQ-PROD-004
+      - REQ-ARCH-001
+      - REQ-ARCH-002
+      - REQ-ARCH-003
+      - REQ-TEN-001
+      - REQ-TEN-002
+      - REQ-TEN-003
+      - REQ-TEN-004
+      - REQ-TEN-005
+      - REQ-DATA-001
+      - REQ-DATA-002
+      - REQ-DATA-003
+      - REQ-DATA-004
+      - REQ-DATA-005
+      - REQ-CON-001
+      - REQ-CON-002
+      - REQ-CON-003
+      - REQ-CON-004
+      - REQ-AI-001
+      - REQ-AI-002
+      - REQ-AI-003
+      - REQ-AI-004
+      - REQ-AI-005
+      - REQ-AI-006
+      - REQ-AI-007
+      - REQ-AI-008
+      - REQ-ACT-001
+      - REQ-ACT-002
+      - REQ-ACT-003
+      - REQ-SIM-001
+      - REQ-SIM-002
+      - REQ-SIM-003
+      - REQ-SIM-004
+      - REQ-UX-001
+      - REQ-UX-002
+      - REQ-UX-003
+      - REQ-UX-004
+      - REQ-SEC-001
+      - REQ-SEC-002
+      - REQ-SEC-003
+      - REQ-SEC-004
+      - REQ-REL-001
+      - REQ-REL-003
+      - REQ-REL-004
+      - REQ-REL-005
+      - REQ-DEV-002
+      - REQ-VER-001
+      - REQ-VER-002
+      - REQ-VER-003
+      - REQ-VER-004
+      - REQ-VER-005
+    quality_attributes:
+      - QAR-SEC-001
+      - QAR-SEC-002
+      - QAR-SEC-003
+      - QAR-PERF-001
+      - QAR-PERF-002
+      - QAR-PERF-003
+      - QAR-SYNC-001
+      - QAR-COR-001
+      - QAR-AI-001
+      - QAR-AI-002
+      - QAR-SIM-001
+      - QAR-OBS-001
+      - QAR-ACC-001
+      - QAR-COST-001
+  - id: H2
+    title: Design-partner pilot
+    status: committed
+    owner: pilot-program-lead
+    exit_evidence: output/test-evidence/H2-release.json
+    requirements: [REQ-PROD-001, REQ-PROD-005, REQ-ARCH-004, REQ-ARCH-007, REQ-DATA-006, REQ-DATA-007, REQ-DATA-008, REQ-DATA-009, REQ-CON-005, REQ-SEC-005, REQ-SEC-006, REQ-SEC-007, REQ-SEC-008, REQ-REL-002, REQ-DEV-001, REQ-DEV-003]
+    quality_attributes: [QAR-PRV-001, QAR-AVL-001, QAR-DR-001, QAR-PORT-001]
+  - id: H3
+    title: Enterprise GA decision boundary
+    status: provisional
+    owner: enterprise-release-board
+    exit_evidence: output/test-evidence/H3-freeze.json
+    requirements: [REQ-ARCH-005, REQ-ACT-004, REQ-SIM-005]
+    quality_attributes: []
+  - id: H4
+    title: Deployment expansion
+    status: provisional
+    owner: deployment-architecture
+    exit_evidence: output/test-evidence/H4-profile-gates.json
+    requirements: [REQ-ARCH-006]
+    quality_attributes: []
+  - id: H5
+    title: Governed research
+    status: research
+    owner: research-governance-board
+    exit_evidence: output/test-evidence/H5-research-gates.json
+    requirements: [REQ-REL-006]
+    quality_attributes: []

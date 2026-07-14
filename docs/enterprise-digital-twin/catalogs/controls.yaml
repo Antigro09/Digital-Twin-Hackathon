@@ -1,0 +1,33 @@
+schema_version: 1
+controls:
+  - {id: CTRL-IAM-001, domain: identity, title: Enterprise authentication, requirement: OIDC or SAML authentication with phishing-resistant MFA for privileged roles and SCIM lifecycle at H2.}
+  - {id: CTRL-IAM-002, domain: authorization, title: Server-derived tenant context, requirement: Tenant and actor context is derived from verified identity and membership and cannot be overridden by request input.}
+  - {id: CTRL-IAM-003, domain: authorization, title: Policy decision point, requirement: Every privileged read write export tool and administrative operation receives an execution-time policy decision.}
+  - {id: CTRL-IAM-004, domain: authorization, title: Delegation intersection, requirement: Delegated authority is the intersection of user tenant caller workflow and tool policies.}
+  - {id: CTRL-TEN-001, domain: tenancy, title: Relational tenant fence, requirement: PostgreSQL RLS and tenant-qualified constraints enforce tenant isolation.}
+  - {id: CTRL-TEN-002, domain: tenancy, title: Derived namespace isolation, requirement: Graph vector search object cache and queue projections use independently tested tenant namespaces.}
+  - {id: CTRL-TEN-003, domain: tenancy, title: Cross-tenant prohibition, requirement: Cross-tenant retrieval resolution memory analytics and training are disabled by default.}
+  - {id: CTRL-DAT-001, domain: data, title: Classification and provenance, requirement: Every source observation claim object and derived artifact carries classification provenance and lifecycle metadata.}
+  - {id: CTRL-DAT-002, domain: data, title: ACL monotonicity, requirement: Derived data visibility cannot be broader than the qualifying source evidence visibility.}
+  - {id: CTRL-DAT-003, domain: data, title: Retention and deletion propagation, requirement: Retention legal hold deletion export and correction workflows cover authoritative and derived stores.}
+  - {id: CTRL-CRY-001, domain: cryptography, title: Encryption in transit and at rest, requirement: Modern TLS protects network paths and tenant-scoped envelope keys protect sensitive stored data.}
+  - {id: CTRL-CRY-002, domain: secrets, title: Connector credential isolation, requirement: Credentials are tenant scoped encrypted rotated redacted and never placed in model context.}
+  - {id: CTRL-CON-001, domain: connectors, title: Least-scope installation, requirement: Connector installations are restricted to allowlisted repositories projects resources and actions.}
+  - {id: CTRL-CON-002, domain: connectors, title: Webhook authenticity and replay defense, requirement: Signatures timestamps nonces and event identifiers are verified before durable acceptance.}
+  - {id: CTRL-CON-003, domain: connectors, title: Parser and egress containment, requirement: Untrusted payload processing is resource bounded and connector egress is allowlisted.}
+  - {id: CTRL-AI-001, domain: ai, title: Content-instruction separation, requirement: User and connector content is carried as untrusted data and cannot modify privileged policy or tool definitions.}
+  - {id: CTRL-AI-002, domain: ai, title: Structured model boundaries, requirement: Model plans handoffs claims scenarios and action drafts are schema validated before use.}
+  - {id: CTRL-AI-003, domain: ai, title: Model and prompt promotion gate, requirement: Snapshot prompt tool and fallback changes require task-specific quality safety latency and cost evaluation.}
+  - {id: CTRL-AI-004, domain: ai, title: Agent resource budgets, requirement: Time token spend tool recursion concurrency and data-volume budgets terminate excessive work.}
+  - {id: CTRL-AI-005, domain: ai, title: Trace minimization, requirement: Store evidence structured rationale tool and policy metadata without secrets unnecessary content or private chain of thought.}
+  - {id: CTRL-ACT-001, domain: actions, title: Exact-payload approval, requirement: Approval binds the canonical payload tenant actors credential target expiry policy and idempotency key.}
+  - {id: CTRL-ACT-002, domain: actions, title: Dual authorization, requirement: Two distinct authenticated people approve the H1 external mutation and requester cannot self-complete control.}
+  - {id: CTRL-ACT-003, domain: actions, title: Action compensation, requirement: Before and after state receipts and idempotent compensation are retained and tested.}
+  - {id: CTRL-AUD-001, domain: audit, title: Tamper-evident audit, requirement: Sensitive operations append hash-linked audit envelopes to restricted immutable storage.}
+  - {id: CTRL-PRV-001, domain: privacy, title: Purpose and minimization, requirement: Data collection and derived inference require documented purpose field minimization and retention.}
+  - {id: CTRL-PRV-002, domain: privacy, title: Sensitive workforce prohibition, requirement: Individual employment health emotion productivity and misconduct inference is disabled through H3.}
+  - {id: CTRL-OPS-001, domain: operations, title: Backup and restore verification, requirement: Authoritative backups are encrypted tested and followed by deterministic projection rebuild and source reconciliation.}
+  - {id: CTRL-OPS-002, domain: operations, title: Observable health, requirement: Every workload publishes liveness readiness dependency health SLO and redacted telemetry.}
+  - {id: CTRL-SUP-001, domain: supply-chain, title: Build provenance, requirement: Dependencies are pinned scanned and inventoried and release artifacts are signed with verifiable provenance.}
+  - {id: CTRL-INC-001, domain: incident-response, title: Incident lifecycle, requirement: Detection containment eradication recovery notification evidence and postmortem procedures have named owners.}
+

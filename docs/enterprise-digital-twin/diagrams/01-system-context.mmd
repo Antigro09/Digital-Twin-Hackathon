@@ -1,0 +1,18 @@
+flowchart LR
+  User[Enterprise user] --> Web[EDT Web]
+  Admin[Tenant administrator] --> Web
+  Web --> API[EDT API]
+  API --> GitHub[GitHub]
+  API --> Jira[Jira]
+  API --> OpenAI[OpenAI Responses API]
+  API --> Identity[OIDC SAML Identity Provider]
+  API --> Audit[Restricted Audit Store]
+  subgraph TenantData[Shared data plane with tenant fences]
+    PG[(PostgreSQL)]
+    Graph[(Neo4j Projection)]
+    Objects[(S3 Objects)]
+  end
+  API --> PG
+  API --> Graph
+  API --> Objects
+

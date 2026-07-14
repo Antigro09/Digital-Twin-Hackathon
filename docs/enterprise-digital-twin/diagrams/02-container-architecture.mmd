@@ -1,0 +1,21 @@
+flowchart TB
+  Web[Next.js React Web] -->|REST SSE| API[NestJS Fastify API]
+  API --> Temporal[Temporal]
+  Temporal --> Connectors[TypeScript Connector Workers]
+  Temporal --> AI[Python AI and Simulation Workers]
+  API --> PG[(PostgreSQL plus pgvector)]
+  API --> Graph[(Neo4j)]
+  API --> Cache[(Valkey)]
+  Connectors --> PG
+  Connectors --> Objects[(S3 compatible objects)]
+  AI --> PG
+  AI --> Graph
+  AI --> OpenAI[OpenAI Responses API]
+  PG -->|Transactional outbox| Relay[Event Relay]
+  Relay --> Graph
+  Relay --> Search[Search Projection]
+  Web -. telemetry .-> OTel[OpenTelemetry]
+  API -. telemetry .-> OTel
+  Connectors -. telemetry .-> OTel
+  AI -. telemetry .-> OTel
+

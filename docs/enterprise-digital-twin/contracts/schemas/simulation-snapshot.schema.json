@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://enterprise-digital-twin.example/schemas/simulation-snapshot.schema.json",
+  "title": "Sealed Launch Simulation Snapshot",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "snapshot_id", "tenant_id", "project_id", "as_of", "project_start", "target_date", "projection_checkpoint_id", "outbox_position", "ontology_version", "simulation_model_version", "parameter_set_version", "default_seed", "timezone", "timezone_database_version", "calendar", "tasks", "dependencies", "team_capacities", "assumptions", "warnings", "evidence_ids", "sealed_at", "canonical_sha256"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "snapshot_id": {"type": "string", "format": "uuid"},
+    "tenant_id": {"type": "string", "format": "uuid"},
+    "project_id": {"type": "string", "format": "uuid"},
+    "as_of": {"type": "string", "format": "date-time"},
+    "project_start": {"type": "string", "format": "date-time"},
+    "target_date": {"type": ["string", "null"], "format": "date"},
+    "projection_checkpoint_id": {"type": "string", "format": "uuid"},
+    "outbox_position": {"type": "integer", "minimum": 0},
+    "ontology_version": {"type": "string"},
+    "simulation_model_version": {"const": "pert-monte-carlo/1.0.0"},
+    "parameter_set_version": {"type": "string", "minLength": 1, "maxLength": 100},
+    "default_seed": {"type": "string", "pattern": "^(0|[1-9][0-9]{0,19})$", "description": "Unsigned 64-bit decimal string; runtime enforces the uint64 maximum."},
+    "timezone": {"type": "string", "minLength": 1, "description": "IANA time-zone identifier."},
+    "timezone_database_version": {"type": "string", "minLength": 1},
+    "calendar": {"$ref": "#/$defs/Calendar"},
+    "tasks": {"type": "array", "items": {"$ref": "#/$defs/WorkItem"}, "description": "May be empty; an empty project deterministically completes at as_of."},
+    "dependencies": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/Dependency"}},
+    "team_capacities": {"type": "array", "items": {"$ref": "#/$defs/TeamCapacity"}},
+    "assumptions": {"type": "array", "items": {"type": "string", "minLength": 1, "maxLength": 2000}},
+    "warnings": {"type": "array", "items": {"type": "string", "minLength": 1, "maxLength": 2000}},
+    "evidence_ids": {"type": "array", "uniqueItems": true, "items": {"type": "string", "format": "uuid"}},
+    "sealed_at": {"type": "string", "format": "date-time"},
+    "canonical_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+  },
+  "$defs": {
+    "Calendar": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version", "working_weekdays", "workday_start", "hours_per_workday", "holidays", "canonical_sha256"],
+      "properties": {
+        "version": {"type": "string", "minLength": 1},
+        "working_weekdays": {"type": "array", "minItems": 1, "maxItems": 7, "uniqueItems": true, "items": {"type": "integer", "minimum": 1, "maximum": 7}},
+        "workday_start": {"type": "string", "pattern": "^(?:[01][0-9]|2[0-3]):[0-5][0-9]$"},
+        "hours_per_workday": {"type": "number", "exclusiveMinimum": 0, "maximum": 24},
+        "holidays": {"type": "array", "uniqueItems": true, "items": {"type": "string", "format": "date"}},
+        "canonical_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+      }
+    },
+    "WorkItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["work_item_id", "label", "state", "team_id", "remaining_duration", "external_blocker", "evidence_ids"],
+      "properties": {
+        "work_item_id": {"type": "string", "format": "uuid"},
+        "source_key": {"type": ["string", "null"]},
+        "label": {"type": "string", "minLength": 1, "maxLength": 500},
+        "state": {"enum": ["not_started", "in_progress", "blocked", "completed", "cancelled"]},
+        "team_id": {"type": "string", "format": "uuid"},
+        "remaining_duration": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["optimistic", "most_likely", "pessimistic", "unit", "source"],
+          "properties": {
+            "optimistic": {"type": "number", "minimum": 0, "maximum": 1300},
+            "most_likely": {"type": "number", "minimum": 0, "maximum": 1300},
+            "pessimistic": {"type": "number", "minimum": 0, "maximum": 1300},
+            "unit": {"const": "workday"},
+            "source": {"enum": ["explicit", "confirmed_imputation"]}
+          }
+        },
+        "earliest_start": {"type": ["string", "null"], "format": "date-time"},
+        "actual_finish": {"type": ["string", "null"], "format": "date-time"},
+        "external_blocker": {"type": "boolean"},
+        "external_blocker_until": {"type": ["string", "null"], "format": "date-time"},
+        "evidence_ids": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "format": "uuid"}}
+      }
+    },
+    "Dependency": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["predecessor_work_item_id", "successor_work_item_id", "type", "lag_workdays", "source_relationship_id", "evidence_ids"],
+      "properties": {
+        "predecessor_work_item_id": {"type": "string", "format": "uuid"},
+        "successor_work_item_id": {"type": "string", "format": "uuid"},
+        "type": {"const": "finish_to_start"},
+        "lag_workdays": {"type": "number", "minimum": 0, "maximum": 1300},
+        "source_relationship_id": {"type": "string", "format": "uuid"},
+        "evidence_ids": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "format": "uuid"}}
+      }
+    },
+    "TeamCapacity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["team_id", "parallel_capacity", "availability", "evidence_ids"],
+      "properties": {
+        "team_id": {"type": "string", "format": "uuid"},
+        "parallel_capacity": {"type": "integer", "minimum": 1, "maximum": 100},
+        "availability": {"type": "number", "exclusiveMinimum": 0, "maximum": 1},
+        "evidence_ids": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "format": "uuid"}}
+      }
+    }
+  },
+  "allOf": [
+    {"description": "Implementations validate optimistic <= most_likely <= pessimistic, completed-task invariants, dependency endpoint existence, no self-edge, acyclicity, target/project time ordering, and calendar availability before sealing. An empty task set requires empty dependencies and capacities and completes at as_of. DEPENDS_ON consumer-to-prerequisite source edges are inverted into scheduler predecessor-to-successor direction. H1 scenario model, calendar version, and seed fields are consistency assertions and must match this snapshot."}
+  ]
+}

@@ -1,0 +1,754 @@
+openapi: 3.1.0
+info:
+  title: Enterprise Digital Twin API
+  version: 1.0.0
+  summary: Permission-aware graph simulation and governed-action API.
+  description: Tenant context is always derived from the authenticated principal and a server-issued context handle. Tenant identifiers supplied in payloads are consistency assertions and never select authorization scope. Raw X-Tenant-ID is rejected.
+x-edt-context-selection:
+  sdk_cli: X-EDT-Context carries an opaque audience-bound short-lived server-issued membership context handle.
+  browser: EDT-Context is an HTTP-only Secure SameSite cookie carrying the equivalent opaque handle.
+  invariant: Exactly one context mechanism is used; it can select only among the authenticated principal's server-known memberships and never contains a raw tenant identifier.
+servers:
+  - url: https://api.enterprise-digital-twin.example
+security:
+  - oidc: [edt.read]
+    contextHeader: []
+  - oidc: [edt.read]
+    contextCookie: []
+tags:
+  - {name: Knowledge}
+  - {name: Agents}
+  - {name: Simulation}
+  - {name: Actions}
+  - {name: Connectors}
+  - {name: Audit}
+  - {name: Administration}
+paths:
+  /v1/me:
+    get:
+      tags: [Administration]
+      operationId: getCurrentActorContext
+      description: Returns the authenticated actor, server-known memberships, active server-derived tenant context, and safe capabilities. No tenant selector is accepted.
+      responses:
+        '200':
+          description: Current actor context.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [actor, active_context, memberships, capabilities]
+                properties:
+                  actor: {$ref: '../schemas/canonical.schema.json#/$defs/Actor'}
+                  active_context: {$ref: '../schemas/canonical.schema.json#/$defs/TenantContext'}
+                  memberships: {type: array, items: {type: object}}
+                  capabilities: {type: array, uniqueItems: true, items: {type: string}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/context-selections:
+    post:
+      tags: [Administration]
+      operationId: selectTenantMembershipContext
+      description: Mints or rotates an opaque context handle for one server-known membership. This bootstrap command accepts no tenant identifier and invalidates the prior handle on context change.
+      security: [{oidc: [edt.context.select]}]
+      parameters: [{$ref: '#/components/parameters/IdempotencyKey'}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [membership_id, audience, delivery]
+              properties:
+                membership_id: {type: string, format: uuid, description: Membership must already belong to the authenticated principal.}
+                audience: {type: string, minLength: 1, maxLength: 200}
+                delivery: {enum: [sdk_header, browser_cookie]}
+      responses:
+        '201':
+          description: Short-lived actor/session- and audience-bound context. Browser delivery sets HTTP-only Secure SameSite EDT-Context and omits context_handle from JSON.
+          headers:
+            Set-Cookie: {description: Present only for browser_cookie delivery., schema: {type: string}}
+            Cache-Control: {schema: {type: string, const: 'private, no-store'}}
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [active_context, expires_at, delivery]
+                properties:
+                  active_context: {$ref: '../schemas/canonical.schema.json#/$defs/TenantContext'}
+                  expires_at: {type: string, format: date-time}
+                  delivery: {enum: [sdk_header, browser_cookie]}
+                  context_handle: {type: string, minLength: 32, maxLength: 2048, description: Present only for sdk_header delivery; send as X-EDT-Context.}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/entities:
+    get:
+      tags: [Knowledge]
+      operationId: listEntities
+      parameters:
+        - {$ref: '#/components/parameters/PageSize'}
+        - {$ref: '#/components/parameters/PageCursor'}
+        - {name: type, in: query, schema: {type: string}}
+        - {name: as_of, in: query, schema: {type: string, format: date-time}}
+      responses:
+        '200':
+          description: Security-trimmed entity page.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [items, next_cursor, has_more, data_watermark]
+                properties:
+                  items: {type: array, items: {$ref: '../schemas/canonical.schema.json#/$defs/Entity'}}
+                  next_cursor: {type: [string, 'null']}
+                  has_more: {type: boolean}
+                  data_watermark: {$ref: '#/components/schemas/DataWatermark'}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/entities/{entity_id}:
+    get:
+      tags: [Knowledge]
+      operationId: getEntity
+      parameters:
+        - {$ref: '#/components/parameters/EntityId'}
+        - {name: include, in: query, schema: {type: array, items: {enum: [claims, evidence, history, relationships]}}}
+      responses:
+        '200': {description: Authorized entity, content: {application/json: {schema: {$ref: '../schemas/canonical.schema.json#/$defs/Entity'}}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/graph/traversals:
+    post:
+      tags: [Knowledge]
+      operationId: traverseGraph
+      description: Executes an allowlisted bounded traversal. Arbitrary Cypher is prohibited.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [start_entity_id, template, max_depth, max_nodes]
+              properties:
+                start_entity_id: {type: string, format: uuid}
+                template: {enum: [delivery_dependencies, ownership_path, evidence_path, incident_blast_radius]}
+                max_depth: {type: integer, minimum: 1, maximum: 4}
+                max_nodes: {type: integer, minimum: 1, maximum: 500}
+                valid_at: {type: string, format: date-time}
+      responses:
+        '200':
+          description: Authorized nodes edges and truncation metadata.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [nodes, relationships, truncated]
+                properties:
+                  nodes: {type: array, items: {$ref: '../schemas/canonical.schema.json#/$defs/Entity'}}
+                  relationships: {type: array, items: {$ref: '../schemas/canonical.schema.json#/$defs/Relationship'}}
+                  truncated: {type: boolean}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/questions:
+    post:
+      tags: [Agents]
+      operationId: askOrganizationalQuestion
+      parameters: [{$ref: '#/components/parameters/IdempotencyKey'}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [question, scope, budget]
+              properties:
+                question: {type: string, minLength: 1, maxLength: 4000}
+                scope: {type: array, minItems: 1, maxItems: 100, items: {$ref: '../schemas/canonical.schema.json#/$defs/ResourceRef'}}
+                budget: {type: object, required: [max_seconds, max_cost_units], properties: {max_seconds: {type: integer, minimum: 1, maximum: 120}, max_cost_units: {type: number, minimum: 0, maximum: 100}}}
+      responses:
+        '202': {description: Grounded-answer run accepted with recoverable status and event links., content: {application/json: {schema: {$ref: '#/components/schemas/AgentRunAccepted'}}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/agent-runs/{run_id}:
+    get:
+      tags: [Agents]
+      operationId: getAgentRun
+      parameters: [{$ref: '#/components/parameters/RunId'}]
+      responses:
+        '200': {description: Redacted run state and a typed cited answer when successful., content: {application/json: {schema: {$ref: '#/components/schemas/AgentRunView'}}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/agent-runs/{run_id}/events:
+    get:
+      tags: [Agents]
+      operationId: streamAgentRun
+      parameters:
+        - {$ref: '#/components/parameters/RunId'}
+        - {name: Last-Event-ID, in: header, schema: {type: string}}
+      responses:
+        '200': {description: Resumable redacted event stream., content: {text/event-stream: {schema: {type: string}}}}
+        '410': {description: Event history expired; recover from the agent run resource., content: {application/problem+json: {schema: {$ref: '../schemas/canonical.schema.json#/$defs/Problem'}}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/agent-runs/{run_id}/cancel:
+    post:
+      tags: [Agents]
+      operationId: cancelAgentRun
+      security: [{oidc: [edt.agent.cancel], contextHeader: []}, {oidc: [edt.agent.cancel], contextCookie: []}]
+      parameters: [{$ref: '#/components/parameters/RunId'}, {$ref: '#/components/parameters/IdempotencyKey'}]
+      responses:
+        '200': {description: Run was already terminal; its state is unchanged., content: {application/json: {schema: {$ref: '#/components/schemas/AgentRunView'}}}}
+        '202': {description: Cancellation is durably requested and the run is stopping., content: {application/json: {schema: {$ref: '#/components/schemas/AgentRunView'}}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/scenarios:
+    post:
+      tags: [Simulation]
+      operationId: createScenario
+      parameters: [{$ref: '#/components/parameters/IdempotencyKey'}]
+      requestBody:
+        required: true
+        content: {application/json: {schema: {$ref: '#/components/schemas/ScenarioDraft'}}}
+      responses:
+        '201':
+          description: Scenario draft compiled against a sealed snapshot; no simulation can run until digest confirmation.
+          headers: {ETag: {description: Strong scenario-draft version used by If-Match on confirmation., schema: {type: string}}}
+          content: {application/json: {schema: {$ref: '#/components/schemas/ScenarioDraftResource'}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/scenarios/{scenario_id}/confirm:
+    post:
+      tags: [Simulation]
+      operationId: confirmScenario
+      parameters:
+        - {name: scenario_id, in: path, required: true, schema: {type: string, format: uuid}}
+        - {$ref: '#/components/parameters/IdempotencyKey'}
+        - {$ref: '#/components/parameters/IfMatch'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [scenario_digest]
+              properties: {scenario_digest: {type: string, pattern: '^[a-f0-9]{64}$'}}
+      responses:
+        '200': {description: Immutable confirmed scenario., content: {application/json: {schema: {$ref: '../schemas/scenario.schema.json'}}}}
+        '412': {$ref: '#/components/responses/Problem'}
+        '428': {$ref: '#/components/responses/Problem'}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/simulation-snapshots:
+    post:
+      tags: [Simulation]
+      operationId: createSimulationSnapshot
+      parameters: [{$ref: '#/components/parameters/IdempotencyKey'}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [project_id, as_of]
+              properties:
+                project_id: {type: string, format: uuid}
+                as_of: {type: string, format: date-time}
+      responses:
+        '201': {description: Evidence-backed sealed simulation snapshot., content: {application/json: {schema: {$ref: '../schemas/canonical.schema.json#/$defs/SimulationSnapshot'}}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/simulations:
+    post:
+      tags: [Simulation]
+      operationId: runSimulation
+      parameters: [{$ref: '#/components/parameters/IdempotencyKey'}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [scenario_id]
+              properties: {scenario_id: {type: string, format: uuid}}
+      responses:
+        '202': {description: Durable simulation accepted with recoverable resource and event links., content: {application/json: {schema: {$ref: '#/components/schemas/SimulationRunAccepted'}}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/simulations/{simulation_id}:
+    get:
+      tags: [Simulation]
+      operationId: getSimulation
+      parameters: [{$ref: '#/components/parameters/SimulationId'}]
+      responses:
+        '200': {description: Simulation state/result plus its resumable event link., content: {application/json: {schema: {$ref: '#/components/schemas/SimulationRunView'}}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/simulations/{simulation_id}/events:
+    get:
+      tags: [Simulation]
+      operationId: streamSimulationRun
+      parameters:
+        - {$ref: '#/components/parameters/SimulationId'}
+        - {name: Last-Event-ID, in: header, schema: {type: string}}
+      responses:
+        '200': {description: Resumable redacted event stream over durable simulation events., content: {text/event-stream: {schema: {type: string}}}}
+        '410': {description: Event history expired; recover from the simulation resource., content: {application/problem+json: {schema: {$ref: '../schemas/canonical.schema.json#/$defs/Problem'}}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/actions/jira/remediation-previews:
+    post:
+      tags: [Actions]
+      operationId: previewJiraRemediation
+      security: [{oidc: [edt.action.propose], contextHeader: []}, {oidc: [edt.action.propose], contextCookie: []}]
+      parameters: [{$ref: '#/components/parameters/IdempotencyKey'}]
+      requestBody:
+        required: true
+        content: {application/json: {schema: {$ref: '#/components/schemas/JiraIssueUpdatePreviewRequest'}}}
+      responses:
+        '201':
+          description: Immutable exact field diff only. No approval or Jira mutation occurs.
+          headers: {ETag: {description: Strong immutable preview version required when opening approval., schema: {type: string}}}
+          content: {application/json: {schema: {$ref: '#/components/schemas/JiraIssueUpdatePreview'}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/actions/jira/remediation-previews/{preview_id}/approval-requests:
+    post:
+      tags: [Actions]
+      operationId: requestJiraRemediationApproval
+      description: Opens the dual-role approval workflow for exactly one immutable, unexpired preview. Approvers are selected only through server policy.
+      security: [{oidc: [edt.action.propose], contextHeader: []}, {oidc: [edt.action.propose], contextCookie: []}]
+      parameters:
+        - {name: preview_id, in: path, required: true, schema: {type: string, format: uuid}}
+        - {$ref: '#/components/parameters/IdempotencyKey'}
+        - {$ref: '#/components/parameters/IfMatch'}
+      responses:
+        '201': {description: Pending exact-payload approval request., content: {application/json: {schema: {$ref: '../schemas/canonical.schema.json#/$defs/ApprovalRequest'}}}}
+        '412': {$ref: '#/components/responses/Problem'}
+        '428': {$ref: '#/components/responses/Problem'}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/approvals/{approval_id}:
+    get:
+      tags: [Actions]
+      operationId: getApproval
+      parameters: [{$ref: '#/components/parameters/ApprovalId'}]
+      responses:
+        '200': {description: Approval state and redacted exact payload., content: {application/json: {schema: {$ref: '../schemas/canonical.schema.json#/$defs/ApprovalRequest'}}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/approvals/{approval_id}/decisions:
+    post:
+      tags: [Actions]
+      operationId: decideApproval
+      security: [{oidc: [edt.action.approve], contextHeader: []}, {oidc: [edt.action.approve], contextCookie: []}]
+      parameters: [{$ref: '#/components/parameters/ApprovalId'}, {$ref: '#/components/parameters/IdempotencyKey'}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [decision, payload_hash]
+              properties:
+                decision: {enum: [approve, deny]}
+                payload_hash: {type: string, pattern: '^[a-f0-9]{64}$'}
+                comment: {type: string, maxLength: 1000}
+      responses:
+        '200': {description: Updated approval., content: {application/json: {schema: {$ref: '../schemas/canonical.schema.json#/$defs/ApprovalRequest'}}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/approvals/{approval_id}/execute:
+    post:
+      tags: [Actions]
+      operationId: executeApprovedAction
+      security: [{oidc: [edt.action.execute], contextHeader: []}, {oidc: [edt.action.execute], contextCookie: []}]
+      parameters: [{$ref: '#/components/parameters/ApprovalId'}, {$ref: '#/components/parameters/IdempotencyKey'}]
+      responses:
+        '200': {description: Existing or newly executed action receipt., content: {application/json: {schema: {$ref: '../schemas/canonical.schema.json#/$defs/ActionReceipt'}}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/action-receipts/{receipt_id}/compensation-previews:
+    post:
+      tags: [Actions]
+      operationId: previewActionCompensation
+      description: Creates a new exact-payload dual-approval request to restore the recorded before snapshot. It never performs compensation directly.
+      security: [{oidc: [edt.action.propose], contextHeader: []}, {oidc: [edt.action.propose], contextCookie: []}]
+      parameters:
+        - {name: receipt_id, in: path, required: true, schema: {type: string, format: uuid}}
+        - {$ref: '#/components/parameters/IdempotencyKey'}
+      responses:
+        '201': {description: Guarded compensation preview and approval request., content: {application/json: {schema: {$ref: '../schemas/canonical.schema.json#/$defs/ApprovalRequest'}}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/connector-installations:
+    post:
+      tags: [Connectors]
+      operationId: createConnectorInstallation
+      security: [{oidc: [edt.connector.admin], contextHeader: []}, {oidc: [edt.connector.admin], contextCookie: []}]
+      parameters: [{$ref: '#/components/parameters/IdempotencyKey'}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [provider, requested_scopes, resource_allowlist, redirect_profile]
+              properties:
+                provider: {enum: [github, jira]}
+                requested_scopes: {type: array, minItems: 1, uniqueItems: true, items: {type: string}}
+                resource_allowlist: {type: array, minItems: 1, uniqueItems: true, items: {type: string}}
+                redirect_profile: {enum: [web_install], description: Selects a server-registered exact redirect URI; callers cannot submit a URI.}
+      responses:
+        '201':
+          description: Short-lived provider authorization flow; credentials are never returned.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [installation_id, authorization_url, expires_at]
+                properties:
+                  installation_id: {type: string, format: uuid}
+                  authorization_url: {type: string, format: uri}
+                  expires_at: {type: string, format: date-time}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/connectors:
+    get:
+      tags: [Connectors]
+      operationId: listConnectorInstallations
+      security: [{oidc: [edt.connector.read], contextHeader: []}, {oidc: [edt.connector.read], contextCookie: []}]
+      responses:
+        '200': {description: Tenant connector health and scope., content: {application/json: {schema: {type: object, properties: {items: {type: array, items: {$ref: '#/components/schemas/ConnectorInstallation'}}}}}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/connectors/{installation_id}/reconcile:
+    post:
+      tags: [Connectors]
+      operationId: reconcileConnector
+      security: [{oidc: [edt.connector.admin], contextHeader: []}, {oidc: [edt.connector.admin], contextCookie: []}]
+      parameters:
+        - {name: installation_id, in: path, required: true, schema: {type: string, format: uuid}}
+        - {$ref: '#/components/parameters/IdempotencyKey'}
+      responses:
+        '202': {description: Reconciliation workflow accepted.}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/connectors/{installation_id}:
+    delete:
+      tags: [Connectors]
+      operationId: revokeConnectorInstallation
+      security: [{oidc: [edt.connector.admin], contextHeader: []}, {oidc: [edt.connector.admin], contextCookie: []}]
+      parameters:
+        - {name: installation_id, in: path, required: true, schema: {type: string, format: uuid}}
+        - {$ref: '#/components/parameters/IdempotencyKey'}
+      responses:
+        '202': {description: Credential revocation, deny barrier, projection invalidation, and governed deletion workflow accepted.}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/webhooks/github:
+    post:
+      tags: [Connectors]
+      operationId: receiveGitHubWebhook
+      security: []
+      parameters:
+        - {name: X-Hub-Signature-256, in: header, required: true, schema: {type: string}}
+        - {name: X-GitHub-Delivery, in: header, required: true, schema: {type: string}}
+      requestBody: {required: true, content: {application/json: {schema: {type: object}}}}
+      responses:
+        '202': {description: Authenticated event durably accepted.}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/webhooks/jira/{path_token}:
+    post:
+      tags: [Connectors]
+      operationId: receiveJiraWebhook
+      security: []
+      parameters:
+        - {name: path_token, in: path, required: true, description: Random installation-bound defense-in-depth token; it is not an authorization credential., schema: {type: string, pattern: '^[A-Za-z0-9_-]{32,128}$'}}
+        - {name: Authorization, in: header, required: true, description: Provider-signed bearer token validated before trusting routing fields., schema: {type: string, pattern: '^Bearer .+$'}}
+        - {name: X-Atlassian-Webhook-Identifier, in: header, required: true, schema: {type: string}}
+      requestBody: {required: true, content: {application/json: {schema: {type: object, required: [matchedWebhookIds], properties: {matchedWebhookIds: {type: array, minItems: 1, items: {type: integer}}}}}}}
+      responses:
+        '202': {description: Bearer, opaque path, matched webhook IDs, cloud/project allowlist, and delivery identifier verified; event durably accepted.}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/audit-events:
+    get:
+      tags: [Audit]
+      operationId: listAuditEvents
+      security: [{oidc: [edt.audit.read], contextHeader: []}, {oidc: [edt.audit.read], contextCookie: []}]
+      parameters:
+        - {$ref: '#/components/parameters/PageSize'}
+        - {$ref: '#/components/parameters/PageCursor'}
+        - {name: from, in: query, schema: {type: string, format: date-time}}
+        - {name: to, in: query, schema: {type: string, format: date-time}}
+        - {name: action, in: query, schema: {type: string}}
+      responses:
+        '200': {description: Redacted audit page., content: {application/json: {schema: {type: object, additionalProperties: false, required: [items, next_cursor, has_more, data_watermark], properties: {items: {type: array, items: {$ref: '../schemas/canonical.schema.json#/$defs/AuditEvent'}}, next_cursor: {type: [string, 'null']}, has_more: {type: boolean}, data_watermark: {$ref: '#/components/schemas/DataWatermark'}}}}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/admin/policy-bundle:
+    get:
+      tags: [Administration]
+      operationId: getPolicyBundleMetadata
+      security: [{oidc: [edt.admin.policy], contextHeader: []}, {oidc: [edt.admin.policy], contextCookie: []}]
+      responses:
+        '200': {description: Active policy metadata without secrets., content: {application/json: {schema: {type: object, required: [version, digest, activated_at], properties: {version: {type: string}, digest: {type: string}, activated_at: {type: string, format: date-time}}}}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/ontology/types:
+    get:
+      tags: [Administration]
+      operationId: listOntologyTypes
+      parameters:
+        - {$ref: '#/components/parameters/PageSize'}
+        - {$ref: '#/components/parameters/PageCursor'}
+      responses:
+        '200': {description: Installed and actor-visible ontology types., content: {application/json: {schema: {type: object, additionalProperties: false, required: [items, next_cursor, has_more, data_watermark], properties: {items: {type: array, items: {$ref: '../schemas/canonical.schema.json#/$defs/OntologyType'}}, next_cursor: {type: [string, 'null']}, has_more: {type: boolean}, data_watermark: {$ref: '#/components/schemas/DataWatermark'}}}}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/extension-packages/validations:
+    post:
+      tags: [Administration]
+      operationId: validateExtensionPackage
+      security: [{oidc: [edt.extension.validate], contextHeader: []}, {oidc: [edt.extension.validate], contextCookie: []}]
+      parameters: [{$ref: '#/components/parameters/IdempotencyKey'}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [package_digest, signature, manifest]
+              properties:
+                package_digest: {type: string, pattern: '^[a-f0-9]{64}$'}
+                signature: {type: string, minLength: 1}
+                manifest: {type: object}
+      responses:
+        '202': {description: Quarantined schema, policy, migration, resource, malicious-fixture, and compatibility validation accepted.}
+        default: {$ref: '#/components/responses/Problem'}
+components:
+  securitySchemes:
+    oidc:
+      type: openIdConnect
+      openIdConnectUrl: https://identity.enterprise-digital-twin.example/.well-known/openid-configuration
+    contextHeader:
+      type: apiKey
+      in: header
+      name: X-EDT-Context
+      description: Opaque short-lived audience-bound server-issued membership context handle. Raw tenant identifiers are rejected.
+    contextCookie:
+      type: apiKey
+      in: cookie
+      name: EDT-Context
+      description: Browser-only HTTP-only Secure SameSite opaque context handle; CSRF controls apply to commands.
+  parameters:
+    PageSize: {name: page_size, in: query, schema: {type: integer, minimum: 1, maximum: 100, default: 50}}
+    PageCursor: {name: page_cursor, in: query, schema: {type: string, maxLength: 2048}}
+    IdempotencyKey: {name: Idempotency-Key, in: header, required: true, schema: {type: string, minLength: 16, maxLength: 128}}
+    IfMatch: {name: If-Match, in: header, required: true, schema: {type: string, minLength: 3, maxLength: 200}}
+    EntityId: {name: entity_id, in: path, required: true, schema: {type: string, format: uuid}}
+    RunId: {name: run_id, in: path, required: true, schema: {type: string, format: uuid}}
+    SimulationId: {name: simulation_id, in: path, required: true, schema: {type: string, format: uuid}}
+    ApprovalId: {name: approval_id, in: path, required: true, schema: {type: string, format: uuid}}
+  responses:
+    Problem:
+      description: RFC 9457-compatible error with no unauthorized resource existence disclosure.
+      content: {application/problem+json: {schema: {$ref: '../schemas/canonical.schema.json#/$defs/Problem'}}}
+  schemas:
+    SimulationRun: {$ref: '../schemas/canonical.schema.json#/$defs/SimulationRun'}
+    DataWatermark:
+      type: object
+      additionalProperties: false
+      required: [projection_checkpoint_id, outbox_position, observed_at]
+      properties:
+        projection_checkpoint_id: {type: string, format: uuid}
+        outbox_position: {type: integer, minimum: 0}
+        observed_at: {type: string, format: date-time}
+      description: Bound to the cursor and authorization fingerprint so every page is evaluated against one consistent visibility snapshot.
+    SimulationRunAccepted:
+      type: object
+      additionalProperties: false
+      required: [run, status_url, events_url]
+      properties:
+        run: {$ref: '#/components/schemas/SimulationRun'}
+        status_url: {type: string, format: uri-reference}
+        events_url: {type: string, format: uri-reference}
+    SimulationRunView:
+      type: object
+      additionalProperties: false
+      required: [run, events_url]
+      properties:
+        run: {$ref: '#/components/schemas/SimulationRun'}
+        events_url: {type: string, format: uri-reference}
+    Citation:
+      type: object
+      additionalProperties: false
+      required: [citation_id, claim_id, evidence_id, source_provider, source_object_id, source_revision, authorized_locator, source_updated_at, twin_ingested_at, observed_at, content_hash]
+      properties:
+        citation_id: {type: string, format: uuid}
+        claim_id: {type: string, format: uuid}
+        evidence_id: {type: string, format: uuid}
+        source_provider: {enum: [github, jira]}
+        source_object_id: {type: string, minLength: 1}
+        source_revision: {type: string, minLength: 1}
+        authorized_locator: {type: string, format: uri-reference, description: Application evidence route or authorized provider locator; never an object-store credential.}
+        source_updated_at: {type: string, format: date-time}
+        twin_ingested_at: {type: string, format: date-time}
+        observed_at: {type: string, format: date-time}
+        content_hash: {type: string, pattern: '^[a-f0-9]{64}$'}
+        excerpt: {type: string, maxLength: 1000}
+    CitedClaim:
+      type: object
+      additionalProperties: false
+      required: [claim_id, statement, epistemic_status, confidence, citation_ids]
+      properties:
+        claim_id: {type: string, format: uuid}
+        statement: {type: string, minLength: 1, maxLength: 4000}
+        epistemic_status: {enum: [source_fact, derived_inference, uncertain, unsupported]}
+        confidence: {type: number, minimum: 0, maximum: 1}
+        citation_ids: {type: array, uniqueItems: true, items: {type: string, format: uuid}}
+    CitedAnswer:
+      type: object
+      additionalProperties: false
+      required: [answer, claims, citations, missing_information, abstained, source_freshness, projection_checkpoint, generated_at]
+      properties:
+        answer: {type: string, maxLength: 20000}
+        claims: {type: array, items: {$ref: '#/components/schemas/CitedClaim'}}
+        citations: {type: array, items: {$ref: '#/components/schemas/Citation'}}
+        missing_information: {type: array, items: {type: string, maxLength: 2000}}
+        abstained: {type: boolean}
+        abstention_reason: {type: [string, 'null'], maxLength: 2000}
+        source_freshness: {type: object, additionalProperties: {type: string, format: date-time}}
+        projection_checkpoint: {$ref: '../schemas/canonical.schema.json#/$defs/ProjectionCheckpoint'}
+        generated_at: {type: string, format: date-time}
+      description: Every material non-unsupported claim has at least one currently authorized citation. When evidence is inaccessible conflicting or insufficient the response labels uncertainty or abstains.
+    AgentRunAccepted:
+      type: object
+      additionalProperties: false
+      required: [run, status_url, events_url]
+      properties:
+        run: {$ref: '../schemas/canonical.schema.json#/$defs/AgentRun'}
+        status_url: {type: string, format: uri-reference}
+        events_url: {type: string, format: uri-reference}
+    AgentRunView:
+      type: object
+      additionalProperties: false
+      required: [run]
+      properties:
+        run: {$ref: '../schemas/canonical.schema.json#/$defs/AgentRun'}
+        result: {$ref: '#/components/schemas/CitedAnswer'}
+      allOf:
+        - if: {properties: {run: {properties: {status: {const: succeeded}}}}}
+          then: {required: [result]}
+    ScenarioDraft:
+      type: object
+      additionalProperties: false
+      required: [name, target_date, snapshot_id, expected_snapshot_hash, interventions, seed, sample_count]
+      properties:
+        name: {type: string, minLength: 1, maxLength: 200}
+        target_date: {type: [string, 'null'], format: date}
+        snapshot_id: {type: string, format: uuid}
+        expected_snapshot_hash: {type: string, pattern: '^[a-f0-9]{64}$'}
+        interventions: {type: array, minItems: 1, maxItems: 50, items: {$ref: '../schemas/scenario.schema.json#/$defs/Intervention'}}
+        seed: {type: string, pattern: '^(0|[1-9][0-9]{0,19})$', description: Unsigned 64-bit decimal string; the runtime enforces the uint64 maximum.}
+        sample_count: {const: 50000}
+    ScenarioDraftResource:
+      type: object
+      additionalProperties: false
+      required: [scenario_id, name, snapshot_id, scenario_digest, status, compiled_scenario]
+      properties:
+        scenario_id: {type: string, format: uuid}
+        name: {type: string}
+        snapshot_id: {type: string, format: uuid}
+        scenario_digest: {type: string, pattern: '^[a-f0-9]{64}$'}
+        status: {const: draft}
+        compiled_scenario: {$ref: '#/components/schemas/CompiledScenarioDraft'}
+    CompiledScenarioDraft:
+      type: object
+      additionalProperties: false
+      required: [snapshot_id, snapshot_hash, name, target_date, model_version, calendar_version, compiler_version, seed, sample_count, interventions, assumptions, scenario_digest]
+      properties:
+        snapshot_id: {type: string, format: uuid}
+        snapshot_hash: {type: string, pattern: '^[a-f0-9]{64}$'}
+        name: {type: string, minLength: 1, maxLength: 200}
+        target_date: {type: [string, 'null'], format: date}
+        model_version: {const: pert-monte-carlo/1.0.0}
+        calendar_version: {type: string, minLength: 1, maxLength: 100}
+        compiler_version: {type: string, minLength: 1, maxLength: 100}
+        seed: {type: string, pattern: '^(0|[1-9][0-9]{0,19})$'}
+        sample_count: {const: 50000}
+        interventions: {type: array, minItems: 1, maxItems: 50, items: {$ref: '../schemas/scenario.schema.json#/$defs/Intervention'}}
+        assumptions: {type: array, items: {type: object, additionalProperties: false, required: [assumption_id, statement, status, source], properties: {assumption_id: {type: string, format: uuid}, statement: {type: string}, status: {enum: [confirmed, inferred_from_evidence, missing, contested]}, source: {enum: [user, evidence, engine_default, confirmed_imputation]}, evidence_ids: {type: array, uniqueItems: true, items: {type: string, format: uuid}}}}}
+        scenario_digest: {type: string, pattern: '^[a-f0-9]{64}$'}
+    JiraIssueUpdatePreviewRequest:
+      type: object
+      additionalProperties: false
+      required: [command, reason, evidence_ids, simulation_id]
+      properties:
+        command: {$ref: '#/components/schemas/JiraIssueUpdateCommand'}
+        reason: {type: string, minLength: 1, maxLength: 2000}
+        evidence_ids: {type: array, minItems: 1, uniqueItems: true, items: {type: string, format: uuid}}
+        simulation_id: {type: string, format: uuid}
+      description: Preview request combines the exact executable command with separately bound governance evidence. Tenant is derived by the server and is not accepted.
+    JiraIssueUpdateCommand:
+      type: object
+      additionalProperties: false
+      required: [action, connectorInstallationId, expectedIssueVersion, issueKey, projectKey, set]
+      properties:
+        action: {const: jira.issue.update}
+        connectorInstallationId: {const: '30000000-0000-4000-8000-000000000001'}
+        expectedIssueVersion: {const: 7}
+        issueKey: {const: AST-142}
+        projectKey: {const: AST}
+        set:
+          type: object
+          additionalProperties: false
+          required: [duedate, labels, priorityId]
+          properties:
+            duedate: {const: '2026-07-31'}
+            labels: {type: array, prefixItems: [{const: digital-twin-remediation}, {const: identity}, {const: orion}], items: false, minItems: 3, maxItems: 3, uniqueItems: true}
+            priorityId: {const: '2'}
+      description: Frozen H1 canonical executable arguments. Evidence, scenario, reason, policy, approvals, and rollback metadata are bound around this digest but are not Jira arguments.
+    ApprovedJiraIssueUpdate:
+      type: object
+      additionalProperties: false
+      required: [action, connectorInstallationId, expectedIssueVersion, issueKey, projectKey, set, tenantId]
+      properties:
+        action: {const: jira.issue.update}
+        connectorInstallationId: {const: '30000000-0000-4000-8000-000000000001'}
+        expectedIssueVersion: {const: 7}
+        issueKey: {const: AST-142}
+        projectKey: {const: AST}
+        set:
+          type: object
+          additionalProperties: false
+          required: [duedate, labels, priorityId]
+          properties:
+            duedate: {const: '2026-07-31'}
+            labels: {type: array, prefixItems: [{const: digital-twin-remediation}, {const: identity}, {const: orion}], items: false, minItems: 3, maxItems: 3, uniqueItems: true}
+            priorityId: {const: '2'}
+        tenantId: {const: '10000000-0000-4000-8000-000000000001', description: Server-injected tenant consistency assertion; never accepted from the public request.}
+    JiraIssueSnapshot:
+      type: object
+      additionalProperties: false
+      required: [issueKey, version, fields]
+      properties:
+        issueKey: {type: string}
+        version: {type: integer, minimum: 1}
+        fields:
+          type: object
+          additionalProperties: false
+          required: [duedate, labels, priority]
+          properties:
+            duedate: {type: string, format: date}
+            labels: {type: array, uniqueItems: true, items: {type: string}}
+            priority: {type: object, required: [id, name], properties: {id: {type: string}, name: {type: string}}, additionalProperties: false}
+    JiraIssueUpdatePreview:
+      type: object
+      additionalProperties: false
+      required: [preview_id, status, before, approved_payload, payload_hash, preview_hash, reason, evidence_ids, simulation_id, created_at, expires_at]
+      properties:
+        preview_id: {type: string, format: uuid}
+        status: {const: ready_for_approval}
+        before: {$ref: '#/components/schemas/JiraIssueSnapshot'}
+        approved_payload: {$ref: '#/components/schemas/ApprovedJiraIssueUpdate'}
+        payload_hash: {type: string, pattern: '^[a-f0-9]{64}$'}
+        preview_hash: {type: string, pattern: '^[a-f0-9]{64}$', description: RFC 8785 hash binding before state, approved payload, governance evidence, simulation, and preview expiry.}
+        reason: {type: string}
+        evidence_ids: {type: array, minItems: 1, uniqueItems: true, items: {type: string, format: uuid}}
+        simulation_id: {type: string, format: uuid}
+        created_at: {type: string, format: date-time}
+        expires_at: {type: string, format: date-time}
+    ConnectorInstallation:
+      type: object
+      additionalProperties: false
+      required: [installation_id, provider, status, scopes, last_reconciled_at, freshness_seconds]
+      properties:
+        installation_id: {type: string, format: uuid}
+        provider: {enum: [github, jira]}
+        status: {enum: [healthy, degraded, paused, revoked, error]}
+        scopes: {type: array, items: {type: string}}
+        last_reconciled_at: {type: string, format: date-time}
+        freshness_seconds: {type: integer, minimum: 0}

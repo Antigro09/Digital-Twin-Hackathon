@@ -1,0 +1,90 @@
+schema_version: 1
+fixture:
+  workload_id: edt-h1-github-jira-launch-risk
+  fixture_version: 1.0.0
+  root_seed: edt-h1-20260713
+  simulation_seed: "20260713"
+  frozen_clock: 2026-07-13T16:00:00Z
+  synthetic_only: true
+  namespace_marker: EDT_SYNTHETIC_H1_V1
+  identity_algorithm: uuidv5
+  identity_namespace: "urn:edt:h1"
+  ordering: Unicode code-point lexical order over tenant alias provider object type and source key
+  rerun_semantics: Upsert immutable source revisions by tenant-qualified key and produce no duplicate observation claim edge or external effect.
+artifacts:
+  source_fixtures: fixtures/h1/source-fixtures.yaml
+  identity_mappings: fixtures/h1/identity-mappings.yaml
+  permission_matrix: fixtures/h1/permission-matrix.yaml
+  oracle: fixtures/h1/ground-truth-oracle.yaml
+artifact_digests:
+  algorithm: sha256-canonical-json
+  source_fixtures: b3d8f648d7bd2d0ed62ab5d803fa25a6aff32a2e0f11ce0f3bddebafc869dd96
+  identity_mappings: 61b3729a92713a066df550670f34988fc0817eec84523d0e5e2bfacac0458ab7
+  permission_matrix: ccbaf7af0874b49acea87963ab88dc88022ea10c3fd17255bb8f0bc42cf17935
+  oracle: eba5ed65cf411a137964943d1403144013160e1c53aeb7f2ac72d5fae5fb1a71
+tenants:
+  - tenant_alias: tnt_aster
+    tenant_id: 10000000-0000-4000-8000-000000000001
+    display_name: Aster Labs
+    jira_installation_id: 30000000-0000-4000-8000-000000000001
+    github_installation_id: 30000000-0000-4000-8000-000000000002
+    jira_allowlist: [AST, SEC, OPS, PROD]
+    github_allowlist:
+      - aster-labs/identity-service
+      - aster-labs/orion-release
+      - aster-labs/platform
+      - aster-labs/web
+      - aster-labs/mobile
+      - aster-labs/billing
+      - aster-labs/data
+      - aster-labs/infra
+      - aster-labs/security
+      - aster-labs/docs
+      - aster-labs/observability
+      - aster-labs/integrations
+    frozen_counts:
+      human_identities: 48
+      teams: 7
+      github_organizations: 1
+      github_repositories: 12
+      github_pull_requests: 420
+      github_reviews: 690
+      github_issue_and_pr_links: 206
+      jira_projects: 4
+      jira_issues: 240
+      jira_issue_links: 318
+      jira_comments: 560
+      release_milestones: 8
+  - tenant_alias: tnt_beacon
+    tenant_id: 10000000-0000-4000-8000-000000000002
+    display_name: Beacon Works
+    jira_installation_id: 30000000-0000-4000-8000-000000000003
+    github_installation_id: 30000000-0000-4000-8000-000000000004
+    jira_allowlist: [BCN, BSEC, BOPS]
+    github_allowlist:
+      - beacon-works/platform
+      - beacon-works/identity
+      - beacon-works/product
+      - beacon-works/mobile
+      - beacon-works/data
+      - beacon-works/infra
+      - beacon-works/security
+      - beacon-works/docs
+    frozen_counts:
+      human_identities: 32
+      teams: 5
+      github_organizations: 1
+      github_repositories: 8
+      github_pull_requests: 260
+      github_reviews: 410
+      github_issue_and_pr_links: 118
+      jira_projects: 3
+      jira_issues: 160
+      jira_issue_links: 204
+      jira_comments: 320
+      release_milestones: 5
+scale_profile:
+  generated_graph_nodes_per_tenant: 100000
+  generated_graph_edges_per_tenant: 1000000
+  maximum_concurrent_users: 10
+  rule: Filler nodes and edges are tenant-local deterministic non-critical components and cannot change the decision-chain oracle.

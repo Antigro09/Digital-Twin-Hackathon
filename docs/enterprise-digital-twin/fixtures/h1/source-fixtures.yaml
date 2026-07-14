@@ -1,0 +1,105 @@
+schema_version: 1
+source_objects:
+  - source_object_id: aster-jira-AST-142-v7
+    tenant_id: 10000000-0000-4000-8000-000000000001
+    installation_id: 30000000-0000-4000-8000-000000000001
+    provider: jira
+    source_key: AST-142
+    source_revision: "7"
+    acl_class: aster-orion-full
+    observed_at: 2026-07-13T15:45:00Z
+    fields:
+      summary: Complete SSO cutover
+      status: In Progress
+      duedate: 2026-08-07
+      priority: {id: "3", name: Medium}
+      labels: [identity, orion]
+      remaining_duration: {optimistic: 8, most_likely: 12, pessimistic: 18, unit: workday, source: explicit}
+      team_key: aster-identity
+  - source_object_id: aster-github-identity-service-pr-184
+    tenant_id: 10000000-0000-4000-8000-000000000001
+    installation_id: 30000000-0000-4000-8000-000000000002
+    provider: github
+    source_key: aster-labs/identity-service#184
+    source_revision: sha256:pr184-revision-12
+    acl_class: aster-identity-restricted
+    observed_at: 2026-07-13T15:47:00Z
+    fields:
+      title: Finalize token migration
+      state: open
+      required_security_reviews: 1
+      received_security_reviews: 0
+      linked_issue: AST-142
+  - source_object_id: aster-jira-AST-173-v4
+    tenant_id: 10000000-0000-4000-8000-000000000001
+    installation_id: 30000000-0000-4000-8000-000000000001
+    provider: jira
+    source_key: AST-173
+    source_revision: "4"
+    acl_class: aster-orion-full
+    observed_at: 2026-07-13T15:46:00Z
+    fields:
+      summary: Build Orion release candidate
+      status: Open
+      blocked_by: AST-142
+      remaining_duration: {optimistic: 5, most_likely: 8, pessimistic: 13, unit: workday, source: explicit}
+      team_key: aster-release
+  - source_object_id: aster-jira-AST-201-v3
+    tenant_id: 10000000-0000-4000-8000-000000000001
+    installation_id: 30000000-0000-4000-8000-000000000001
+    provider: jira
+    source_key: AST-201
+    source_revision: "3"
+    acl_class: aster-orion-full
+    observed_at: 2026-07-13T15:46:30Z
+    fields:
+      summary: Complete launch certification
+      status: Open
+      blocked_by: AST-173
+      gates_milestone: Orion 2.0 General Availability
+      remaining_duration: {optimistic: 4, most_likely: 7, pessimistic: 12, unit: workday, source: explicit}
+      team_key: aster-security
+  - source_object_id: aster-risk-secondary-1
+    tenant_id: 10000000-0000-4000-8000-000000000001
+    installation_id: 30000000-0000-4000-8000-000000000001
+    provider: jira
+    source_key: OPS-61
+    source_revision: "2"
+    acl_class: aster-orion-full
+    observed_at: 2026-07-13T15:42:00Z
+    fields: {summary: Validate regional capacity reservation, confidence: 0.58, on_p80_critical_path: false}
+  - source_object_id: aster-risk-secondary-2
+    tenant_id: 10000000-0000-4000-8000-000000000001
+    installation_id: 30000000-0000-4000-8000-000000000001
+    provider: jira
+    source_key: PROD-88
+    source_revision: "5"
+    acl_class: aster-orion-full
+    observed_at: 2026-07-13T15:43:00Z
+    fields: {summary: Finalize launch documentation, confidence: 0.51, on_p80_critical_path: false}
+  - source_object_id: beacon-jira-BCN-142-v9
+    tenant_id: 10000000-0000-4000-8000-000000000002
+    installation_id: 30000000-0000-4000-8000-000000000003
+    provider: jira
+    source_key: BCN-142
+    source_revision: "9"
+    acl_class: beacon-private
+    observed_at: 2026-07-13T15:44:00Z
+    fields:
+      summary: Complete SSO cutover
+      description: BEACON-CANARY-7Q9K
+      status: In Progress
+  - source_object_id: beacon-github-platform-pr-184
+    tenant_id: 10000000-0000-4000-8000-000000000002
+    installation_id: 30000000-0000-4000-8000-000000000004
+    provider: github
+    source_key: beacon-works/platform#184
+    source_revision: sha256:beacon-pr184-revision-4
+    acl_class: beacon-private
+    observed_at: 2026-07-13T15:44:30Z
+    fields: {title: Finalize token migration, state: open}
+relationships:
+  - {tenant_id: 10000000-0000-4000-8000-000000000001, source_relationship_id: 75000000-0000-4000-8000-000000000001, type: IMPLEMENTS, from: aster-labs/identity-service#184, to: AST-142}
+  - {tenant_id: 10000000-0000-4000-8000-000000000001, source_relationship_id: 75000000-0000-4000-8000-000000000002, type: BLOCKS, from: AST-142, to: AST-173}
+  - {tenant_id: 10000000-0000-4000-8000-000000000001, source_relationship_id: 75000000-0000-4000-8000-000000000003, type: BLOCKS, from: AST-173, to: AST-201}
+  - {tenant_id: 10000000-0000-4000-8000-000000000001, source_relationship_id: 75000000-0000-4000-8000-000000000004, type: BLOCKS, from: AST-201, to: Orion 2.0 General Availability}

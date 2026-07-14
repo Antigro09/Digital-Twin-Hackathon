@@ -1,0 +1,25 @@
+flowchart TB
+  subgraph RequestBoundary[Interactive request boundary]
+    direction LR
+    Browser[Untrusted browser input] --> WAF[Edge validation and rate limit]
+    WAF --> Auth[Identity and server-derived tenant context]
+    Auth --> Policy[Policy decision point]
+    Policy --> API[Application boundary]
+    API --> TenantStore[(Tenant fenced stores)]
+  end
+  subgraph ContentBoundary[Untrusted connector and model-content boundary]
+    direction LR
+    GitHub[Hostile GitHub payload] --> Connector[Isolated connector parser]
+    Jira[Hostile Jira payload] --> Connector
+    Connector --> Observation[Immutable normalized observation]
+    Observation --> Model[Model context as data only]
+    Model --> Schema[Structured output validation]
+  end
+  subgraph ActionBoundary[Sensitive action boundary]
+    direction LR
+    Schema --> ToolGateway[Tool policy gateway]
+    ToolGateway --> Approval[Exact-payload dual approval]
+    Approval --> JiraWrite[Allowlisted Jira write]
+    JiraWrite --> Audit[(Tamper-evident audit)]
+    ToolGateway --> Audit
+  end

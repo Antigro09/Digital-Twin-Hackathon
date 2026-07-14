@@ -1,0 +1,75 @@
+schema_version: 1
+decisions:
+  - {technology: TypeScript, disposition: adopt, horizon: H1, ownership: Web API connector workers shared contracts, rationale: Strong end-to-end typing and mature web ecosystem.}
+  - {technology: Python, disposition: adopt, horizon: H1, ownership: AI extraction graph analytics simulation evaluation, rationale: Best fit for model and scientific-computing ecosystems.}
+  - {technology: SQL, disposition: adopt, horizon: H1, ownership: Transactional invariants migrations analytics, rationale: Declarative integrity at the authoritative boundary.}
+  - {technology: Rust, disposition: conditional, horizon: H4, ownership: Sandboxed extensions edge appliance hardened parsers, trigger: Profiling or isolation proves a TypeScript or Python component inadequate.}
+  - {technology: Go, disposition: conditional, horizon: H3, ownership: High-throughput gateway CLI or connector appliance, trigger: Sustained concurrency or distribution requirements justify another runtime.}
+  - {technology: WebAssembly, disposition: conditional, horizon: H4, ownership: Portable untrusted extension sandbox, trigger: Marketplace permits customer code and a capability sandbox passes security review.}
+  - {technology: CSharp, disposition: conditional, horizon: H3, ownership: Enterprise SDK and Microsoft ecosystem adapters, trigger: Design partners require first-class dotnet integration.}
+  - {technology: Java, disposition: conditional, horizon: H3, ownership: Enterprise SDK and JVM connectors, trigger: Design partners require JVM integration.}
+  - {technology: Kotlin, disposition: conditional, horizon: H4, ownership: Android client or JVM SDK ergonomics, trigger: Native Android demand is validated.}
+  - {technology: Swift, disposition: conditional, horizon: H4, ownership: Native Apple client, trigger: Responsive web fails validated mobile workflows.}
+  - {technology: C++, disposition: rejected, horizon: H1, ownership: None in core, rationale: Memory-safety and maintenance costs exceed any demonstrated need.}
+  - {technology: Next.js, disposition: adopt, horizon: H1, ownership: Web shell routing rendering and BFF boundary, rationale: Coherent React application and server integration.}
+  - {technology: React, disposition: adopt, horizon: H1, ownership: Accessible component and visualization UI, rationale: Mature ecosystem and team fit.}
+  - {technology: NestJS, disposition: adopt, horizon: H1, ownership: Modular TypeScript API, rationale: Explicit modules dependency injection validation and OpenAPI integration.}
+  - {technology: Fastify, disposition: adopt, horizon: H1, ownership: HTTP runtime under NestJS, rationale: Efficient typed plugin architecture.}
+  - {technology: Temporal, disposition: adopt, horizon: H1, ownership: Durable sync agent approval action and simulation workflows, rationale: Durable timers retries signals cancellation and replay.}
+  - {technology: PostgreSQL, disposition: adopt, horizon: H1, ownership: Authoritative transactional and claim store, rationale: ACID constraints RLS mature operations and extension ecosystem.}
+  - {technology: pgvector, disposition: adopt, horizon: H1, ownership: Initial tenant-scoped semantic index, rationale: Avoids a separate vector control plane at H1 scale.}
+  - {technology: Neo4j, disposition: adopt, horizon: H1, ownership: Rebuildable graph traversal and visualization projection, rationale: Productive labeled-property graph queries with a documented pooled-tenancy residual risk.}
+  - {technology: S3-compatible object storage, disposition: adopt, horizon: H1, ownership: Raw payloads documents artifacts snapshots, rationale: Portable immutable object contract.}
+  - {technology: MinIO, disposition: adopt, horizon: H1, ownership: Local S3-compatible implementation, rationale: Deterministic local development without cloud coupling.}
+  - {technology: Valkey, disposition: adopt, horizon: H1, ownership: Cache rate limit ephemeral coordination, rationale: Open Redis-compatible non-authoritative runtime.}
+  - {technology: Redis, disposition: rejected, horizon: H1, ownership: None when Valkey is available, rationale: Do not operate duplicate cache technologies.}
+  - {technology: OpenSearch, disposition: conditional, horizon: H2, ownership: Hybrid lexical vector faceted search, trigger: PostgreSQL search misses corpus latency relevance or operational SLOs.}
+  - {technology: Elastic, disposition: rejected, horizon: H2, ownership: None by default, rationale: Duplicate responsibility with OpenSearch; reconsider only for a contractual managed-service need.}
+  - {technology: Qdrant, disposition: conditional, horizon: H3, ownership: Specialized vector retrieval, trigger: Benchmarks prove OpenSearch and pgvector cannot meet recall latency or isolation needs.}
+  - {technology: Milvus, disposition: rejected, horizon: H3, ownership: None by default, rationale: Operational complexity is not justified by committed scale.}
+  - {technology: ClickHouse, disposition: conditional, horizon: H2, ownership: High-volume product agent trace and simulation analytics, trigger: PostgreSQL retention or analytical concurrency misses SLOs.}
+  - {technology: Kafka, disposition: conditional, horizon: H3, ownership: Replayable event backbone, trigger: Outbox relay cannot meet throughput retention or independent-consumer requirements.}
+  - {technology: NATS, disposition: rejected, horizon: H3, ownership: None by default, rationale: Kafka and Temporal already cover committed messaging and workflow needs; avoid overlapping brokers.}
+  - {technology: REST, disposition: adopt, horizon: H1, ownership: Public command administration and resource APIs, rationale: Explicit cacheable and broadly supported contracts.}
+  - {technology: OpenAPI, disposition: adopt, horizon: H1, ownership: REST contract and generated SDK surface, rationale: Machine-readable compatibility and validation.}
+  - {technology: SSE, disposition: adopt, horizon: H1, ownership: Agent sync and simulation progress, rationale: Simple unidirectional resumable browser streaming.}
+  - {technology: GraphQL, disposition: conditional, horizon: H2, ownership: Read-only curated graph exploration, trigger: Multiple clients demonstrate REST over-fetching or composition pain; arbitrary graph queries remain prohibited.}
+  - {technology: gRPC, disposition: conditional, horizon: H3, ownership: Extracted internal service calls, trigger: A service boundary requires high-throughput streaming or multi-language generated contracts.}
+  - {technology: AsyncAPI, disposition: adopt, horizon: H1, ownership: Event and webhook contracts, rationale: Machine-readable asynchronous interface governance.}
+  - {technology: OpenTelemetry, disposition: adopt, horizon: H1, ownership: Vendor-neutral logs metrics traces and context, rationale: Portable observability and correlation.}
+  - {technology: Docker, disposition: adopt, horizon: H1, ownership: OCI build and local packaging, rationale: Reproducible workload boundary.}
+  - {technology: Docker Compose, disposition: adopt, horizon: H1, ownership: Local and single-host demo profile, rationale: Low operational cost for the bounded demonstrator.}
+  - {technology: Kubernetes, disposition: adopt, horizon: H2, ownership: Shared regional pilot workload orchestration, trigger: Freeze supported version and conformance profile before first design-partner production deployment., rationale: The committed multi-zone H2 application plane requires standardized scheduling rollout policy and workload identity controls.}
+  - {technology: Helm, disposition: adopt, horizon: H2, ownership: Kubernetes application packaging, trigger: Freeze charts and rendered-manifest conformance before first design-partner production deployment., rationale: Versioned rendered manifests provide one reviewable release contract across the committed H2 environments.}
+  - {technology: OpenTofu, disposition: adopt, horizon: H2, ownership: Portable infrastructure modules, rationale: Open infrastructure-as-code contract.}
+  - {technology: Terraform, disposition: conditional, horizon: H2, ownership: Customer-required IaC compatibility, trigger: Provider or customer support requires Terraform specifically.}
+  - {technology: Service mesh, disposition: rejected, horizon: H2, ownership: None initially, rationale: Workload count does not justify another security and operations control plane.}
+  - {technology: pnpm, disposition: adopt, horizon: H1, ownership: JavaScript workspace package and task entry point, rationale: Deterministic workspace installation with one lockfile and efficient content-addressed storage.}
+  - {technology: Turborepo, disposition: adopt, horizon: H1, ownership: Monorepo task graph and local or CI caching, rationale: Enforces workload boundaries while avoiding a custom build orchestrator.}
+  - {technology: Kysely, disposition: adopt, horizon: H1, ownership: Typed TypeScript SQL construction below repository and RLS boundaries, rationale: Keeps SQL visible and typed without claiming that an ORM supplies authorization.}
+  - {technology: psycopg, disposition: adopt, horizon: H1, ownership: Python PostgreSQL access, rationale: Maintained PostgreSQL-native driver with explicit transaction control.}
+  - {technology: Pydantic, disposition: adopt, horizon: H1, ownership: Python boundary validation and canonical models, rationale: Strict typed validation for model extraction simulation and evaluation inputs.}
+  - {technology: NumPy, disposition: adopt, horizon: H1, ownership: Vectorized deterministic simulation mathematics, rationale: Mature numerical implementation for the bounded Monte Carlo workload.}
+  - {technology: uv, disposition: adopt, horizon: H1, ownership: Locked Python environment and task bootstrap, rationale: Fast reproducible Python dependency and virtual-environment management.}
+  - {technology: RabbitMQ, disposition: rejected, horizon: H1, ownership: None, rationale: Adds queue semantics that overlap Temporal and the transactional outbox without a committed requirement.}
+  - {technology: Dapr, disposition: rejected, horizon: H2, ownership: None, rationale: Duplicates workflow pub-sub secrets and service invocation abstractions already assigned to explicit contracts.}
+  - {technology: Prometheus, disposition: adopt, horizon: H1, ownership: Reference metrics storage alert rules and SLO recording, rationale: OpenMetrics-compatible and replaceable behind OpenTelemetry.}
+  - {technology: Grafana, disposition: adopt, horizon: H1, ownership: Reference operational dashboards and telemetry correlation, rationale: Provides an operator surface without becoming a business authorization data source.}
+  - {technology: Loki, disposition: adopt, horizon: H1, ownership: Reference redacted log backend, rationale: Replaceable OpenTelemetry-compatible local and shared reference profile.}
+  - {technology: Tempo, disposition: adopt, horizon: H1, ownership: Reference distributed trace backend, rationale: Replaceable OpenTelemetry-compatible correlation for the four workloads.}
+  - {technology: Argo CD, disposition: adopt, horizon: H2, ownership: Kubernetes GitOps reconciliation and environment promotion, rationale: Reviewed Git state and drift correction support the committed pilot deployment process.}
+  - {technology: GitHub Actions, disposition: adopt, horizon: H1, ownership: CI publication contract security and evaluation gates, rationale: Repository-native automation with workload identity federation and protected secrets.}
+  - {technology: External Secrets Operator, disposition: adopt, horizon: H2, ownership: Kubernetes secret materialization from approved vault or KMS, rationale: Keeps secret values out of Git and Helm release history.}
+  - {technology: Sigstore and Cosign, disposition: adopt, horizon: H2, ownership: Artifact signing attestation and deploy-time verification, rationale: Supports verifiable build identity provenance and admission checks.}
+  - {technology: Syft, disposition: adopt, horizon: H2, ownership: Release image SBOM generation, rationale: Produces retained SPDX or CycloneDX component evidence.}
+  - {technology: SPDX and CycloneDX, disposition: adopt, horizon: H2, ownership: SBOM exchange formats, rationale: Standard machine-readable software inventory evidence.}
+  - {technology: Trivy, disposition: adopt, horizon: H1, ownership: Dependency image secret and IaC scanning, rationale: One policy-integrated scanner covers the committed build surfaces.}
+  - {technology: Vitest, disposition: adopt, horizon: H1, ownership: TypeScript unit and component tests, rationale: Fast workspace-native feedback for web API and connector packages.}
+  - {technology: Pytest, disposition: adopt, horizon: H1, ownership: Python unit property simulation and evaluation tests, rationale: Mature fixtures and scientific testing ecosystem.}
+  - {technology: Playwright, disposition: adopt, horizon: H1, ownership: Cross-browser journey and accessibility automation, rationale: Exercises the real browser and production-shaped HTTP boundaries.}
+  - {technology: Testcontainers, disposition: adopt, horizon: H1, ownership: Production-engine integration fixtures, rationale: Validates real PostgreSQL Neo4j Valkey object and Temporal semantics instead of mocks.}
+  - {technology: k6, disposition: adopt, horizon: H1, ownership: API SSE workflow load and soak tests, rationale: Scriptable thresholds produce CI-readable H1 and H2 performance evidence.}
+  - {technology: Schemathesis, disposition: adopt, horizon: H1, ownership: OpenAPI property and negative testing, rationale: Generates boundary cases from the normative API contract.}
+  - {technology: Ruff, disposition: adopt, horizon: H1, ownership: Python formatting and lint gate, rationale: Fast deterministic checks reduce overlapping formatter and lint tools.}
+  - {technology: mypy, disposition: adopt, horizon: H1, ownership: Python static type gate, rationale: Checks typed boundaries across AI extraction and simulation modules.}
+  - {technology: OpenAPI Generator, disposition: adopt, horizon: H1, ownership: Client conformance fixtures and later generated SDKs, rationale: Keeps consumers aligned with versioned public contracts.}

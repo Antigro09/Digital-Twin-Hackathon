@@ -1,0 +1,27 @@
+schema_version: 1
+model_defaults:
+  reproducibility: Persist canonical inputs snapshot identifier code and model versions random seed and environment metadata.
+  uncertainty: Return distributions intervals sensitivity and missing-data warnings rather than a single deterministic claim.
+  governance: State intended use prohibited use calibration evidence human confirmation and decision limits.
+models:
+  - id: SIM-LAUNCH-DELAY
+    name: Launch-delay risk
+    status: committed
+    horizon: H1
+    method: Dependency DAG with PERT duration distributions and seeded Monte Carlo sampling.
+    inputs: [target_date, work_items, three_point_estimates, dependencies, team_capacity, availability, scope_changes, staffing_changes]
+    outputs: [p50_date, p80_date, p95_date, miss_probability, critical_path, blockers, sensitivity, assumptions, warnings]
+    prohibited: [individual_productivity_score, employment_decision, causal_claim_from_synthetic_data]
+  - {id: SIM-INCIDENT, name: Incident blast radius, status: provisional, horizon: H2, method: Dependency propagation plus recovery-state simulation.}
+  - {id: SIM-CAPACITY, name: Team capacity and portfolio flow, status: provisional, horizon: H2, method: Queueing and discrete-event simulation at team-level aggregation.}
+  - {id: SIM-BUDGET, name: Budget and portfolio allocation, status: provisional, horizon: H3, method: Constraint optimization plus Monte Carlo uncertainty.}
+  - {id: SIM-CUSTOMER, name: Customer churn scenarios, status: research, horizon: H3, method: Calibrated survival model only after consented historical validation.}
+  - {id: SIM-PRICING, name: Pricing scenarios, status: research, horizon: H3, method: Elasticity and cohort model with experiment evidence.}
+  - {id: SIM-MA, name: Merger and acquisition integration, status: research, horizon: H5, method: Multi-layer dependency and capacity scenario model.}
+  - {id: SIM-SUPPLY, name: Supply-chain disruption, status: research, horizon: H4, method: Network flow and inventory simulation.}
+  - {id: SIM-OFFICE, name: Office closure, status: research, horizon: H4, method: Facility service and aggregate team dependency scenario.}
+  - {id: SIM-MIGRATION, name: Technology migration, status: provisional, horizon: H3, method: Dependency DAG capacity risk and staged cutover model.}
+  - {id: SIM-VENDOR, name: Vendor outage, status: provisional, horizon: H3, method: Service dependency propagation and recovery scenarios.}
+  - {id: SIM-SECURITY, name: Security incident, status: provisional, horizon: H3, method: Attack-path and control-effectiveness tabletop simulation.}
+  - {id: SIM-WORKFORCE, name: Workforce-sensitive scenarios, status: research, horizon: H5, method: Not selected pending legal scientific fairness and worker-governance gates.}
+

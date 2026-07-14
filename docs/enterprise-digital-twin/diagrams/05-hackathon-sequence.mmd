@@ -1,0 +1,35 @@
+sequenceDiagram
+  actor U as User
+  participant W as Web
+  participant A as API
+  participant T as Temporal
+  participant C as Connector Workers
+  participant P as PostgreSQL
+  participant G as Graph Projection
+  participant M as AI Gateway
+  participant S as Simulation
+  participant J as Jira
+  U->>W: Seed and synchronize demo tenant
+  W->>A: Start reconciliation
+  A->>T: Durable sync workflow
+  T->>C: Fetch allowlisted GitHub and Jira metadata
+  C->>P: Upsert observations claims and outbox
+  P-->>G: Rebuildable projection events
+  U->>W: Why is launch at risk?
+  W->>A: Authorized question
+  A->>M: Permission-trimmed evidence and graph tools
+  M-->>U: Cited answer or abstention
+  U->>W: Confirm scenario assumptions
+  W->>S: Seeded PERT Monte Carlo run
+  S-->>U: p50 p80 p95 critical path and sensitivity
+  U->>W: Draft remediation
+  W->>A: Exact Jira preview
+  A-->>U: Immutable payload awaiting two approvals
+  U->>A: First approval
+  actor V as Second approver
+  V->>A: Second approval
+  A->>T: Idempotent action workflow
+  T->>J: Upsert remediation issue once
+  J-->>A: Provider receipt
+  A-->>U: Audit and rollback option
+

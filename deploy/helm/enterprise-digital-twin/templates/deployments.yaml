@@ -1,0 +1,71 @@
+{{- $root := . -}}
+{{- $workloads := list
+  (dict "name" "api" "image" .Values.images.api "replicas" .Values.replicas.api "port" 8080 "health" "/readyz" "resources" .Values.resources.api)
+  (dict "name" "web" "image" .Values.images.web "replicas" .Values.replicas.web "port" 3000 "health" "/" "resources" .Values.resources.web)
+  (dict "name" "sync-worker" "image" .Values.images.syncWorker "replicas" .Values.replicas.syncWorker "port" 8090 "health" "/healthz" "resources" .Values.resources.syncWorker)
+  (dict "name" "ai-worker" "image" .Values.images.aiWorker "replicas" .Values.replicas.aiWorker "port" 8080 "health" "/health/ready" "resources" .Values.resources.aiWorker)
+-}}
+{{- range $index, $workload := $workloads }}
+{{- if $index }}
+---
+{{- end }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: edt-{{ $workload.name }}
+  labels:
+    {{- include "edt.labels" $root | nindent 4 }}
+    app.kubernetes.io/component: {{ $workload.name }}
+spec:
+  replicas: {{ $workload.replicas }}
+  revisionHistoryLimit: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate: {maxUnavailable: 0, maxSurge: 1}
+  selector:
+    matchLabels: {app.kubernetes.io/instance: {{ $root.Release.Name }}, app.kubernetes.io/component: {{ $workload.name }}}
+  template:
+    metadata:
+      labels: {app.kubernetes.io/instance: {{ $root.Release.Name }}, app.kubernetes.io/component: {{ $workload.name }}}
+    spec:
+      serviceAccountName: {{ include "edt.serviceAccountName" $root }}
+      automountServiceAccountToken: false
+      securityContext: {runAsNonRoot: true, seccompProfile: {type: RuntimeDefault}}
+      imagePullSecrets:
+        {{- toYaml $root.Values.global.imagePullSecrets | nindent 8 }}
+      containers:
+        - name: {{ $workload.name }}
+          image: "{{ $workload.image.repository }}:{{ $workload.image.tag }}"
+          imagePullPolicy: {{ $workload.image.pullPolicy }}
+          securityContext: {allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: {drop: ["ALL"]}}
+          ports: [{name: http, containerPort: {{ $workload.port }}, protocol: TCP}]
+          env:
+            - {name: PORT, value: {{ $workload.port | quote }}}
+            {{- if eq $workload.name "api" }}
+            - {name: DATABASE_URL, valueFrom: {secretKeyRef: {name: {{ $root.Values.global.existingSecret }}, key: {{ $root.Values.secretKeys.databaseUrl }}}}}
+            - {name: EDT_REQUIRE_POSTGRES, value: {{ $root.Values.config.requirePostgres | quote }}}
+            - {name: EDT_ALLOW_ORACLE_FALLBACK, value: {{ $root.Values.config.allowOracleFallback | quote }}}
+            - {name: EDT_DEMO_AUTH, value: {{ $root.Values.config.demoAuth | quote }}}
+            - {name: EDT_FROZEN_CLOCK, value: {{ $root.Values.config.frozenClock | quote }}}
+            - {name: AI_WORKER_URL, value: {{ $root.Values.config.aiWorkerUrl | quote }}}
+            - {name: WEB_ORIGIN, value: {{ $root.Values.config.webOrigin | quote }}}
+            {{- else if eq $workload.name "sync-worker" }}
+            - {name: DATABASE_URL, valueFrom: {secretKeyRef: {name: {{ $root.Values.global.existingSecret }}, key: {{ $root.Values.secretKeys.databaseUrl }}}}}
+            - {name: NEO4J_URI, value: {{ $root.Values.config.neo4jUri | quote }}}
+            - {name: NEO4J_USER, valueFrom: {secretKeyRef: {name: {{ $root.Values.global.existingSecret }}, key: {{ $root.Values.secretKeys.neo4jUser }}}}}
+            - {name: NEO4J_PASSWORD, valueFrom: {secretKeyRef: {name: {{ $root.Values.global.existingSecret }}, key: {{ $root.Values.secretKeys.neo4jPassword }}}}}
+            - {name: S3_ENDPOINT, value: {{ $root.Values.config.s3Endpoint | quote }}}
+            - {name: S3_REGION, value: {{ $root.Values.config.s3Region | quote }}}
+            - {name: S3_SOURCE_BUCKET, value: {{ $root.Values.config.sourceBucket | quote }}}
+            - {name: S3_ACCESS_KEY_ID, valueFrom: {secretKeyRef: {name: {{ $root.Values.global.existingSecret }}, key: {{ $root.Values.secretKeys.s3AccessKeyId }}}}}
+            - {name: S3_SECRET_ACCESS_KEY, valueFrom: {secretKeyRef: {name: {{ $root.Values.global.existingSecret }}, key: {{ $root.Values.secretKeys.s3SecretAccessKey }}}}}
+            - {name: TEMPORAL_ADDRESS, value: {{ $root.Values.config.temporalAddress | quote }}}
+            - {name: TEMPORAL_NAMESPACE, value: {{ $root.Values.config.temporalNamespace | quote }}}
+            {{- end }}
+          readinessProbe: {httpGet: {path: {{ $workload.health | quote }}, port: http}, initialDelaySeconds: 5, periodSeconds: 5, timeoutSeconds: 2, failureThreshold: 6}
+          livenessProbe: {httpGet: {path: {{ $workload.health | quote }}, port: http}, initialDelaySeconds: 15, periodSeconds: 10, timeoutSeconds: 2, failureThreshold: 3}
+          resources:
+            {{- toYaml $workload.resources | nindent 12 }}
+          volumeMounts: [{name: tmp, mountPath: /tmp}]
+      volumes: [{name: tmp, emptyDir: {sizeLimit: 128Mi}}]
+{{- end }}

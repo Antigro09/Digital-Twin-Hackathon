@@ -1,0 +1,27 @@
+{
+  "schema_version": "1.0",
+  "observation_id": "43000000-0000-4000-8000-000000000184",
+  "tenant_id": "10000000-0000-4000-8000-000000000001",
+  "installation_id": "30000000-0000-4000-8000-000000000002",
+  "provider": "github",
+  "source_key": "aster-labs/identity-service#184",
+  "source_revision": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "ontology_candidate_type": "edt.engineering.PullRequest",
+  "attributes": [
+    {"predicate": "edt.engineering.title", "value": "Finalize token migration", "value_type": "string", "classification": "confidential", "authority": "source"},
+    {"predicate": "edt.engineering.state", "value": "open", "value_type": "string", "classification": "internal", "authority": "source"},
+    {"predicate": "edt.engineering.updated_at", "value": "2026-07-13T15:47:00Z", "value_type": "date-time", "classification": "internal", "authority": "source"}
+  ],
+  "relationships": [
+    {"predicate": "edt.engineering.implements", "target_source_key": "AST-142", "classification": "confidential", "confidence": 1.0}
+  ],
+  "source_acl": {"acl_class": "aster-identity-restricted", "visibility": "repository", "principal_ids": ["20000000-0000-4000-8000-000000000001"], "permission_revision": "github-installation-aster-v12"},
+  "effective_time": {"valid_from": "2026-07-13T15:47:00Z", "valid_to": null},
+  "source_locator": {"application_path": "/evidence/44000000-0000-4000-8000-000000000184", "provider_url": "https://github.com/aster-labs/identity-service/pull/184"},
+  "parser_version": "1.0.0",
+  "mapping_id": "github.pull-request.h1",
+  "mapping_version": "1.0.0",
+  "raw_payload_sha256": "711b6b41953e9f7dfbd14b587ecbafcd5e0847b2a39f45320cbbebf5b6e109ae",
+  "warnings": [],
+  "status": "active"
+}

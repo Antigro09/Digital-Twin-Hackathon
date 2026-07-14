@@ -1,0 +1,169 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://enterprise-digital-twin.example/schemas/scenario.schema.json",
+  "title": "Confirmed Launch Delay Scenario",
+  "description": "Immutable intervention envelope. Work items, dependencies, and capacities remain in the referenced sealed simulation snapshot.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["scenario_id", "tenant_id", "snapshot_id", "snapshot_hash", "name", "target_date", "model_version", "calendar_version", "compiler_version", "seed", "sample_count", "interventions", "assumptions", "confirmed_by", "confirmed_at", "scenario_digest"],
+  "properties": {
+    "scenario_id": {"type": "string", "format": "uuid"},
+    "tenant_id": {"type": "string", "format": "uuid", "description": "Server-derived internal tenant binding; omitted from public draft commands."},
+    "snapshot_id": {"type": "string", "format": "uuid"},
+    "snapshot_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "name": {"type": "string", "minLength": 1, "maxLength": 200},
+    "target_date": {"type": ["string", "null"], "format": "date"},
+    "model_version": {"const": "pert-monte-carlo/1.0.0"},
+    "calendar_version": {"type": "string", "minLength": 1, "maxLength": 100},
+    "compiler_version": {"type": "string", "minLength": 1, "maxLength": 100},
+    "seed": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]{0,19})$",
+      "description": "Unsigned 64-bit integer encoded as a decimal string. Implementations also enforce a maximum of 18446744073709551615."
+    },
+    "sample_count": {"const": 50000},
+    "interventions": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 50,
+      "items": {"$ref": "#/$defs/Intervention"}
+    },
+    "assumptions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["assumption_id", "statement", "status", "source"],
+        "properties": {
+          "assumption_id": {"type": "string", "format": "uuid"},
+          "statement": {"type": "string", "minLength": 1, "maxLength": 2000},
+          "status": {"enum": ["confirmed", "inferred_from_evidence", "missing", "contested"]},
+          "source": {"enum": ["user", "evidence", "engine_default", "confirmed_imputation"]},
+          "evidence_ids": {"type": "array", "uniqueItems": true, "items": {"type": "string", "format": "uuid"}}
+        }
+      }
+    },
+    "confirmed_by": {"type": "string", "format": "uuid"},
+    "confirmed_at": {"type": "string", "format": "date-time"},
+    "scenario_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+  },
+  "$defs": {
+    "Intervention": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "work_item_id", "optimistic_days", "most_likely_days", "pessimistic_days"],
+          "properties": {
+            "type": {"const": "set_duration_estimate"},
+            "work_item_id": {"type": "string", "format": "uuid"},
+            "optimistic_days": {"type": "number", "minimum": 0, "maximum": 1300},
+            "most_likely_days": {"type": "number", "minimum": 0, "maximum": 1300},
+            "pessimistic_days": {"type": "number", "minimum": 0, "maximum": 1300}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "work_item_id", "delta_workdays"],
+          "properties": {
+            "type": {"const": "shift_completion_distribution"},
+            "work_item_id": {"type": "string", "format": "uuid"},
+            "delta_workdays": {"type": "integer", "minimum": -260, "maximum": 260}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "work_item_id", "earliest_start"],
+          "properties": {
+            "type": {"const": "set_earliest_start"},
+            "work_item_id": {"type": "string", "format": "uuid"},
+            "earliest_start": {"type": ["string", "null"], "format": "date-time"}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "predecessor_work_item_id", "successor_work_item_id", "lag_workdays"],
+          "properties": {
+            "type": {"const": "add_dependency"},
+            "predecessor_work_item_id": {"type": "string", "format": "uuid"},
+            "successor_work_item_id": {"type": "string", "format": "uuid"},
+            "lag_workdays": {"type": "number", "minimum": 0, "maximum": 1300}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "predecessor_work_item_id", "successor_work_item_id"],
+          "properties": {
+            "type": {"const": "remove_dependency"},
+            "predecessor_work_item_id": {"type": "string", "format": "uuid"},
+            "successor_work_item_id": {"type": "string", "format": "uuid"}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "work_item_id"],
+          "properties": {
+            "type": {"const": "remove_scope"},
+            "work_item_id": {"type": "string", "format": "uuid"}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "team_id", "capacity_delta"],
+          "properties": {
+            "type": {"const": "change_team_capacity"},
+            "team_id": {"type": "string", "format": "uuid"},
+            "capacity_delta": {"type": "integer", "minimum": -99, "maximum": 99}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "work_item_id", "resolution_date"],
+          "properties": {
+            "type": {"const": "resolve_external_blocker"},
+            "work_item_id": {"type": "string", "format": "uuid"},
+            "resolution_date": {"type": "string", "format": "date-time"}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "work_item_id", "actual_finish"],
+          "properties": {
+            "type": {"const": "mark_task_completed"},
+            "work_item_id": {"type": "string", "format": "uuid"},
+            "actual_finish": {"type": "string", "format": "date-time"}
+          }
+        }
+      ]
+    }
+  },
+  "allOf": [
+    {"description": "The compiler validates PERT ordering, dependency existence and acyclicity, capacity bounds after deltas, non-negative shifted durations, calendar constraints, and common-random-number preservation before confirmation."}
+  ],
+  "examples": [{
+    "scenario_id": "70000000-0000-4000-8000-000000000001",
+    "tenant_id": "10000000-0000-4000-8000-000000000001",
+    "snapshot_id": "71000000-0000-4000-8000-000000000001",
+    "snapshot_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "name": "AST-142 completes five working days earlier",
+    "target_date": "2026-09-15",
+    "model_version": "pert-monte-carlo/1.0.0",
+    "calendar_version": "aster-working-calendar/1.0.0",
+    "compiler_version": "scenario-compiler/1.0.0",
+    "seed": "20260713",
+    "sample_count": 50000,
+    "interventions": [{"type": "shift_completion_distribution", "work_item_id": "116ab4b3-b108-5f91-ab7e-111f7fba1d45", "delta_workdays": -5}],
+    "assumptions": [],
+    "confirmed_by": "73000000-0000-4000-8000-000000000001",
+    "confirmed_at": "2026-07-13T16:00:00Z",
+    "scenario_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  }]
+}

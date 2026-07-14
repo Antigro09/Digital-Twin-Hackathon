@@ -1,0 +1,15 @@
+erDiagram
+  TENANT ||--o{ SOURCE_OBJECT : owns
+  TENANT ||--o{ ENTITY : owns
+  SOURCE_OBJECT ||--o{ EVIDENCE : yields
+  SOURCE_ACL ||--o{ EVIDENCE : constrains
+  ENTITY ||--o{ ENTITY_VERSION : versions
+  ENTITY ||--o{ CLAIM : subject
+  CLAIM }o--o{ EVIDENCE : supported_by
+  CLAIM }o--o{ SOURCE_ACL : constrained_by
+  CLAIM }o--|| ONTOLOGY_TYPE : validates_against
+  CLAIM }o--o{ RELATIONSHIP : projects_to
+  ENTITY ||--o{ RESOLUTION_DECISION : candidate
+  ONTOLOGY_PACKAGE ||--o{ ONTOLOGY_TYPE : defines
+  OUTBOX_EVENT ||--o{ PROJECTION_CHECKPOINT : advances
+

@@ -1,0 +1,219 @@
+name: enterprise-digital-twin
+
+services:
+  postgres:
+    image: postgres:17.5-bookworm
+    environment:
+      POSTGRES_DB: edt
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-edt-local-postgres-only}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d edt"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+    networks: [data]
+
+  temporal:
+    image: temporalio/auto-setup:1.27.2
+    environment:
+      DB: postgres12
+      DB_PORT: 5432
+      POSTGRES_USER: postgres
+      POSTGRES_PWD: ${POSTGRES_PASSWORD:-edt-local-postgres-only}
+      POSTGRES_SEEDS: postgres
+      BIND_ON_IP: 0.0.0.0
+      TEMPORAL_ADDRESS: temporal:7233
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "7233:7233"
+    healthcheck:
+      test: ["CMD", "temporal", "operator", "cluster", "health", "--address", "127.0.0.1:7233"]
+      interval: 5s
+      timeout: 5s
+      start_period: 10s
+      retries: 30
+    restart: unless-stopped
+    networks: [edge, control, data]
+
+  temporal-ui:
+    image: temporalio/ui:2.34.0
+    environment:
+      TEMPORAL_ADDRESS: temporal:7233
+      TEMPORAL_CORS_ORIGINS: http://localhost:${EDT_WEB_PORT:-3000}
+    depends_on:
+      temporal:
+        condition: service_healthy
+    ports:
+      - "${TEMPORAL_UI_PORT:-8233}:8080"
+    restart: unless-stopped
+    networks: [edge, control]
+
+  neo4j:
+    image: neo4j:5.26.8-community
+    environment:
+      NEO4J_AUTH: neo4j/${NEO4J_PASSWORD:-edt-local-neo4j-only}
+      NEO4J_server_memory_heap_initial__size: 256m
+      NEO4J_server_memory_heap_max__size: 512m
+      NEO4J_server_memory_pagecache_size: 256m
+    volumes:
+      - neo4j-data:/data
+    ports:
+      - "${NEO4J_HTTP_PORT:-7474}:7474"
+      - "${NEO4J_BOLT_PORT:-7687}:7687"
+    healthcheck:
+      test: ["CMD-SHELL", "cypher-shell -u neo4j -p \"$${NEO4J_AUTH#*/}\" 'RETURN 1' >/dev/null 2>&1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+    networks: [edge, data]
+
+  valkey:
+    image: valkey/valkey:8.1.3-alpine
+    command: ["valkey-server", "--save", "", "--appendonly", "no", "--maxmemory", "128mb", "--maxmemory-policy", "allkeys-lru"]
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+    networks: [data]
+
+  minio:
+    image: quay.io/minio/minio:RELEASE.2025-04-22T22-12-26Z
+    command: ["server", "/data", "--console-address", ":9001"]
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-edtminio}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-edt-local-minio-only}
+    volumes:
+      - minio-data:/data
+    ports:
+      - "${MINIO_API_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+    networks: [edge, data]
+
+  ai-worker:
+    build:
+      context: ./apps/ai-worker
+      dockerfile: Dockerfile
+    environment:
+      PYTHONHASHSEED: "0"
+    ports:
+      - "${EDT_AI_PORT:-8010}:8080"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/health/ready', timeout=2)"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+    networks: [control]
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    environment:
+      PORT: 8080
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-edt-local-postgres-only}@postgres:5432/edt
+      EDT_REQUIRE_POSTGRES: "true"
+      EDT_AUTO_MIGRATE: "true"
+      EDT_DEMO_AUTH: "true"
+      EDT_FROZEN_CLOCK: "true"
+      EDT_ALLOW_ORACLE_FALLBACK: "false"
+      AI_WORKER_URL: http://ai-worker:8080
+      WEB_ORIGIN: http://localhost:${EDT_WEB_PORT:-3000}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      ai-worker:
+        condition: service_healthy
+    ports:
+      - "${EDT_API_PORT:-8080}:8080"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8080/readyz').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+    networks: [edge, control, data]
+
+  sync-worker:
+    build:
+      context: .
+      dockerfile: apps/sync-worker/Dockerfile
+    environment:
+      PORT: 8090
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-edt-local-postgres-only}@postgres:5432/edt
+      S3_ENDPOINT: http://minio:9000
+      S3_REGION: us-east-1
+      S3_ACCESS_KEY_ID: ${MINIO_ROOT_USER:-edtminio}
+      S3_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD:-edt-local-minio-only}
+      S3_SOURCE_BUCKET: edt-source-payloads
+      NEO4J_URI: bolt://neo4j:7687
+      NEO4J_USER: neo4j
+      NEO4J_PASSWORD: ${NEO4J_PASSWORD:-edt-local-neo4j-only}
+      TEMPORAL_ADDRESS: temporal:7233
+      TEMPORAL_NAMESPACE: default
+      TEMPORAL_SYNC_TASK_QUEUE: edt-sync-v1
+    depends_on:
+      api:
+        condition: service_healthy
+      neo4j:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      temporal:
+        condition: service_healthy
+    ports:
+      - "${EDT_SYNC_PORT:-8090}:8090"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8090/healthz').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+    networks: [edge, control, data]
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:${EDT_API_PORT:-8080}
+        NEXT_PUBLIC_ENABLE_DEMO_DATA: "false"
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "${EDT_WEB_PORT:-3000}:3000"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+    networks: [edge]
+
+networks:
+  edge: {}
+  control:
+    internal: true
+  data:
+    internal: true
+
+volumes:
+  postgres-data: {}
+  neo4j-data: {}
+  minio-data: {}

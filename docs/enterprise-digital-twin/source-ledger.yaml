@@ -1,0 +1,97 @@
+schema_version: 1
+sources:
+  - id: SRC-001
+    title: Approved Enterprise Digital Twin implementation plan
+    type: user-approved-plan
+    effective_date: 2026-07-13
+    authority: normative
+  - id: SRC-002
+    title: OpenAI Responses API migration guidance
+    type: primary-technical-source
+    url: https://developers.openai.com/api/docs/guides/migrate-to-responses
+    accessed: 2026-07-13
+    authority: informative-current-product-fact
+  - id: SRC-003
+    title: OpenAI model guidance
+    type: primary-technical-source
+    url: https://developers.openai.com/api/docs/guides/latest-model
+    accessed: 2026-07-13
+    authority: informative-current-product-fact
+  - id: SRC-004
+    title: OpenAI agent safety guidance
+    type: primary-technical-source
+    url: https://developers.openai.com/api/docs/guides/agent-builder-safety
+    accessed: 2026-07-13
+    authority: informative-current-product-fact
+  - id: SRC-005
+    title: OpenAI evaluation best practices
+    type: primary-technical-source
+    url: https://developers.openai.com/api/docs/guides/evaluation-best-practices
+    accessed: 2026-07-13
+    authority: informative-current-product-fact
+  - id: SRC-006
+    title: OpenAI Agents SDK guidance
+    type: primary-technical-source
+    url: https://developers.openai.com/api/docs/guides/agents
+    accessed: 2026-07-13
+    authority: informative-current-product-fact
+  - id: SRC-007
+    title: OpenAI Structured Outputs guidance
+    type: primary-technical-source
+    url: https://developers.openai.com/api/docs/guides/structured-outputs
+    accessed: 2026-07-13
+    authority: informative-current-product-fact
+  - id: SRC-008
+    title: OpenAI MCP and connectors guidance
+    type: primary-technical-source
+    url: https://developers.openai.com/api/docs/guides/tools-connectors-mcp
+    accessed: 2026-07-13
+    authority: informative-current-product-fact
+  - id: SRC-009
+    title: GitHub App permission selection
+    type: primary-technical-source
+    url: https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/choosing-permissions-for-a-github-app
+    accessed: 2026-07-13
+    authority: informative-provider-contract
+  - id: SRC-010
+    title: GitHub webhook troubleshooting and delivery behavior
+    type: primary-technical-source
+    url: https://docs.github.com/en/webhooks/testing-and-troubleshooting-webhooks/troubleshooting-webhooks
+    accessed: 2026-07-13
+    authority: informative-provider-contract
+  - id: SRC-011
+    title: Jira OAuth scopes
+    type: primary-technical-source
+    url: https://developer.atlassian.com/cloud/jira/platform/scopes-for-oauth-2-3LO-and-forge-apps/
+    accessed: 2026-07-13
+    authority: informative-provider-contract
+  - id: SRC-012
+    title: Jira Cloud webhook REST API
+    type: primary-technical-source
+    url: https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-webhooks/
+    accessed: 2026-07-13
+    authority: informative-provider-contract
+  - id: SRC-013
+    title: Jira Software webhook guidance
+    type: primary-technical-source
+    url: https://developer.atlassian.com/cloud/jira/software/webhooks/
+    accessed: 2026-07-13
+    authority: informative-provider-contract
+  - id: SRC-014
+    title: Atlassian OAuth 2.0 authorization code flow
+    type: primary-technical-source
+    url: https://developer.atlassian.com/cloud/oauth/getting-started/implementing-oauth-3lo/
+    accessed: 2026-07-13
+    authority: informative-provider-contract
+  - id: SRC-015
+    title: RFC 9457 Problem Details for HTTP APIs
+    type: primary-standard
+    url: https://www.rfc-editor.org/rfc/rfc9457
+    accessed: 2026-07-13
+    authority: normative-external-standard
+  - id: SRC-016
+    title: Jira Cloud REST API edit issue operation
+    type: primary-technical-source
+    url: https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-rest-api-3-issue-issueidorkey-put
+    accessed: 2026-07-13
+    authority: informative-provider-contract

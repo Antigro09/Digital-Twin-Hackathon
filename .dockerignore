@@ -1,0 +1,12 @@
+.git
+.github
+.env
+.venv
+**/.next
+**/dist
+**/node_modules
+**/__pycache__
+**/*.pyc
+output
+tmp
+*.log

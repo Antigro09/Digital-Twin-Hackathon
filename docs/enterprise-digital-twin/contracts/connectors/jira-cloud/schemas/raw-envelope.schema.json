@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://enterprise-digital-twin.example/connectors/jira-cloud/1.0.0/raw-envelope.schema.json",
+  "title": "Jira Cloud H1 Immutable Raw Envelope",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "tenant_id", "installation_id", "provider", "delivery_id", "event_type", "external_object_id", "external_version", "observed_at", "source_updated_at", "payload_sha256", "payload_object_uri", "ingest_run_id", "payload"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "tenant_id": {"type": "string", "format": "uuid"},
+    "installation_id": {"type": "string", "format": "uuid"},
+    "provider": {"const": "jira"},
+    "delivery_id": {"type": "string", "minLength": 1, "maxLength": 255},
+    "event_type": {"enum": ["jira:issue_created", "jira:issue_updated", "jira:issue_deleted", "comment_created", "comment_updated", "comment_deleted", "poll.issue"]},
+    "external_object_id": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{1,19}-[1-9][0-9]*$"},
+    "external_version": {"type": "string", "pattern": "^[1-9][0-9]*$"},
+    "observed_at": {"type": "string", "format": "date-time"},
+    "source_updated_at": {"type": ["string", "null"], "format": "date-time"},
+    "payload_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "payload_object_uri": {"type": "string", "pattern": "^s3://edt-fixtures/tenant/[0-9a-f-]{36}/connector/[0-9a-f-]{36}/sha256/[a-f0-9]{64}$"},
+    "ingest_run_id": {"type": "string", "format": "uuid"},
+    "payload": {"$ref": "raw-payload.schema.json"}
+  }
+}

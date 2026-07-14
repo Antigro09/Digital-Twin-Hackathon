@@ -1,0 +1,110 @@
+schema_version: 1
+specification:
+  id: EDT
+  name: Enterprise Digital Twin Architecture Blueprint
+  version: 1.0.0-rc.1
+  status: committed
+  release_stage: candidate
+  published_on: 2026-07-13
+  normative_root: docs/enterprise-digital-twin
+  default_horizon: H1
+documents:
+  - chapters/01-product-vision.md
+  - chapters/02-reference-workload.md
+  - chapters/03-system-architecture.md
+  - chapters/04-technology-stack.md
+  - chapters/05-data-knowledge-graph.md
+  - chapters/06-ingestion-connectors-sync.md
+  - chapters/07-ai-agents-reasoning.md
+  - chapters/08-simulation-prediction.md
+  - chapters/09-security-privacy-compliance.md
+  - chapters/10-scalability-reliability-observability.md
+  - chapters/11-ux-visualizations.md
+  - chapters/12-apis-developer-platform.md
+  - chapters/13-deployment-operations.md
+  - chapters/14-testing-evaluation-dx.md
+  - chapters/15-roadmap-research.md
+  - chapters/16-architecture-audit.md
+normative_catalogs:
+  - source-ledger.yaml
+  - catalogs/requirements.yaml
+  - catalogs/quality-attributes.yaml
+  - catalogs/traceability.yaml
+  - catalogs/components.yaml
+  - catalogs/technologies.yaml
+  - catalogs/ontology.yaml
+  - catalogs/agents.yaml
+  - catalogs/connectors.yaml
+  - catalogs/screens.yaml
+  - catalogs/simulations.yaml
+  - catalogs/controls.yaml
+  - catalogs/risks.yaml
+  - catalogs/acceptance.yaml
+  - catalogs/tests-evaluations.yaml
+  - catalogs/roadmap.yaml
+normative_contracts:
+  - contracts/openapi/enterprise-digital-twin.openapi.yaml
+  - contracts/asyncapi/events.asyncapi.yaml
+  - contracts/graphql/schema.graphql
+  - contracts/proto/digital_twin.proto
+  - contracts/schemas/canonical.schema.json
+  - contracts/schemas/scenario.schema.json
+  - contracts/schemas/simulation-snapshot.schema.json
+  - contracts/schemas/connector-manifest.schema.json
+  - contracts/schemas/ontology-package.schema.json
+  - contracts/schemas/plugin-manifest.schema.json
+  - contracts/schemas/agent-profile.schema.json
+  - contracts/schemas/workflow-definition.schema.json
+  - contracts/schemas/ui-panel.schema.json
+  - contracts/schemas/sdk-contract.schema.json
+  - contracts/schemas/cli-contract.schema.json
+  - contracts/mcp-manifest.json
+  - contracts/connectors/github/manifest.json
+  - contracts/connectors/github/schemas/raw-envelope.schema.json
+  - contracts/connectors/github/schemas/raw-payload.schema.json
+  - contracts/connectors/github/schemas/normalized-observation.schema.json
+  - contracts/connectors/github/schemas/cursor.schema.json
+  - contracts/connectors/github/schemas/ontology-mapping.schema.json
+  - contracts/connectors/jira-cloud/manifest.json
+  - contracts/connectors/jira-cloud/schemas/raw-envelope.schema.json
+  - contracts/connectors/jira-cloud/schemas/raw-payload.schema.json
+  - contracts/connectors/jira-cloud/schemas/normalized-observation.schema.json
+  - contracts/connectors/jira-cloud/schemas/cursor.schema.json
+  - contracts/connectors/jira-cloud/schemas/ontology-mapping.schema.json
+normative_fixtures:
+  - fixtures/h1/seed-manifest.yaml
+  - fixtures/h1/source-fixtures.yaml
+  - fixtures/h1/identity-mappings.yaml
+  - fixtures/h1/permission-matrix.yaml
+  - fixtures/h1/ground-truth-oracle.yaml
+  - fixtures/h1/connectors/github-pr-184.valid.payload.json
+  - fixtures/h1/connectors/github-pr-184.invalid.payload.json
+  - fixtures/h1/connectors/github-pr-184.valid.raw.json
+  - fixtures/h1/connectors/github-pr-184.invalid.raw.json
+  - fixtures/h1/connectors/github-pr-184.valid.observation.json
+  - fixtures/h1/connectors/github-pr.mapping.json
+  - fixtures/h1/connectors/jira-ast-142.valid.payload.json
+  - fixtures/h1/connectors/jira-ast-142.invalid.payload.json
+  - fixtures/h1/connectors/jira-ast-142.valid.raw.json
+  - fixtures/h1/connectors/jira-ast-142.invalid.raw.json
+  - fixtures/h1/connectors/jira-ast-142.valid.observation.json
+  - fixtures/h1/connectors/jira-issue.mapping.json
+generated_outputs:
+  markdown: output/enterprise-digital-twin-blueprint.md
+  html: output/html/enterprise-digital-twin-blueprint.html
+  pdf: output/pdf/enterprise-digital-twin-blueprint.pdf
+  coverage: output/traceability-report.json
+  coverage_markdown: output/traceability-report.md
+  audit_dossier: output/audit-remediation-dossier.md
+release_gates:
+  traceability_coverage_percent: 100
+  maximum_open_critical_risks: 0
+  maximum_open_high_risks: 0
+  consecutive_clear_reviews: 2
+precedence:
+  - accepted_adrs
+  - machine_readable_contracts
+  - security_privacy_ai_controls
+  - chapters
+  - diagrams
+  - examples

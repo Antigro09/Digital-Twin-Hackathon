@@ -1,0 +1,129 @@
+schema_version: 1
+semantics: A test or evaluation covers only the exact REQ/QAR identifiers enumerated in covers. Prefix inheritance is prohibited in this catalog.
+tests_evaluations:
+  - id: TST-GOV-001
+    title: Normative specification governance conformance
+    kind: document_conformance
+    horizons: [H1]
+    owners: [architecture-governance]
+    method: Run the blueprint validator, regenerate editions and reports, and independently inspect precedence, identifiers, citations, review gates, and frozen-scope trace expansion.
+    oracle: Zero validation findings; generated artifacts match the manifest; each exact covered identifier has all mandatory trace dimensions.
+    evidence: output/test-evidence/TST-GOV-001.json
+    covers: [REQ-GOV-001, REQ-GOV-002, REQ-GOV-003, REQ-GOV-004]
+  - id: TST-PROD-001
+    title: Product boundary and demo outcome review
+    kind: acceptance_review
+    horizons: [H1, H2]
+    owners: [product-architecture]
+    method: Replay the frozen demo narrative and design-partner scorecard against personas, non-goals, accessibility principles, source-backed claims, and horizon metrics.
+    oracle: Every claimed outcome has a measurable metric and source or is explicitly labeled an assumption; excluded workforce scoring remains absent.
+    evidence: output/test-evidence/TST-PROD-001.json
+    covers: [REQ-PROD-001, REQ-PROD-002, REQ-PROD-003, REQ-PROD-004, REQ-PROD-005]
+  - id: TST-ARCH-001
+    title: Workload topology and portability verification
+    kind: architecture_test
+    horizons: [H1, H2, H3, H4]
+    owners: [platform-architecture]
+    method: Validate container boundaries, durable workflow and outbox topology, system-of-record assignments, deployment profiles, and benchmark-gated transition records against the accepted ADRs.
+    oracle: The four H1 workloads deploy with only adopted dependencies; conditional technologies have measurable triggers and no undeclared authority.
+    evidence: output/test-evidence/TST-ARCH-001.json
+    covers: [REQ-ARCH-001, REQ-ARCH-002, REQ-ARCH-003, REQ-ARCH-004, REQ-ARCH-005, REQ-ARCH-006, REQ-ARCH-007]
+  - id: TST-TEN-001
+    title: Tenant isolation and authorization adversarial suite
+    kind: security_test
+    horizons: [H1]
+    owners: [security-engineering, data-platform]
+    method: Exercise server-derived context, RLS, tenant-qualified relations, namespace isolation, ACL revocation, cache barriers, delegation ceilings, and cross-tenant identifier substitution.
+    oracle: Zero cross-tenant existence or content disclosure and no authorization decision derived from caller-supplied tenant context.
+    evidence: output/test-evidence/TST-TEN-001.json
+    covers: [REQ-TEN-001, REQ-TEN-002, REQ-TEN-003, REQ-TEN-004, REQ-TEN-005]
+  - id: TST-DATA-001
+    title: Canonical data, provenance, projection, and lifecycle suite
+    kind: contract_test
+    horizons: [H1, H2]
+    owners: [data-platform]
+    method: Validate canonical schemas, tenant-qualified keys, claim/evidence chains, reversible resolution, deterministic graph rebuilds, ontology extension constraints, retention, deletion, and permission revocation.
+    oracle: Replays are byte-identical, projections rebuild from PostgreSQL/object storage, provenance is complete, and deletion/revocation removes every serving path within the declared SLO.
+    evidence: output/test-evidence/TST-DATA-001.json
+    covers: [REQ-DATA-001, REQ-DATA-002, REQ-DATA-003, REQ-DATA-004, REQ-DATA-005, REQ-DATA-006, REQ-DATA-007, REQ-DATA-008, REQ-DATA-009, QAR-PRV-001]
+  - id: TST-CON-001
+    title: GitHub and Jira connector certification suite
+    kind: contract_test
+    horizons: [H1, H2]
+    owners: [connector-platform]
+    method: Validate package manifests, content-addressed schemas, positive and negative fixtures, exact permissions/events/egress, duplicate and out-of-order ingress, cursor recovery, reconciliation, tombstones, and connector SDK lifecycle behavior.
+    oracle: Only frozen allowlists validate; retries and recovery produce deterministic observations; invalid, replayed, oversized, or misbound input has no canonical effect.
+    evidence: output/test-evidence/TST-CON-001.json
+    covers: [REQ-CON-001, REQ-CON-002, REQ-CON-003, REQ-CON-004, REQ-CON-005, QAR-SYNC-001, QAR-COR-001]
+  - id: TST-AI-001
+    title: Grounded AI safety and quality evaluation
+    kind: evaluation
+    horizons: [H1]
+    owners: [ai-platform, security-engineering]
+    method: Run golden and adversarial cases for citations, abstention, ACL-filtered context, tool selection and arguments, trace grading, prompt injection, workload routing, approved fallback, cost budgets, and model failure.
+    oracle: Thresholds in the acceptance catalog pass on pinned snapshots; inaccessible evidence never enters context; no unapproved fallback or tool authority is exercised.
+    evidence: output/test-evidence/TST-AI-001.json
+    covers: [REQ-AI-001, REQ-AI-002, REQ-AI-003, REQ-AI-004, REQ-AI-005, REQ-AI-006, REQ-AI-007, REQ-AI-008, QAR-AI-001, QAR-AI-002, QAR-COST-001]
+  - id: TST-ACT-001
+    title: Exact-payload Jira action safety suite
+    kind: security_test
+    horizons: [H1, H3]
+    owners: [workflow-platform, security-engineering]
+    method: Exercise preview canonicalization, two-role approval, expiry, payload/version/credential/policy mutation, replay, at-most-one send, ambiguous result verification, receipt evidence, and authorized compensation.
+    oracle: Every negative case performs zero writes; the approved fixture performs one field-limited PUT; replay returns the original receipt; rollback is idempotent and audited.
+    evidence: output/test-evidence/TST-ACT-001.json
+    covers: [REQ-ACT-001, REQ-ACT-002, REQ-ACT-003, REQ-ACT-004]
+  - id: TST-SIM-001
+    title: Seeded launch-delay simulation verification
+    kind: numerical_test
+    horizons: [H1, H3]
+    owners: [simulation-team]
+    method: Validate scenario schema and compiler, dependency-DAG rejection, seeded PERT sampling, quantile and sensitivity calculations, snapshot immutability, baseline comparison, missing-data warnings, and prohibited inference labels.
+    oracle: Identical snapshots and seeds produce byte-identical forecasts; expected p50/p80/p95 and critical paths match the frozen oracle within declared tolerances.
+    evidence: output/test-evidence/TST-SIM-001.json
+    covers: [REQ-SIM-001, REQ-SIM-002, REQ-SIM-003, REQ-SIM-004, REQ-SIM-005, QAR-SIM-001]
+  - id: TST-UX-001
+    title: Permission-aware UX and accessibility journey suite
+    kind: accessibility_test
+    horizons: [H1]
+    owners: [web-experience]
+    method: Test keyboard and screen-reader journeys for organizational question, citation inspection, context confirmation, scenario comparison, exact Jira preview, dual approval, receipt, and rollback across permission variants.
+    oracle: WCAG-aligned interactions preserve provenance and uncertainty, inaccessible content is not disclosed, and sensitive actions require explicit confirmation states.
+    evidence: output/test-evidence/TST-UX-001.json
+    covers: [REQ-UX-001, REQ-UX-002, REQ-UX-003, REQ-UX-004, QAR-ACC-001]
+  - id: TST-SEC-001
+    title: Security, privacy, and abuse-case verification
+    kind: security_test
+    horizons: [H1, H2]
+    owners: [security-engineering, privacy-office]
+    method: Execute threat-model abuse cases for credential isolation, webhook authenticity, SSRF and egress, malicious connector text, prompt injection, encryption, audit integrity, deletion, incident response, and compliance evidence controls.
+    oracle: Critical controls fail closed, secrets and restricted content are absent from telemetry, deletion evidence is complete, and no prohibited workforce inference is emitted.
+    evidence: output/test-evidence/TST-SEC-001.json
+    covers: [REQ-SEC-001, REQ-SEC-002, REQ-SEC-003, REQ-SEC-004, REQ-SEC-005, REQ-SEC-006, REQ-SEC-007, REQ-SEC-008, QAR-SEC-001, QAR-SEC-002, QAR-SEC-003]
+  - id: TST-REL-001
+    title: Performance, resilience, observability, and recovery suite
+    kind: resilience_test
+    horizons: [H1, H2, H5]
+    owners: [reliability-engineering]
+    method: Load the frozen scale profile and inject database, object, graph, cache, model, connector, network, and regional failures while measuring SLOs, backpressure, recovery, telemetry redaction, RPO, and RTO.
+    oracle: H1/H2 SLOs and recovery objectives pass; authoritative data is not lost; degraded projections fail safely; research-scale claims remain gated.
+    evidence: output/test-evidence/TST-REL-001.json
+    covers: [REQ-REL-001, REQ-REL-002, REQ-REL-003, REQ-REL-004, REQ-REL-005, REQ-REL-006, QAR-AVL-001, QAR-DR-001, QAR-PERF-001, QAR-PERF-002, QAR-PERF-003, QAR-OBS-001]
+  - id: TST-DEV-001
+    title: Public contract, SDK, plugin, and deployment portability suite
+    kind: compatibility_test
+    horizons: [H1, H2]
+    owners: [developer-platform]
+    method: Lint and compatibility-test OpenAPI, AsyncAPI, JSON Schema, GraphQL, Protobuf, MCP, connector/plugin manifests, generated SDK behavior, local Compose, Kubernetes/Helm, and infrastructure profiles.
+    oracle: Normative contracts are valid and backward-compatible within their declared window; plugins cannot exceed tenant policy; adopted deployment profiles use only portable boundaries.
+    evidence: output/test-evidence/TST-DEV-001.json
+    covers: [REQ-DEV-001, REQ-DEV-002, REQ-DEV-003, QAR-PORT-001]
+  - id: TST-VER-001
+    title: Frozen H1 end-to-end and release-gate suite
+    kind: end_to_end_test
+    horizons: [H1]
+    owners: [quality-engineering, architecture-governance]
+    method: Regenerate both synthetic tenants, execute the complete cited-question, seeded-simulation, exact-preview, dual-approval, one-write, replay, receipt, and rollback flow, then run two independent cross-domain reviews.
+    oracle: The frozen oracle and every acceptance identifier pass; coverage is 100 percent across all mandatory dimensions; no Critical/High or unowned committed decision remains.
+    evidence: output/test-evidence/TST-VER-001.json
+    covers: [REQ-VER-001, REQ-VER-002, REQ-VER-003, REQ-VER-004, REQ-VER-005]

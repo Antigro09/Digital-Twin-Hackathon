@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://enterprise-digital-twin.example/schemas/agent-profile.schema.json",
+  "title": "Bounded Agent Capability Profile",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "id", "version", "status", "horizon", "owner", "purpose", "non_goals", "authority", "tools", "handoffs", "budget", "model_policy", "input_schema", "output_schema", "evaluation_gate", "audit"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "id": {"type": "string", "pattern": "^agent\\.[a-z0-9_.-]+$"},
+    "version": {"$ref": "#/$defs/semver"},
+    "status": {"enum": ["committed", "provisional", "research", "rejected"]},
+    "horizon": {"enum": ["H1", "H2", "H3", "H4", "H5"]},
+    "owner": {"type": "string", "minLength": 1},
+    "purpose": {"type": "string", "minLength": 1},
+    "non_goals": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string"}},
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["delegation_intersection", "reads", "reasoning", "simulation", "drafting", "external_mutations", "authority_expansion"],
+      "properties": {
+        "delegation_intersection": {"const": true},
+        "reads": {"type": "boolean"},
+        "reasoning": {"type": "boolean"},
+        "simulation": {"type": "boolean"},
+        "drafting": {"type": "boolean"},
+        "external_mutations": {"type": "array", "uniqueItems": true, "items": {"type": "string"}},
+        "authority_expansion": {"const": false}
+      }
+    },
+    "tools": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "handoffs": {"type": "array", "uniqueItems": true, "items": {"type": "string", "pattern": "^agent\\.[a-z0-9_.-]+$"}},
+    "budget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["max_seconds", "max_tokens", "max_cost_units", "max_tool_calls"],
+      "properties": {
+        "max_seconds": {"type": "integer", "minimum": 1},
+        "max_tokens": {"type": "integer", "minimum": 1},
+        "max_cost_units": {"type": "number", "minimum": 0},
+        "max_tool_calls": {"type": "integer", "minimum": 0}
+      }
+    },
+    "model_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["capability", "pinned_snapshot_required", "approved_fallbacks", "fail_closed"],
+      "properties": {
+        "capability": {"enum": ["difficult_orchestration", "grounded_analysis", "high_volume_extraction", "none"]},
+        "pinned_snapshot_required": {"const": true},
+        "approved_fallbacks": {"type": "array", "uniqueItems": true, "items": {"type": "string"}},
+        "fail_closed": {"const": true}
+      }
+    },
+    "input_schema": {"type": "object"},
+    "output_schema": {"type": "object"},
+    "evaluation_gate": {"type": "string", "minLength": 1},
+    "audit": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string"}},
+    "deprecated_at": {"type": "string", "format": "date-time"},
+    "sunset_at": {"type": "string", "format": "date-time"}
+  },
+  "$defs": {
+    "semver": {"type": "string", "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z.-]+)?$"}
+  }
+}

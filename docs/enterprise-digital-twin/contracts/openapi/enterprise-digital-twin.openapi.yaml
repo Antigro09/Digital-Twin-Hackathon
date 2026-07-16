@@ -18,6 +18,7 @@ security:
 tags:
   - {name: Knowledge}
   - {name: Agents}
+  - {name: AI Intelligence}
   - {name: Simulation}
   - {name: Actions}
   - {name: Connectors}
@@ -587,6 +588,403 @@ paths:
         '412': {$ref: '#/components/responses/Problem'}
         '428': {$ref: '#/components/responses/Problem'}
         default: {$ref: '#/components/responses/Problem'}
+  /v1/event-intelligence/taxonomy:
+    get:
+      tags: [Event Intelligence]
+      operationId: getEventTaxonomy
+      description: Returns the versioned event taxonomy available to the active tenant context. This read grants no graph or workflow authority.
+      security: [{oidc: [event.read], contextHeader: []}, {oidc: [event.read], contextCookie: []}]
+      responses:
+        '200':
+          description: Versioned people project technology business operations external and unknown event types.
+          headers: {Cache-Control: {schema: {type: string, const: 'private, no-store'}}}
+          content: {application/json: {schema: {$ref: '#/components/schemas/EventTaxonomy'}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/event-intelligence/interpretations:
+    post:
+      tags: [Event Intelligence]
+      operationId: interpretReportedEvents
+      description: Treats natural-language text as untrusted data and returns one or more tenant-bounded typed event interpretations, entity candidates, bounded impacts, confidence routing, and safety flags. It does not mutate graph truth.
+      security: [{oidc: [event.create], contextHeader: []}, {oidc: [event.create], contextCookie: []}]
+      parameters: [{$ref: '#/components/parameters/IdempotencyKey'}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [text]
+              properties:
+                text: {type: string, minLength: 3, maxLength: 4000}
+                requested_mode: {type: string, enum: [auto, reality, scenario], default: auto}
+                occurred_at: {type: string, format: date-time}
+      responses:
+        '201':
+          description: Deterministic synthetic event interpretation batch; no current-truth or external write occurred.
+          headers: {Cache-Control: {schema: {type: string, const: 'private, no-store'}}}
+          content: {application/json: {schema: {$ref: '#/components/schemas/EventInterpretationBatch'}}}
+        '422': {$ref: '#/components/responses/Problem'}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/event-intelligence/events:
+    get:
+      tags: [Event Intelligence]
+      operationId: listIntelligenceEvents
+      description: Lists only events created in the server-derived tenant context with no cross-tenant counts or identifiers.
+      security: [{oidc: [event.read], contextHeader: []}, {oidc: [event.read], contextCookie: []}]
+      parameters: [{$ref: '#/components/parameters/PageSize'}, {$ref: '#/components/parameters/PageCursor'}]
+      responses:
+        '200':
+          description: Tenant-scoped event collection.
+          headers: {Cache-Control: {schema: {type: string, const: 'private, no-store'}}}
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [items, next_cursor, has_more]
+                properties:
+                  items: {type: array, maxItems: 100, items: {$ref: '#/components/schemas/IntelligenceEvent'}}
+                  next_cursor: {type: [string, 'null']}
+                  has_more: {type: boolean}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/event-intelligence/events/{eventId}:
+    get:
+      tags: [Event Intelligence]
+      operationId: getIntelligenceEvent
+      security: [{oidc: [event.read], contextHeader: []}, {oidc: [event.read], contextCookie: []}]
+      parameters: [{$ref: '#/components/parameters/EventId'}]
+      responses:
+        '200':
+          description: One tenant-authorized event interpretation with current state and exact-version ETag.
+          headers:
+            Cache-Control: {schema: {type: string, const: 'private, no-store'}}
+            ETag: {description: Strong event version required by subsequent state transitions., schema: {type: string}}
+          content: {application/json: {schema: {$ref: '#/components/schemas/IntelligenceEvent'}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/event-intelligence/events/{eventId}/reviews:
+    post:
+      tags: [Event Intelligence]
+      operationId: reviewIntelligenceEvent
+      description: Freezes human verification, selected authorized entity candidates, reality-or-scenario route, exact impact payload, and the current shared graph snapshot version and hash. Quarantined input cannot be reviewed into a mutation, and applied, rolled-back, or rejected events are immutable terminal history that returns a conflict.
+      security: [{oidc: [event.review], contextHeader: []}, {oidc: [event.review], contextCookie: []}]
+      parameters: [{$ref: '#/components/parameters/EventId'}, {$ref: '#/components/parameters/IdempotencyKey'}, {$ref: '#/components/parameters/IfMatch'}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [expected_version, verification_status, target_mode, entity_resolutions, notes]
+              properties:
+                expected_version: {type: integer, minimum: 1}
+                verification_status: {type: string, enum: [unverified, confirmed, rejected], description: Scenario review preserves unverified factual status; reality review requires confirmed.}
+                target_mode: {type: string, enum: [reality, scenario]}
+                entity_resolutions:
+                  type: array
+                  maxItems: 32
+                  items:
+                    type: object
+                    additionalProperties: false
+                    required: [mention, selected_entity_id]
+                    properties:
+                      mention: {type: string, minLength: 1, maxLength: 256}
+                      selected_entity_id: {type: [string, 'null'], format: uuid}
+                notes: {type: string, minLength: 4, maxLength: 1000, description: Required human review rationale persisted as review_notes on the reviewed event.}
+      responses:
+        '200':
+          description: Reviewed exact interpretation with a new event version, graph snapshot version and hash, payload hash, and ETag.
+          headers:
+            Cache-Control: {schema: {type: string, const: 'private, no-store'}}
+            ETag: {schema: {type: string}}
+          content: {application/json: {schema: {$ref: '#/components/schemas/IntelligenceEvent'}}}
+        '412': {$ref: '#/components/responses/Problem'}
+        '409': {$ref: '#/components/responses/Problem'}
+        '422': {$ref: '#/components/responses/Problem'}
+        '428': {$ref: '#/components/responses/Problem'}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/event-intelligence/events/{eventId}/approval-requests:
+    post:
+      tags: [Event Intelligence]
+      operationId: requestEventMutationApproval
+      description: Creates an approval bound to the exact reviewed payload, event version, graph snapshot version, and graph state hash. Reality updates require distinct operations and security approvers; scenario branches receive only deterministic scenario-policy approval.
+      security: [{oidc: [event.review], contextHeader: []}, {oidc: [event.review], contextCookie: []}]
+      parameters: [{$ref: '#/components/parameters/EventId'}, {$ref: '#/components/parameters/IdempotencyKey'}, {$ref: '#/components/parameters/IfMatch'}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [expected_version, reviewed_payload_hash, reason]
+              properties:
+                expected_version: {type: integer, minimum: 1}
+                reviewed_payload_hash: {type: string, pattern: '^[a-f0-9]{64}$'}
+                reason: {type: string, minLength: 8, maxLength: 500}
+      responses:
+        '201':
+          description: Approval request bound to one event version, reviewed payload, and graph snapshot version and hash.
+          headers: {Cache-Control: {schema: {type: string, const: 'private, no-store'}}}
+          content: {application/json: {schema: {$ref: '#/components/schemas/EventApproval'}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/event-intelligence/approval-requests/{approvalId}:
+    get:
+      tags: [Event Intelligence]
+      operationId: getEventMutationApproval
+      security: [{oidc: [event.read], contextHeader: []}, {oidc: [event.read], contextCookie: []}]
+      parameters: [{$ref: '#/components/parameters/EventApprovalId'}]
+      responses:
+        '200':
+          description: Tenant-authorized exact-payload approval state.
+          headers: {Cache-Control: {schema: {type: string, const: 'private, no-store'}}}
+          content: {application/json: {schema: {$ref: '#/components/schemas/EventApproval'}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/event-intelligence/approval-requests/{approvalId}/decisions:
+    post:
+      tags: [Event Intelligence]
+      operationId: decideEventMutationApproval
+      description: Records one authenticated operations or security decision over the exact reviewed payload. The same actor or role cannot occupy two slots.
+      security: [{oidc: [event.approve], contextHeader: []}, {oidc: [event.approve], contextCookie: []}]
+      parameters: [{$ref: '#/components/parameters/EventApprovalId'}, {$ref: '#/components/parameters/IdempotencyKey'}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [decision, payload_hash]
+              properties:
+                decision: {type: string, enum: [approve, deny]}
+                payload_hash: {type: string, pattern: '^[a-f0-9]{64}$'}
+      responses:
+        '200':
+          description: Updated approval state.
+          headers: {Cache-Control: {schema: {type: string, const: 'private, no-store'}}}
+          content: {application/json: {schema: {$ref: '#/components/schemas/EventApproval'}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/event-intelligence/events/{eventId}/apply:
+    post:
+      tags: [Event Intelligence]
+      operationId: applyIntelligenceEvent
+      description: Reauthorizes and applies one unchanged approved event to a synthetic scenario branch or the shared tenant projection. Scenario branches retain non-authoritative derived proposals; reality receipts contain only live_mutation_eligible allowlisted authoritative operations and fail closed when none exist or any operation is unsupported. Reality application compare-and-swaps both graph version and hash and atomically persists receipt audit application timeline projection and outbox records. It never writes an external HR identity production security or customer system.
+      security: [{oidc: [event.apply], contextHeader: []}, {oidc: [event.apply], contextCookie: []}]
+      parameters: [{$ref: '#/components/parameters/EventId'}, {$ref: '#/components/parameters/IdempotencyKey'}, {$ref: '#/components/parameters/IfMatch'}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [expected_version, reviewed_payload_hash, approval_id]
+              properties:
+                expected_version: {type: integer, minimum: 1}
+                reviewed_payload_hash: {type: string, pattern: '^[a-f0-9]{64}$'}
+                approval_id: {type: string, format: uuid}
+      responses:
+        '200':
+          description: Synthetic apply receipt or the original receipt for an idempotent replay.
+          headers: {Cache-Control: {schema: {type: string, const: 'private, no-store'}}}
+          content: {application/json: {schema: {$ref: '#/components/schemas/EventActionReceipt'}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/event-intelligence/events/{eventId}/rollback:
+    post:
+      tags: [Event Intelligence]
+      operationId: rollbackIntelligenceEvent
+      description: Records an authorized compensating synthetic event when the current shared projection version and state hash still match the applied post-state. The compensating transition receives a new monotonic graph version and is atomically persisted with audit and outbox evidence. History is preserved and no external permission or employment state is restored.
+      security: [{oidc: [event.rollback], contextHeader: []}, {oidc: [event.rollback], contextCookie: []}]
+      parameters: [{$ref: '#/components/parameters/EventId'}, {$ref: '#/components/parameters/IdempotencyKey'}, {$ref: '#/components/parameters/IfMatch'}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [expected_version, applied_payload_hash, reason]
+              properties:
+                expected_version: {type: integer, minimum: 1}
+                applied_payload_hash: {type: string, pattern: '^[a-f0-9]{64}$'}
+                reason: {type: string, minLength: 8, maxLength: 500}
+      responses:
+        '200':
+          description: Idempotent synthetic compensation receipt.
+          headers: {Cache-Control: {schema: {type: string, const: 'private, no-store'}}}
+          content: {application/json: {schema: {$ref: '#/components/schemas/EventActionReceipt'}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/event-intelligence/events/{eventId}/audit:
+    get:
+      tags: [Event Intelligence]
+      operationId: getIntelligenceEventAudit
+      security: [{oidc: [event.read], contextHeader: []}, {oidc: [event.read], contextCookie: []}]
+      parameters: [{$ref: '#/components/parameters/EventId'}]
+      responses:
+        '200':
+          description: Restricted hash-linked audit evidence plus explicit invalid-record, gap, fork, orphan, sequence, empty-chain, and event-completeness diagnostics for this tenant workflow.
+          headers: {Cache-Control: {schema: {type: string, const: 'private, no-store'}}}
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [items, chain_valid, diagnostics]
+                properties:
+                  items: {type: array, maxItems: 100, items: {$ref: '#/components/schemas/EventAuditEvidence'}}
+                  chain_valid: {type: boolean}
+                  diagnostics: {$ref: '#/components/schemas/EventAuditChainDiagnostics'}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/event-intelligence/events/{eventId}/replay:
+    get:
+      tags: [Event Intelligence]
+      operationId: replayIntelligenceEvent
+      description: Reconstructs the tenant-authorized synthetic event transition from persisted application snapshots, receipts, and timeline evidence. This is a read-only reconstruction and performs no mutation.
+      security: [{oidc: [event.read], contextHeader: []}, {oidc: [event.read], contextCookie: []}]
+      parameters: [{$ref: '#/components/parameters/EventId'}]
+      responses:
+        '200':
+          description: Exact replay reconstruction, including graph deltas when persisted snapshots exist.
+          headers: {Cache-Control: {schema: {type: string, const: 'private, no-store'}}}
+          content: {application/json: {schema: {$ref: '#/components/schemas/EventReplay'}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/event-intelligence/timeline:
+    get:
+      tags: [Event Intelligence]
+      operationId: getEventIntelligenceTimeline
+      security: [{oidc: [event.read], contextHeader: []}, {oidc: [event.read], contextCookie: []}]
+      responses:
+        '200':
+          description: Valid-time and system-time synthetic event timeline with branch and reversibility metadata.
+          headers: {Cache-Control: {schema: {type: string, const: 'private, no-store'}}}
+          content: {application/json: {schema: {$ref: '#/components/schemas/EventTimeline'}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/event-intelligence/branches:
+    get:
+      tags: [Event Intelligence]
+      operationId: listEventScenarioBranches
+      security: [{oidc: [event.read], contextHeader: []}, {oidc: [event.read], contextCookie: []}]
+      responses:
+        '200':
+          description: Tenant-scoped baseline and isolated event scenario branches.
+          headers: {Cache-Control: {schema: {type: string, const: 'private, no-store'}}}
+          content: {application/json: {schema: {$ref: '#/components/schemas/EventBranches'}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/event-intelligence/branches/compare:
+    post:
+      tags: [Event Intelligence]
+      operationId: compareEventScenarioBranches
+      description: Compares two tenant-authorized baseline or scenario branches without promoting either branch or mutating shared projection truth.
+      security: [{oidc: [event.read], contextHeader: []}, {oidc: [event.read], contextCookie: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [left_branch_id, right_branch_id]
+              properties:
+                left_branch_id: {type: string, format: uuid}
+                right_branch_id: {type: string, format: uuid}
+      responses:
+        '200':
+          description: Exact branch membership, base-snapshot, state-hash, and timeline comparison.
+          headers: {Cache-Control: {schema: {type: string, const: 'private, no-store'}}}
+          content: {application/json: {schema: {$ref: '#/components/schemas/BranchComparison'}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/ai/status:
+    get:
+      tags: [AI Intelligence]
+      operationId: getAiGatewayStatus
+      description: Reports provider, durable-store, vector-retrieval, and bounded-agent readiness without exposing credentials or accepting a provider selector.
+      x-edt-required-capabilities: [authenticated_membership]
+      responses:
+        '200': {description: AI gateway readiness; a degraded response is healthy but one or more optional provider capabilities are unavailable., headers: {Cache-Control: {schema: {type: string, const: 'private, no-store'}}}, content: {application/json: {schema: {$ref: '#/components/schemas/AiStatus'}}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/ai/activity:
+    get:
+      tags: [AI Intelligence]
+      operationId: listAiActivity
+      x-edt-authorization-any-of: [connector.admin, 'evidence.read.*']
+      parameters: [{$ref: '#/components/parameters/AiPageSize'}]
+      responses:
+        '200': {description: Actor-scoped redacted AI activity metadata; AI reviewers and administrators may receive the tenant review queue only through separately authorized operations., headers: {Cache-Control: {schema: {type: string, const: 'private, no-store'}}}, content: {application/json: {schema: {$ref: '#/components/schemas/AiActivityList'}}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/ai/agent-runs:
+    post:
+      tags: [AI Intelligence]
+      operationId: runSpecializedAiAgent
+      description: Runs one allowlisted agent through the centralized gateway. The caller cannot select an arbitrary provider model schema tenant or actor. The returned result is a review-only suggestion and never mutates state.
+      x-edt-agent-capabilities:
+        connector.admin: [knowledge_ingestion, entity_resolution, technical_knowledge]
+        scenario.create: [event_understanding]
+        simulation.run: [causal_analysis, simulation_planning, prediction_explanation]
+      parameters: [{$ref: '#/components/parameters/IdempotencyKey'}]
+      requestBody: {required: true, content: {application/json: {schema: {$ref: '#/components/schemas/AiAgentRunRequest'}}}}
+      responses:
+        '202': {description: Real provider-backed structured result with provider usage audit and PENDING_REVIEW suggestion., headers: {Cache-Control: {schema: {type: string, const: 'private, no-store'}}}, content: {application/json: {schema: {$ref: '#/components/schemas/AiAgentRunResult'}}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/ai/retrieval/query:
+    post:
+      tags: [AI Intelligence]
+      operationId: queryPermissionAwareAiKnowledge
+      description: Performs tenant- and ACL-trimmed lexical and, when configured, real-vector retrieval. Permissions are derived server-side.
+      x-edt-required-capabilities: ['evidence.read.*']
+      requestBody: {required: true, content: {application/json: {schema: {$ref: '#/components/schemas/AiRetrievalRequest'}}}}
+      responses:
+        '200': {description: Authorized evidence with provenance and explicit relevance signals., headers: {Cache-Control: {schema: {type: string, const: 'private, no-store'}}}, content: {application/json: {schema: {$ref: '#/components/schemas/AiRetrievalResult'}}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/ai/knowledge/import:
+    post:
+      tags: [AI Intelligence]
+      operationId: importAiKnowledgeDocument
+      description: Validates and deterministically extracts an allowlisted document into the private authorized retrieval corpus. Import itself does not invoke a model; a knowledge-ingestion agent run is separate.
+      x-edt-required-capabilities: [connector.admin]
+      parameters: [{$ref: '#/components/parameters/IdempotencyKey'}]
+      requestBody: {required: true, content: {application/json: {schema: {$ref: '#/components/schemas/AiDocumentImportRequest'}}}}
+      responses:
+        '202': {description: Indexed or quarantined import receipt with provenance and model_invoked false., headers: {Cache-Control: {schema: {type: string, const: 'private, no-store'}}}, content: {application/json: {schema: {$ref: '#/components/schemas/AiDocumentImportReceipt'}}}}
+        '413': {$ref: '#/components/responses/Problem'}
+        '415': {$ref: '#/components/responses/Problem'}
+        '422': {$ref: '#/components/responses/Problem'}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/ai/suggestions:
+    get:
+      tags: [AI Intelligence]
+      operationId: listAiSuggestions
+      x-edt-authorization-any-of: [connector.admin, 'evidence.read.*']
+      parameters:
+        - {$ref: '#/components/parameters/AiPageSize'}
+        - {name: review_decision, in: query, schema: {enum: [approve, reject]}}
+      responses:
+        '200': {description: Actor- and tenant-bound AI suggestions. A review record never changes suggestion status or mutates graph state., headers: {Cache-Control: {schema: {type: string, const: 'private, no-store'}}}, content: {application/json: {schema: {$ref: '#/components/schemas/AiSuggestionList'}}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/ai/suggestions/{suggestionId}/reviews:
+    post:
+      tags: [AI Intelligence]
+      operationId: reviewAiSuggestion
+      description: Records an authenticated human validation decision against the exact suggestion. An approval also persists an evidence-bound validated enterprise-memory record; it does not mutate the graph, simulation, or any external system.
+      x-edt-required-capabilities: [connector.admin]
+      parameters:
+        - {name: suggestionId, in: path, required: true, schema: {type: string, format: uuid}}
+        - {$ref: '#/components/parameters/IdempotencyKey'}
+      requestBody: {required: true, content: {application/json: {schema: {$ref: '#/components/schemas/AiReviewRequest'}}}}
+      responses:
+        '201': {description: Immutable review receipt with mutation_performed false., headers: {Cache-Control: {schema: {type: string, const: 'private, no-store'}}}, content: {application/json: {schema: {$ref: '#/components/schemas/AiReviewReceipt'}}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/ai/learning/outcomes:
+    post:
+      tags: [AI Intelligence]
+      operationId: recordValidatedAiLearningOutcome
+      description: Persists an authenticated human-validated outcome for an approved suggestion as governed learning memory. The cited evidence is re-authorized server-side and the operation cannot mutate graph or simulation state.
+      x-edt-required-capabilities: [connector.admin]
+      parameters: [{$ref: '#/components/parameters/IdempotencyKey'}]
+      requestBody: {required: true, content: {application/json: {schema: {$ref: '#/components/schemas/AiLearningOutcomeRequest'}}}}
+      responses:
+        '201': {description: Evidence-bound validated learning-memory receipt with both mutation flags false., headers: {Cache-Control: {schema: {type: string, const: 'private, no-store'}}}, content: {application/json: {schema: {$ref: '#/components/schemas/AiLearningOutcomeReceipt'}}}}
+        default: {$ref: '#/components/responses/Problem'}
 components:
   securitySchemes:
     oidc:
@@ -604,6 +1002,7 @@ components:
       description: Browser-only HTTP-only Secure SameSite opaque context handle; CSRF controls apply to commands.
   parameters:
     PageSize: {name: page_size, in: query, schema: {type: integer, minimum: 1, maximum: 100, default: 50}}
+    AiPageSize: {name: page_size, in: query, schema: {type: integer, minimum: 1, maximum: 100, default: 25}}
     PageCursor: {name: page_cursor, in: query, schema: {type: string, maxLength: 2048}}
     IdempotencyKey: {name: Idempotency-Key, in: header, required: true, schema: {type: string, minLength: 16, maxLength: 128}}
     IfMatch: {name: If-Match, in: header, required: true, schema: {type: string, minLength: 3, maxLength: 200}}
@@ -613,11 +1012,68 @@ components:
     ApprovalId: {name: approval_id, in: path, required: true, schema: {type: string, format: uuid}}
     AssetId: {name: assetId, in: path, required: true, schema: {type: string, pattern: '^[a-z0-9][a-z0-9_-]{2,127}$'}}
     AssetControlPreviewId: {name: previewId, in: path, required: true, schema: {type: string, format: uuid}}
+    EventId: {name: eventId, in: path, required: true, schema: {type: string, format: uuid}}
+    EventApprovalId: {name: approvalId, in: path, required: true, schema: {type: string, format: uuid}}
   responses:
     Problem:
       description: RFC 9457-compatible error with no unauthorized resource existence disclosure.
       content: {application/problem+json: {schema: {$ref: '../schemas/canonical.schema.json#/$defs/Problem'}}}
   schemas:
+    AiStatus: {$ref: '../schemas/ai-intelligence.schema.json#/$defs/aiStatus'}
+    AiActivityList: {$ref: '../schemas/ai-intelligence.schema.json#/$defs/activityList'}
+    AiAgentRunRequest: {$ref: '../schemas/ai-intelligence.schema.json#/$defs/agentRunRequest'}
+    AiAgentRunResult: {$ref: '../schemas/ai-intelligence.schema.json#/$defs/agentRunResult'}
+    AiRetrievalRequest: {$ref: '../schemas/ai-intelligence.schema.json#/$defs/retrievalRequest'}
+    AiRetrievalResult: {$ref: '../schemas/ai-intelligence.schema.json#/$defs/retrievalResult'}
+    AiDocumentImportRequest: {$ref: '../schemas/ai-intelligence.schema.json#/$defs/documentImportRequest'}
+    AiDocumentImportReceipt: {$ref: '../schemas/ai-intelligence.schema.json#/$defs/documentImportReceipt'}
+    AiSuggestionList: {$ref: '../schemas/ai-intelligence.schema.json#/$defs/suggestionList'}
+    AiReviewRequest: {$ref: '../schemas/ai-intelligence.schema.json#/$defs/reviewRequest'}
+    AiReviewReceipt: {$ref: '../schemas/ai-intelligence.schema.json#/$defs/reviewReceipt'}
+    AiLearningOutcomeRequest: {$ref: '../schemas/ai-intelligence.schema.json#/$defs/learningOutcomeRequest'}
+    AiLearningOutcomeReceipt: {$ref: '../schemas/ai-intelligence.schema.json#/$defs/learningOutcomeReceipt'}
+    IntelligenceEvent: {$ref: '../schemas/event-intelligence.schema.json#/$defs/intelligenceEvent'}
+    EventReview: {$ref: '../schemas/event-intelligence.schema.json#/$defs/eventReview'}
+    EventAuditEvidence: {$ref: '../schemas/event-intelligence.schema.json#/$defs/eventAuditEvidenceApi'}
+    EventAuditChainDiagnostics: {$ref: '../schemas/event-intelligence.schema.json#/$defs/eventAuditChainDiagnosticsApi'}
+    EventApprovalDecision: {$ref: '../schemas/event-intelligence.schema.json#/$defs/eventApprovalDecisionApi'}
+    EventApproval: {$ref: '../schemas/event-intelligence.schema.json#/$defs/eventApprovalApi'}
+    EventActionReceipt: {$ref: '../schemas/event-intelligence.schema.json#/$defs/eventActionReceiptApi'}
+    EventTimelineEntry: {$ref: '../schemas/event-intelligence.schema.json#/$defs/eventTimelineEntryApi'}
+    EventBranch: {$ref: '../schemas/event-intelligence.schema.json#/$defs/eventBranchApi'}
+    EventReplay: {$ref: '../schemas/event-intelligence.schema.json#/$defs/eventReplayApi'}
+    BranchComparison: {$ref: '../schemas/event-intelligence.schema.json#/$defs/branchComparisonApi'}
+    EventInterpretationBatch:
+      type: object
+      additionalProperties: false
+      required: [interpretation_id, events, safety, limits, model]
+      properties:
+        interpretation_id: {type: string, format: uuid}
+        events: {type: array, minItems: 1, maxItems: 8, items: {$ref: '#/components/schemas/IntelligenceEvent'}}
+        safety: {type: object}
+        limits: {type: object}
+        model: {type: object}
+    EventTaxonomy:
+      type: object
+      additionalProperties: false
+      required: [items, taxonomy_version, categories]
+      properties:
+        items: {type: array, maxItems: 100, items: {$ref: '../schemas/event-intelligence.schema.json#/$defs/eventTaxonomyEntryApi'}}
+        taxonomy_version: {type: string}
+        categories: {type: array, maxItems: 7, uniqueItems: true, items: {type: string, enum: [people, project, technology, business, operations, external, unknown]}}
+    EventTimeline:
+      type: object
+      additionalProperties: false
+      required: [items, baseline_branch_id]
+      properties:
+        items: {type: array, maxItems: 100, items: {$ref: '#/components/schemas/EventTimelineEntry'}}
+        baseline_branch_id: {type: string, format: uuid}
+    EventBranches:
+      type: object
+      additionalProperties: false
+      required: [items]
+      properties:
+        items: {type: array, items: {$ref: '#/components/schemas/EventBranch'}}
     SimulationRun: {$ref: '../schemas/canonical.schema.json#/$defs/SimulationRun'}
     DataWatermark:
       type: object

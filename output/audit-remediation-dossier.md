@@ -8,8 +8,8 @@ This dossier consolidates threat, privacy, failure, compliance, risk-acceptance,
 
 | Severity | Status | Count |
 | --- | --- | --- |
-| high | mitigated | 7 |
-| medium | mitigated | 7 |
+| high | mitigated | 8 |
+| medium | mitigated | 9 |
 | medium | accepted | 4 |
 | low | mitigated | 1 |
 
@@ -207,7 +207,7 @@ Pooled graph isolation remains weaker than PostgreSQL RLS. H1 accepts this only 
 
 ```json
 {
-  "complete": 101,
+  "complete": 106,
   "coverage_percent": 100.0,
   "quality_attribute": {
     "complete": 18,
@@ -225,9 +225,9 @@ Pooled graph isolation remains weaker than PostgreSQL RLS. H1 accepts this only 
     "roadmap"
   ],
   "requirement": {
-    "complete": 83,
-    "total": 83
+    "complete": 88,
+    "total": 88
   },
-  "total": 101
+  "total": 106
 }
 ```

@@ -4,6 +4,7 @@ import hashlib
 import math
 import struct
 from datetime import date, datetime, timezone
+from decimal import Decimal
 from enum import Enum
 from typing import Any
 from uuid import UUID
@@ -28,6 +29,11 @@ def _normalise(value: Any) -> Any:
         return value.isoformat()
     if isinstance(value, Enum):
         return _normalise(value.value)
+    if isinstance(value, Decimal):
+        # Pydantic JSON mode represents arbitrary-precision decimals as
+        # strings. Preserve that exact, non-lossy representation for response
+        # isolation scans and hashes instead of coercing through binary float.
+        return format(value, "f")
     if isinstance(value, dict):
         return {str(key): _normalise(item) for key, item in value.items()}
     if isinstance(value, (list, tuple)):

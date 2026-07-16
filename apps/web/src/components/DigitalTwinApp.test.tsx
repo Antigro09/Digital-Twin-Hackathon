@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { resetApiForTests } from "@/lib/api/client";
@@ -14,6 +14,26 @@ describe("DigitalTwinApp H1 journey", () => {
   afterEach(() => {
     cleanup();
     resetApiForTests();
+    vi.unstubAllGlobals();
+  });
+
+  it("shows the local operator unlock ceremony when connected actor-token minting is locked", async () => {
+    process.env.NEXT_PUBLIC_ENABLE_DEMO_DATA = "false";
+    process.env.NEXT_PUBLIC_API_URL = "http://api.local";
+    resetApiForTests();
+    vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL) => {
+      expect(String(input)).toBe("/api/demo-auth/session");
+      return Response.json({
+        code: "demo_auth_locked",
+        detail: "Unlock the trusted local demo before requesting an actor session.",
+      }, { status: 401 });
+    }));
+
+    render(<DigitalTwinApp />);
+
+    expect(await screen.findByRole("heading", { name: "Unlock trusted local demo" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Local demo access key")).toHaveAttribute("type", "password");
+    expect(screen.getByText(/does not replace the distinct approvals/i)).toBeInTheDocument();
   });
 
   it("loads the evidence-backed control room and exposes semantic navigation", async () => {
@@ -23,6 +43,16 @@ describe("DigitalTwinApp H1 journey", () => {
     expect(screen.getByRole("navigation", { name: "Primary navigation" })).toBeInTheDocument();
     expect(screen.getByLabelText("Active membership")).toHaveValue("mem_aster_operator");
     expect(screen.getByText("AST-142 is the strongest recorded blocker", { exact: false })).toBeInTheDocument();
+  });
+
+  it("opens the AI Control Center from primary navigation without simulating offline AI output", async () => {
+    const user = userEvent.setup();
+    render(<DigitalTwinApp />);
+    await screen.findByRole("heading", { name: /one dependency chain/i });
+    await user.click(within(screen.getByRole("navigation", { name: "Primary navigation" })).getByRole("button", { name: /AI Control Center/ }));
+    expect(await screen.findByRole("heading", { name: "AI Control Center" })).toBeInTheDocument();
+    expect(screen.getByText(/does not connect to an AI provider/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Run bounded explanation" })).toBeDisabled();
   });
 
   it("switches membership through a server-known ID and discloses no revoked graph evidence", async () => {
@@ -74,6 +104,94 @@ describe("DigitalTwinApp H1 journey", () => {
     expect(await screen.findByRole("heading", { name: "Synthetic command executed once" })).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Replay same idempotency key" }));
     expect(await screen.findByRole("heading", { name: "Replay returned the original receipt" })).toBeInTheDocument();
+  });
+
+  it("interprets an event, explores causal effects, and applies an exact dual-approved synthetic reality update", async () => {
+    const user = userEvent.setup();
+    render(<DigitalTwinApp />);
+    await screen.findByRole("heading", { name: /one dependency chain/i });
+    await user.click(within(screen.getByRole("navigation", { name: "Primary navigation" })).getByRole("button", { name: /Event intelligence/ }));
+
+    expect(await screen.findByRole("heading", { name: /Understand what changed/i })).toBeInTheDocument();
+    expect(screen.getByText("External write: false")).toBeInTheDocument();
+    expect(screen.getAllByText("Local demo data").length).toBeGreaterThan(0);
+    await user.click(screen.getByRole("button", { name: "Interpret event and trace impacts" }));
+
+    expect(await screen.findByRole("heading", { name: "Lead backend engineer departure" })).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: /Sarah Kim/ })).not.toBeChecked();
+    expect(screen.getByRole("button", { name: "Build exact reality review" })).toBeDisabled();
+    await user.click(screen.getByRole("radio", { name: /Sarah Kim/ }));
+    expect(screen.getByRole("button", { name: /Causal link: Authentication Service raises risk Payment Platform delivery/ })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /Causal link: Authentication Service raises risk Payment Platform delivery/ }));
+    expect(screen.getByRole("heading", { name: "Authentication Service → Payment Platform delivery" })).toBeInTheDocument();
+    expect(screen.getByText("Conditional estimate from the recorded owner and dependency graph.")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Build exact reality review" }));
+    expect(await screen.findByText("Server-sealed payload displayed")).toBeInTheDocument();
+    await user.click(screen.getByRole("checkbox", { name: /reviewed this exact server-sealed payload/i }));
+    await user.click(screen.getByRole("button", { name: "Request operations and security approval" }));
+    expect(await screen.findByText(/Production requires each approver to use a separate signed-in session/i)).toBeInTheDocument();
+    await user.click(await screen.findByRole("button", { name: "Synthetic demo: approve as operations actor" }));
+    await user.click(await screen.findByRole("button", { name: "Synthetic demo: approve as security actor" }));
+    const applyButton = screen.getByRole("button", { name: "Apply once to synthetic reality graph" });
+    await waitFor(() => expect(applyButton).toBeEnabled());
+    await user.click(applyButton);
+    expect(await screen.findByRole("heading", { name: "Synthetic reality graph updated" })).toBeInTheDocument();
+    expect(screen.getByText("Event version")).toBeInTheDocument();
+    expect(screen.getAllByText("Graph version").length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/synthetic tenant projection only/i).length).toBeGreaterThan(0);
+    expect(await screen.findByRole("button", { name: /Lead backend engineer departure/ })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Reconstruct this event" }));
+    expect(await screen.findByText("Audited reconstruction")).toBeInTheDocument();
+  }, 10_000);
+
+  it("routes uncertain event language into an isolated scenario branch", async () => {
+    const user = userEvent.setup();
+    render(<DigitalTwinApp />);
+    await screen.findByRole("heading", { name: /one dependency chain/i });
+    await user.click(within(screen.getByRole("navigation", { name: "Primary navigation" })).getByRole("button", { name: /Event intelligence/ }));
+    await user.click(await screen.findByRole("button", { name: "Customer may leave" }));
+    await user.click(screen.getByRole("button", { name: "Interpret event and trace impacts" }));
+
+    expect(await screen.findByRole("heading", { name: "Potential strategic customer loss" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Review destination")).toHaveValue("scenario");
+    expect(screen.getByRole("option", { name: "Reality graph—synthetic projection only" })).toBeDisabled();
+    await user.click(screen.getByRole("radio", { name: /Northstar Bank/ }));
+    await user.click(screen.getByRole("button", { name: "Build exact scenario review" }));
+    await user.click(await screen.findByRole("checkbox", { name: /reviewed this exact server-sealed payload/i }));
+    await user.click(screen.getByRole("button", { name: "Request scenario isolation policy" }));
+    expect(await screen.findByText("Scenario isolation policy passed")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Create isolated scenario branch" }));
+    expect(await screen.findByRole("heading", { name: "Alternate future created" })).toBeInTheDocument();
+    expect(screen.getAllByText(/reality graph and external systems were not changed/i).length).toBeGreaterThan(0);
+    expect(await screen.findByText("Scenario base graph version")).toBeInTheDocument();
+    expect(screen.getByText("Scenario base graph hash")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Compare branches" }));
+    expect(await screen.findByText("Same base snapshot")).toBeInTheDocument();
+  });
+
+  it("rebuilds the displayed reviewed payload for the explicitly selected ambiguous entity", async () => {
+    const user = userEvent.setup();
+    render(<DigitalTwinApp />);
+    await screen.findByRole("heading", { name: /one dependency chain/i });
+    await user.click(within(screen.getByRole("navigation", { name: "Primary navigation" })).getByRole("button", { name: /Event intelligence/ }));
+    await user.click(screen.getByRole("button", { name: "Interpret event and trace impacts" }));
+    await user.click(await screen.findByRole("radio", { name: /Sarah Ibrahim/ }));
+    await user.click(screen.getByRole("button", { name: "Build exact reality review" }));
+    expect(await screen.findByText("Server-sealed payload displayed")).toBeInTheDocument();
+    expect(screen.getAllByText("Sarah Ibrahim").length).toBeGreaterThan(1);
+    const approvalButton = screen.getByRole("button", { name: "Request operations and security approval" });
+    expect(approvalButton).toBeDisabled();
+
+    await user.click(screen.getByRole("checkbox", { name: /restore the synthetic projection/i }));
+    await user.click(screen.getByRole("button", { name: "Roll back this event" }));
+    expect(await screen.findByText("Compensation receipt")).toBeInTheDocument();
+    const outageHistory = screen.getAllByRole("button", { name: /Identity database outage resolved/ });
+    expect(outageHistory).toHaveLength(2);
+    expect(outageHistory.filter((button) => button.getAttribute("aria-pressed") === "true")).toHaveLength(1);
+
+    await user.click(screen.getByRole("checkbox", { name: /reviewed this exact server-sealed payload/i }));
+    expect(approvalButton).toBeEnabled();
   });
 
   it("abstains from an excluded workforce inference without citations", async () => {

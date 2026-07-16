@@ -26,6 +26,9 @@ channels:
   actionReceiptRecorded:
     address: edt.v1.action-receipt.recorded
     messages: {actionReceiptRecorded: {$ref: '#/components/messages/ActionReceiptRecorded'}}
+  intelligenceEventChanged:
+    address: edt.v1.event-intelligence.event-changed
+    messages: {intelligenceEventChanged: {$ref: '#/components/messages/IntelligenceEventChanged'}}
 operations:
   consumeObservationAccepted: {action: receive, channel: {$ref: '#/channels/observationAccepted'}}
   consumeClaimsChanged: {action: receive, channel: {$ref: '#/channels/claimsChanged'}}
@@ -34,6 +37,7 @@ operations:
   consumeSimulationRunChanged: {action: receive, channel: {$ref: '#/channels/simulationRunChanged'}}
   consumeApprovalChanged: {action: receive, channel: {$ref: '#/channels/approvalChanged'}}
   consumeActionReceiptRecorded: {action: receive, channel: {$ref: '#/channels/actionReceiptRecorded'}}
+  consumeIntelligenceEventChanged: {action: receive, channel: {$ref: '#/channels/intelligenceEventChanged'}}
 components:
   messages:
     ObservationAccepted: {name: ObservationAccepted, payload: {$ref: '#/components/schemas/ObservationAcceptedEvent'}}
@@ -43,6 +47,7 @@ components:
     SimulationRunChanged: {name: SimulationRunChanged, payload: {$ref: '#/components/schemas/SimulationRunChangedEvent'}}
     ApprovalChanged: {name: ApprovalChanged, payload: {$ref: '#/components/schemas/ApprovalChangedEvent'}}
     ActionReceiptRecorded: {name: ActionReceiptRecorded, payload: {$ref: '#/components/schemas/ActionReceiptRecordedEvent'}}
+    IntelligenceEventChanged: {name: IntelligenceEventChanged, payload: {$ref: '#/components/schemas/IntelligenceEventChangedEvent'}}
   schemas:
     EventEnvelope:
       type: object
@@ -211,3 +216,5 @@ components:
         status: {enum: [succeeded, failed, verification_required, compensated, compensation_conflict, manual_intervention_required]}
         before_hash: {type: string, pattern: '^[a-f0-9]{64}$'}
         after_hash: {type: string, pattern: '^[a-f0-9]{64}$'}
+    IntelligenceEventChangedEvent:
+      $ref: '../schemas/event-intelligence-event-changed.v1.schema.json'

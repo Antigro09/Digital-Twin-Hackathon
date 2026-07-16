@@ -1,6 +1,7 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { FastifyRequest } from 'fastify';
 import { randomBytes } from 'node:crypto';
+import { DemoAuthService } from './demo-auth.service';
 import { ActorRecord, RequestContext, newId } from './domain';
 import { FixtureService } from './fixture.service';
 import { ProblemException } from './problem';
@@ -18,20 +19,26 @@ interface HandleRecord {
 export class ContextService {
   private readonly handles = new Map<string, HandleRecord>();
 
-  constructor(private readonly fixtures: FixtureService) {}
+  constructor(
+    private readonly fixtures: FixtureService,
+    private readonly auth: DemoAuthService,
+  ) {}
 
   resolve(request: FastifyRequest, allowBootstrap = false): RequestContext {
     if (request.headers['x-tenant-id']) {
       throw new ProblemException(HttpStatus.BAD_REQUEST, 'raw_tenant_selector_rejected', 'Tenant scope is derived by the server; X-Tenant-ID is never accepted.');
     }
-    const actorHeader = request.headers['x-demo-actor'];
-    if (process.env.EDT_DEMO_AUTH === 'false' && actorHeader) {
-      throw new ProblemException(HttpStatus.UNAUTHORIZED, 'demo_auth_disabled', 'Synthetic actor selection is disabled.');
+    if (request.headers['x-demo-actor']) {
+      throw new ProblemException(HttpStatus.BAD_REQUEST, 'legacy_actor_selector_rejected', 'X-Demo-Actor is not authentication and is never accepted.');
     }
+    const principal = this.auth.authenticate(request.headers.authorization);
     let actor: ActorRecord;
     try {
-      actor = this.fixtures.getActor(typeof actorHeader === 'string' ? actorHeader : undefined);
+      actor = this.fixtures.getActor(principal.actorAlias);
     } catch {
+      throw new ProblemException(HttpStatus.UNAUTHORIZED, 'invalid_actor', 'Authentication failed.');
+    }
+    if (actor.actor_id !== principal.actorId || actor.tenant_id !== principal.tenantId) {
       throw new ProblemException(HttpStatus.UNAUTHORIZED, 'invalid_actor', 'Authentication failed.');
     }
     const membershipId = this.fixtures.membershipId(actor);

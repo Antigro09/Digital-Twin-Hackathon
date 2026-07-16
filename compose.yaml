@@ -17,6 +17,61 @@ services:
     restart: unless-stopped
     networks: [data]
 
+  postgres-app-db-init:
+    image: postgres:17.5-bookworm
+    environment:
+      PGHOST: postgres
+      PGUSER: postgres
+      PGPASSWORD: ${POSTGRES_PASSWORD:-edt-local-postgres-only}
+      EDT_DATABASE_NAME: ${EDT_DATABASE_NAME:-edt_hardened}
+      AI_DATABASE_USER: edt_ai_worker
+      AI_DATABASE_PASSWORD: ${AI_DATABASE_PASSWORD:?run npm run demo once to generate the AI database credential}
+    command:
+      - /bin/bash
+      - -ec
+      - |
+        if [[ ! "$${EDT_DATABASE_NAME}" =~ ^[a-z][a-z0-9_]{0,62}$ ]]; then
+          echo "EDT_DATABASE_NAME must be a safe PostgreSQL identifier." >&2
+          exit 2
+        fi
+        if [[ "$$(psql --dbname postgres --tuples-only --no-align --command "select 1 from pg_database where datname = '$${EDT_DATABASE_NAME}'")" != "1" ]]; then
+          createdb --maintenance-db postgres "$${EDT_DATABASE_NAME}"
+        fi
+        if [[ ! "$${AI_DATABASE_USER}" =~ ^[a-z][a-z0-9_]{0,62}$ ]]; then
+          echo "AI_DATABASE_USER must be a safe PostgreSQL identifier." >&2
+          exit 2
+        fi
+        psql --dbname "$${EDT_DATABASE_NAME}" \
+          --set=ai_user="$${AI_DATABASE_USER}" \
+          --set=ai_password="$${AI_DATABASE_PASSWORD}" \
+          --set=app_db="$${EDT_DATABASE_NAME}" <<'SQL'
+        SELECT format(
+          'CREATE ROLE %I LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOBYPASSRLS PASSWORD %L',
+          :'ai_user', :'ai_password'
+        ) WHERE NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = :'ai_user') \gexec
+        SELECT format(
+          'ALTER ROLE %I LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOBYPASSRLS PASSWORD %L',
+          :'ai_user', :'ai_password'
+        ) \gexec
+        SELECT format('GRANT CONNECT ON DATABASE %I TO %I', :'app_db', :'ai_user') \gexec
+        SELECT format('CREATE SCHEMA IF NOT EXISTS edt_ai AUTHORIZATION %I', :'ai_user') \gexec
+        SELECT format('ALTER SCHEMA edt_ai OWNER TO %I', :'ai_user') \gexec
+        SELECT 'ALTER TABLE public.edt_ai_records SET SCHEMA edt_ai'
+        WHERE to_regclass('public.edt_ai_records') IS NOT NULL
+          AND to_regclass('edt_ai.edt_ai_records') IS NULL \gexec
+        SELECT format('ALTER TABLE edt_ai.edt_ai_records OWNER TO %I', :'ai_user')
+        WHERE to_regclass('edt_ai.edt_ai_records') IS NOT NULL \gexec
+        SELECT format(
+          'ALTER ROLE %I IN DATABASE %I SET search_path TO edt_ai, pg_catalog',
+          :'ai_user', :'app_db'
+        ) \gexec
+        SQL
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+    networks: [data]
+
   temporal:
     image: temporalio/auto-setup:1.27.2
     environment:
@@ -110,15 +165,48 @@ services:
       dockerfile: Dockerfile
     environment:
       PYTHONHASHSEED: "0"
+      AI_WORKER_SHARED_SECRET: ${AI_WORKER_SHARED_SECRET:?run npm run demo once to generate the internal AI service credential}
+      AI_STORE_DSN: postgresql://edt_ai_worker:${AI_DATABASE_PASSWORD:?run npm run demo once to generate the AI database credential}@postgres:5432/${EDT_DATABASE_NAME:-edt_hardened}
+      AI_DURABLE_STORE_REQUIRED: "true"
+      AI_PROVIDER_DEFAULT: ${AI_PROVIDER_DEFAULT:-llama}
+      AI_REASONING_PROVIDER: ${AI_REASONING_PROVIDER:-llama}
+      LLAMA_API_KEY: ${LLAMA_API_KEY:-}
+      LLAMA_MODEL: ${LLAMA_MODEL:-}
+      LLAMA_REASONING_MODEL: ${LLAMA_REASONING_MODEL:-}
+      LLAMA_ENDPOINT: ${LLAMA_ENDPOINT:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_MODEL: ${OPENAI_MODEL:-}
+      OPENAI_ENDPOINT: ${OPENAI_ENDPOINT:-}
+      AI_EMBEDDING_API_KEY: ${AI_EMBEDDING_API_KEY:-}
+      AI_EMBEDDING_MODEL: ${AI_EMBEDDING_MODEL:-}
+      AI_EMBEDDING_ENDPOINT: ${AI_EMBEDDING_ENDPOINT:-}
+      AI_VECTOR_DIMENSIONS: ${AI_VECTOR_DIMENSIONS:-256}
+      AI_GATEWAY_TIMEOUT_SECONDS: ${AI_GATEWAY_TIMEOUT_SECONDS:-20}
+      AI_GATEWAY_MAX_RETRIES: ${AI_GATEWAY_MAX_RETRIES:-2}
+      AI_GATEWAY_MAX_INPUT_TOKENS: ${AI_GATEWAY_MAX_INPUT_TOKENS:-24000}
+      AI_GATEWAY_MAX_OUTPUT_TOKENS: ${AI_GATEWAY_MAX_OUTPUT_TOKENS:-4096}
+      AI_GATEWAY_REQUESTS_PER_MINUTE: ${AI_GATEWAY_REQUESTS_PER_MINUTE:-30}
+      AI_GATEWAY_CACHE_TTL_SECONDS: ${AI_GATEWAY_CACHE_TTL_SECONDS:-300}
+      AI_GATEWAY_MAX_CACHE_ENTRIES: ${AI_GATEWAY_MAX_CACHE_ENTRIES:-1000}
+      AI_GATEWAY_MAX_DOCUMENT_BYTES: ${AI_GATEWAY_MAX_DOCUMENT_BYTES:-5242880}
+      AI_MAX_RETRIEVAL_CANDIDATES: ${AI_MAX_RETRIEVAL_CANDIDATES:-10000}
+      AI_SESSION_TTL_MINUTES: ${AI_SESSION_TTL_MINUTES:-60}
+      AI_LLAMA_INPUT_USD_PER_MILLION: ${AI_LLAMA_INPUT_USD_PER_MILLION:-}
+      AI_LLAMA_OUTPUT_USD_PER_MILLION: ${AI_LLAMA_OUTPUT_USD_PER_MILLION:-}
+      AI_OPENAI_INPUT_USD_PER_MILLION: ${AI_OPENAI_INPUT_USD_PER_MILLION:-}
+      AI_OPENAI_OUTPUT_USD_PER_MILLION: ${AI_OPENAI_OUTPUT_USD_PER_MILLION:-}
+    depends_on:
+      postgres-app-db-init:
+        condition: service_completed_successfully
     ports:
-      - "${EDT_AI_PORT:-8010}:8080"
+      - "127.0.0.1:${EDT_AI_PORT:-8010}:8080"
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/health/ready', timeout=2)"]
       interval: 5s
       timeout: 3s
       retries: 20
     restart: unless-stopped
-    networks: [control]
+    networks: [control, data, ai-egress]
 
   api:
     build:
@@ -126,17 +214,21 @@ services:
       dockerfile: apps/api/Dockerfile
     environment:
       PORT: 8080
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-edt-local-postgres-only}@postgres:5432/edt
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-edt-local-postgres-only}@postgres:5432/${EDT_DATABASE_NAME:-edt_hardened}
       EDT_REQUIRE_POSTGRES: "true"
       EDT_AUTO_MIGRATE: "true"
       EDT_DEMO_AUTH: "true"
+      EDT_DEMO_AUTH_SECRET: ${EDT_DEMO_AUTH_SECRET:?run npm run demo once to generate local demo authentication secrets}
+      EDT_DEMO_AUTH_BOOTSTRAP_KEY: ${EDT_DEMO_AUTH_BOOTSTRAP_KEY:?run npm run demo once to generate local demo authentication secrets}
+      AI_WORKER_SHARED_SECRET: ${AI_WORKER_SHARED_SECRET:?run npm run demo once to generate the internal AI service credential}
+      EDT_DEMO_AUTH_TTL_SECONDS: "900"
       EDT_FROZEN_CLOCK: "true"
       EDT_ALLOW_ORACLE_FALLBACK: "false"
       AI_WORKER_URL: http://ai-worker:8080
       WEB_ORIGIN: http://localhost:${EDT_WEB_PORT:-3000}
     depends_on:
-      postgres:
-        condition: service_healthy
+      postgres-app-db-init:
+        condition: service_completed_successfully
       ai-worker:
         condition: service_healthy
     ports:
@@ -155,7 +247,7 @@ services:
       dockerfile: apps/sync-worker/Dockerfile
     environment:
       PORT: 8090
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-edt-local-postgres-only}@postgres:5432/edt
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-edt-local-postgres-only}@postgres:5432/${EDT_DATABASE_NAME:-edt_hardened}
       S3_ENDPOINT: http://minio:9000
       S3_REGION: us-east-1
       S3_ACCESS_KEY_ID: ${MINIO_ROOT_USER:-edtminio}
@@ -196,6 +288,11 @@ services:
     depends_on:
       api:
         condition: service_healthy
+    environment:
+      EDT_DEMO_AUTH: "true"
+      EDT_DEMO_AUTH_BOOTSTRAP_KEY: ${EDT_DEMO_AUTH_BOOTSTRAP_KEY:?run npm run demo once to generate local demo authentication secrets}
+      EDT_DEMO_UI_ACCESS_KEY: ${EDT_DEMO_UI_ACCESS_KEY:?run npm run demo once to generate the local demo UI access key}
+      EDT_API_INTERNAL_URL: http://api:8080
     ports:
       - "${EDT_WEB_PORT:-3000}:3000"
     healthcheck:
@@ -212,6 +309,7 @@ networks:
     internal: true
   data:
     internal: true
+  ai-egress: {}
 
 volumes:
   postgres-data: {}

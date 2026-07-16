@@ -22,7 +22,8 @@
     "dev:sync": "npm run start:dev -w @edt/sync-worker",
     "demo": "node scripts/edt.mjs start",
     "demo:seed": "node scripts/edt.mjs seed",
-    "demo:verify": "node scripts/edt.mjs verify"
+    "demo:verify": "node scripts/edt.mjs verify",
+    "demo:token": "node scripts/edt.mjs auth-token"
   },
   "devDependencies": {
     "@mermaid-js/mermaid-cli": "11.16.0"

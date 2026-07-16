@@ -2,7 +2,7 @@
 
 Specification: `1.0.0-rc.1`
 
-Coverage: **100.00%** (101 of 101)
+Coverage: **100.00%** (106 of 106)
 
 | ID | Kind | Horizon | Artifact | ADR | Component | Contract | Control | Acceptance | Test/Eval | Roadmap | Complete |
 |---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|:---:|
@@ -10,14 +10,14 @@ Coverage: **100.00%** (101 of 101)
 | REQ-ACT-002 | requirement | H1 | 2 | 1 | 4 | 2 | 3 | 3 | 1 | 1 | yes |
 | REQ-ACT-003 | requirement | H1 | 2 | 1 | 4 | 2 | 3 | 3 | 1 | 1 | yes |
 | REQ-ACT-004 | requirement | H3 | 2 | 1 | 4 | 2 | 3 | 3 | 1 | 1 | yes |
-| REQ-AI-001 | requirement | H1 | 2 | 2 | 4 | 3 | 5 | 4 | 1 | 1 | yes |
-| REQ-AI-002 | requirement | H1 | 2 | 2 | 4 | 3 | 5 | 4 | 1 | 1 | yes |
-| REQ-AI-003 | requirement | H1 | 2 | 2 | 4 | 3 | 5 | 4 | 1 | 1 | yes |
-| REQ-AI-004 | requirement | H1 | 2 | 2 | 4 | 3 | 5 | 4 | 1 | 1 | yes |
-| REQ-AI-005 | requirement | H1 | 2 | 2 | 4 | 3 | 5 | 4 | 1 | 1 | yes |
-| REQ-AI-006 | requirement | H1 | 2 | 2 | 4 | 3 | 5 | 4 | 1 | 1 | yes |
-| REQ-AI-007 | requirement | H1 | 2 | 2 | 4 | 3 | 5 | 4 | 1 | 1 | yes |
-| REQ-AI-008 | requirement | H1 | 2 | 2 | 4 | 3 | 5 | 4 | 1 | 1 | yes |
+| REQ-AI-001 | requirement | H1 | 2 | 3 | 4 | 4 | 5 | 4 | 1 | 1 | yes |
+| REQ-AI-002 | requirement | H1 | 2 | 3 | 4 | 4 | 5 | 4 | 1 | 1 | yes |
+| REQ-AI-003 | requirement | H1 | 2 | 3 | 4 | 4 | 5 | 4 | 1 | 1 | yes |
+| REQ-AI-004 | requirement | H1 | 2 | 3 | 4 | 4 | 5 | 4 | 1 | 1 | yes |
+| REQ-AI-005 | requirement | H1 | 2 | 3 | 4 | 4 | 5 | 4 | 1 | 1 | yes |
+| REQ-AI-006 | requirement | H1 | 2 | 3 | 4 | 4 | 5 | 4 | 1 | 1 | yes |
+| REQ-AI-007 | requirement | H1 | 2 | 3 | 4 | 4 | 5 | 4 | 1 | 1 | yes |
+| REQ-AI-008 | requirement | H1 | 2 | 3 | 4 | 4 | 5 | 4 | 1 | 1 | yes |
 | REQ-ARCH-001 | requirement | H1 | 3 | 4 | 6 | 3 | 2 | 2 | 1 | 1 | yes |
 | REQ-ARCH-002 | requirement | H1 | 3 | 4 | 6 | 3 | 2 | 2 | 1 | 1 | yes |
 | REQ-ARCH-003 | requirement | H1 | 3 | 4 | 6 | 3 | 2 | 2 | 1 | 1 | yes |
@@ -42,6 +42,11 @@ Coverage: **100.00%** (101 of 101)
 | REQ-DEV-001 | requirement | H2 | 3 | 2 | 6 | 5 | 2 | 2 | 1 | 1 | yes |
 | REQ-DEV-002 | requirement | H1 | 3 | 2 | 6 | 5 | 2 | 2 | 1 | 1 | yes |
 | REQ-DEV-003 | requirement | H2 | 3 | 2 | 6 | 5 | 2 | 2 | 1 | 1 | yes |
+| REQ-EVT-001 | requirement | H1 | 7 | 7 | 9 | 3 | 8 | 1 | 1 | 1 | yes |
+| REQ-EVT-002 | requirement | H1 | 7 | 7 | 9 | 3 | 8 | 1 | 1 | 1 | yes |
+| REQ-EVT-003 | requirement | H1 | 7 | 7 | 9 | 3 | 8 | 1 | 1 | 1 | yes |
+| REQ-EVT-004 | requirement | H1 | 7 | 7 | 9 | 3 | 8 | 1 | 1 | 1 | yes |
+| REQ-EVT-005 | requirement | H1 | 7 | 7 | 9 | 3 | 8 | 1 | 1 | 1 | yes |
 | REQ-GOV-001 | requirement | H1 | 4 | 2 | 1 | 3 | 1 | 4 | 1 | 1 | yes |
 | REQ-GOV-002 | requirement | H1 | 4 | 2 | 1 | 3 | 1 | 4 | 1 | 1 | yes |
 | REQ-GOV-003 | requirement | H1 | 4 | 2 | 1 | 3 | 1 | 4 | 1 | 1 | yes |
@@ -90,11 +95,11 @@ Coverage: **100.00%** (101 of 101)
 | REQ-VER-004 | requirement | H1 | 2 | 1 | 3 | 3 | 2 | 4 | 1 | 1 | yes |
 | REQ-VER-005 | requirement | H1 | 2 | 1 | 3 | 3 | 2 | 4 | 1 | 1 | yes |
 | QAR-ACC-001 | quality_attribute | H1 | 2 | 1 | 2 | 1 | 2 | 1 | 1 | 1 | yes |
-| QAR-AI-001 | quality_attribute | H1 | 2 | 2 | 3 | 2 | 4 | 4 | 1 | 1 | yes |
-| QAR-AI-002 | quality_attribute | H1 | 2 | 2 | 3 | 2 | 4 | 4 | 1 | 1 | yes |
+| QAR-AI-001 | quality_attribute | H1 | 2 | 3 | 3 | 2 | 4 | 4 | 1 | 1 | yes |
+| QAR-AI-002 | quality_attribute | H1 | 2 | 3 | 3 | 2 | 4 | 4 | 1 | 1 | yes |
 | QAR-AVL-001 | quality_attribute | H2 | 2 | 3 | 4 | 1 | 2 | 2 | 1 | 1 | yes |
 | QAR-COR-001 | quality_attribute | H1 | 2 | 2 | 4 | 5 | 2 | 3 | 1 | 1 | yes |
-| QAR-COST-001 | quality_attribute | H1 | 2 | 2 | 3 | 2 | 2 | 2 | 1 | 1 | yes |
+| QAR-COST-001 | quality_attribute | H1 | 2 | 3 | 3 | 2 | 2 | 2 | 1 | 1 | yes |
 | QAR-DR-001 | quality_attribute | H2 | 2 | 2 | 4 | 1 | 1 | 1 | 1 | 1 | yes |
 | QAR-OBS-001 | quality_attribute | H1 | 2 | 2 | 5 | 2 | 2 | 1 | 1 | 1 | yes |
 | QAR-PERF-001 | quality_attribute | H1 | 2 | 3 | 4 | 2 | 2 | 1 | 1 | 1 | yes |

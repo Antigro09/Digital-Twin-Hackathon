@@ -3,9 +3,10 @@ import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify
 import request = require('supertest');
 import { AppModule } from '../src/app.module';
 import { ASTER_PUMP_ASSET_ID, BEACON_PUMP_ASSET_ID } from '../src/asset-twin.service';
+import { demoAuthHeaders } from './demo-auth.helpers';
 
-const aster = { 'x-demo-actor': 'usr_aster_analyst' };
-const beacon = { 'x-demo-actor': 'usr_beacon_analyst' };
+const aster = demoAuthHeaders('usr_aster_analyst');
+const beacon = demoAuthHeaders('usr_beacon_analyst');
 const key = (suffix: string): string => `asset-test-${suffix.padEnd(28, '0')}`;
 
 describe('Synthetic physical-asset digital twin (e2e)', () => {

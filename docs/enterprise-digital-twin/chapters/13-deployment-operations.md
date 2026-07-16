@@ -7,7 +7,7 @@ owners:
   - Platform Engineering
   - Site Reliability Engineering
   - Release Engineering
-last_reviewed: 2026-07-13
+last_reviewed: 2026-07-15
 ---
 
 # Deployment and Operations
@@ -59,7 +59,7 @@ Rules:
 4. Images run the same entrypoints, schema versions, non-root user, and read-only filesystem used in Kubernetes.
 5. Named volumes make restarts realistic. The reset command refuses non-synthetic environments and prints the resolved absolute volume/project scope before deletion.
 6. A seed value creates the same two tenants, identities, source payloads, oracle, graph, scenarios, and expected action target.
-7. Local deterministic tests can run without public provider/model credentials by using signed provider fixtures and recorded model-safe stubs. Stubs cannot satisfy the model-integration, AI-evaluation, or cited-answer release gate; the H1 presentation/release evidence includes an approved live OpenAI endpoint run. Live mode is explicit and is not used to establish deterministic fixture assertions.
+7. Local deterministic tests can run without public provider/model credentials by using test-only provider doubles. Doubles cannot satisfy the model-integration, AI-evaluation, or cited-answer release gate; the H1 presentation/release evidence includes an approved live Llama endpoint run with the exact provider/model configuration and redacted usage receipt. Live mode is explicit and is not used to establish deterministic fixture assertions.
 8. Compose is not a production HA profile and does not support real customer data.
 
 The required developer experience is a cross-platform Node launcher that implements bootstrap, start, stop, seed, test, verify, export-logs, and reset. It wraps Compose and workspace commands so developers do not memorize container sequencing.
@@ -282,7 +282,7 @@ Support bundles are customer-triggered, previewable, redacted, encrypted to supp
 
 An offline release bundle contains signed images, charts, OpenTofu/manifest options, SBOMs, provenance, licenses, vulnerability database snapshot/date, documentation, migration tool, preflight, and verification public keys. Import verifies every digest/signature without network access.
 
-GitHub, Jira and OpenAI capabilities are unavailable unless the customer provides approved reachable equivalents with the same connector/model contract and evaluation. The UI must state capability unavailable; it cannot silently simulate live synchronization or model reasoning. Security updates use a documented out-of-band bundle and emergency cadence.
+GitHub, Jira, Llama, OpenAI, and other online-provider capabilities are unavailable unless the customer provides approved reachable equivalents with the same connector/model contract and evaluation. The UI must state capability unavailable; it cannot silently simulate live synchronization, embeddings, or model reasoning. Security updates use a documented out-of-band bundle and emergency cadence.
 
 ### 10.4 Regional and multi-cloud
 

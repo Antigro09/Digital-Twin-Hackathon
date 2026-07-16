@@ -1,0 +1,720 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.invalid/edt/event-intelligence.schema.json",
+  "title": "Event Intelligence canonical contracts",
+  "oneOf": [
+    { "$ref": "#/$defs/intelligenceEvent" },
+    { "$ref": "#/$defs/eventApprovalApi" },
+    { "$ref": "#/$defs/eventActionReceiptApi" },
+    { "$ref": "#/$defs/eventTimelineEntryApi" },
+    { "$ref": "#/$defs/eventBranchApi" },
+    { "$ref": "#/$defs/eventReplayApi" },
+    { "$ref": "#/$defs/branchComparisonApi" },
+    { "$ref": "#/$defs/eventInterpretation" },
+    { "$ref": "#/$defs/eventReview" },
+    { "$ref": "#/$defs/eventMutationReceipt" },
+    { "$ref": "#/$defs/eventBranch" }
+  ],
+  "$defs": {
+    "uuid": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "confidenceBand": {
+      "type": "string",
+      "enum": ["confirmed", "likely", "possible", "speculative", "rejected"]
+    },
+    "verificationStatus": {
+      "type": "string",
+      "enum": ["unverified", "needs_review", "verified", "conflicted", "rejected"]
+    },
+    "eventTaxonomyEntryApi": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "category", "label", "description", "default_mode", "sensitive", "example_phrases"],
+      "properties": {
+        "code": { "type": "string", "pattern": "^[a-z][a-z0-9_.-]{2,127}$" },
+        "category": { "type": "string", "enum": ["people", "project", "technology", "business", "operations", "external", "unknown"] },
+        "label": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "description": { "type": "string", "minLength": 1, "maxLength": 1024 },
+        "default_mode": { "type": "string", "enum": ["reality", "scenario"] },
+        "sensitive": { "type": "boolean" },
+        "example_phrases": { "type": "array", "maxItems": 16, "items": { "type": "string", "minLength": 1, "maxLength": 512 } }
+      }
+    },
+    "resolutionCandidateApi": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["entity_id", "entity_type", "display_name", "confidence", "reasons", "aliases", "current_state"],
+      "properties": {
+        "entity_id": { "$ref": "#/$defs/uuid" },
+        "entity_type": { "type": "string", "enum": ["person", "team", "project", "service", "database", "customer", "vendor", "asset", "external_entity"] },
+        "display_name": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "reasons": { "type": "array", "maxItems": 16, "items": { "type": "string", "maxLength": 512 } },
+        "aliases": { "type": "array", "maxItems": 32, "items": { "type": "string", "maxLength": 256 } },
+        "current_state": { "type": "object" }
+      }
+    },
+    "entityResolutionApi": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mention", "normalized_mention", "candidates", "selected_entity_id", "confidence", "required_confirmation", "reasons"],
+      "properties": {
+        "mention": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "normalized_mention": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "candidates": { "type": "array", "maxItems": 16, "items": { "$ref": "#/$defs/resolutionCandidateApi" } },
+        "selected_entity_id": { "oneOf": [{ "$ref": "#/$defs/uuid" }, { "type": "null" }] },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "required_confirmation": { "type": "boolean" },
+        "reasons": { "type": "array", "maxItems": 16, "items": { "type": "string", "maxLength": 512 } }
+      }
+    },
+    "eventImpactApi": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["impact_id", "caused_by", "depth", "effect_kind", "affected_entity", "affected_relationship", "severity", "confidence", "time_horizon", "explanation", "evidence", "recommended_action", "proposed_mutation", "live_mutation_eligible"],
+      "properties": {
+        "impact_id": { "$ref": "#/$defs/uuid" },
+        "caused_by": { "$ref": "#/$defs/uuid" },
+        "depth": { "type": "integer", "minimum": 0, "maximum": 3 },
+        "effect_kind": { "type": "string", "enum": ["node_state", "relationship", "risk", "prediction", "workflow", "knowledge", "recommendation", "unknown"] },
+        "affected_entity": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["entity_id", "entity_type", "display_name"],
+          "properties": {
+            "entity_id": { "oneOf": [{ "$ref": "#/$defs/uuid" }, { "type": "null" }] },
+            "entity_type": { "type": "string", "maxLength": 128 },
+            "display_name": { "type": "string", "maxLength": 256 }
+          }
+        },
+        "affected_relationship": {
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["type", "from_entity_id", "to_entity_id", "operation"],
+              "properties": {
+                "type": { "type": "string", "maxLength": 128 },
+                "from_entity_id": { "$ref": "#/$defs/uuid" },
+                "to_entity_id": { "$ref": "#/$defs/uuid" },
+                "operation": { "type": "string", "enum": ["create", "modify", "remove"] }
+              }
+            }
+          ]
+        },
+        "severity": { "type": "string", "enum": ["informational", "low", "medium", "high", "critical"] },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "time_horizon": { "type": "string", "enum": ["immediate", "days", "weeks", "months", "unknown"] },
+        "explanation": { "type": "string", "minLength": 1, "maxLength": 2048 },
+        "evidence": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "uniqueItems": true,
+          "description": "Tenant-authorized evidence identifiers that MUST resolve to entries in the containing intelligence event.",
+          "items": { "$ref": "#/$defs/uuid" }
+        },
+        "recommended_action": { "type": ["string", "null"], "maxLength": 1024 },
+        "proposed_mutation": { "type": ["object", "null"] },
+        "live_mutation_eligible": { "type": "boolean", "description": "True only for an allowlisted authoritative projection operation; scenario-only risk, forecast, workflow, annotation, and recommendation inputs remain false." }
+      }
+    },
+    "causalGraphApi": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["nodes", "edges", "max_depth", "traversed_nodes", "traversed_edges", "truncated", "cycle_paths_suppressed"],
+      "properties": {
+        "nodes": {
+          "type": "array",
+          "maxItems": 60,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "kind", "label", "depth"],
+            "properties": {
+              "id": { "type": "string", "minLength": 1, "maxLength": 256 },
+              "kind": { "type": "string", "enum": ["event", "entity", "impact"] },
+              "label": { "type": "string", "maxLength": 256 },
+              "depth": { "type": "integer", "minimum": 0, "maximum": 3 }
+            }
+          }
+        },
+        "edges": {
+          "type": "array",
+          "maxItems": 50,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["from", "to", "relation", "confidence"],
+            "properties": {
+              "from": { "type": "string", "minLength": 1, "maxLength": 256 },
+              "to": { "type": "string", "minLength": 1, "maxLength": 256 },
+              "relation": { "type": "string", "enum": ["affects", "causes", "may_cause"] },
+              "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+            }
+          }
+        },
+        "max_depth": { "const": 3 },
+        "traversed_nodes": { "type": "integer", "minimum": 0, "maximum": 60 },
+        "traversed_edges": { "type": "integer", "minimum": 0, "maximum": 50 },
+        "truncated": { "type": "boolean" },
+        "cycle_paths_suppressed": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "eventAuditEvidenceApi": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["audit_id", "tenant_sequence", "action", "actor_id", "resource_type", "resource_id", "occurred_at", "request_id", "trace_id", "details_hash", "previous_hash", "event_hash"],
+      "properties": {
+        "audit_id": { "$ref": "#/$defs/uuid" },
+        "tenant_sequence": { "type": "integer", "minimum": 1 },
+        "action": { "type": "string", "maxLength": 128 },
+        "actor_id": { "$ref": "#/$defs/uuid" },
+        "resource_type": { "type": "string", "enum": ["event_interpretation", "event", "event_approval", "event_receipt"] },
+        "resource_id": { "$ref": "#/$defs/uuid" },
+        "occurred_at": { "type": "string", "format": "date-time" },
+        "request_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "trace_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "details_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "previous_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "event_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      }
+    },
+    "eventAuditChainDiagnosticsApi": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "total_records", "valid_records", "canonical_records", "invalid_records", "gap_records", "fork_points", "orphan_records", "sequence_gaps",
+        "event_records", "expected_event_records", "invalid_record_ids", "gap_record_ids", "fork_previous_hashes", "orphan_record_ids",
+        "sequence_gap_record_ids", "missing_event_audit_ids", "diagnostics_truncated", "issues"
+      ],
+      "properties": {
+        "total_records": { "type": "integer", "minimum": 0 },
+        "valid_records": { "type": "integer", "minimum": 0 },
+        "canonical_records": { "type": "integer", "minimum": 0 },
+        "invalid_records": { "type": "integer", "minimum": 0 },
+        "gap_records": { "type": "integer", "minimum": 0 },
+        "fork_points": { "type": "integer", "minimum": 0 },
+        "orphan_records": { "type": "integer", "minimum": 0 },
+        "sequence_gaps": { "type": "integer", "minimum": 0 },
+        "event_records": { "type": "integer", "minimum": 0 },
+        "expected_event_records": { "type": "integer", "minimum": 0 },
+        "invalid_record_ids": { "type": "array", "maxItems": 100, "items": { "type": "string", "minLength": 1, "maxLength": 128 } },
+        "gap_record_ids": { "type": "array", "maxItems": 100, "items": { "type": "string", "minLength": 1, "maxLength": 128 } },
+        "fork_previous_hashes": { "type": "array", "maxItems": 100, "items": { "type": "string", "pattern": "^[a-f0-9]{64}$" } },
+        "orphan_record_ids": { "type": "array", "maxItems": 100, "items": { "type": "string", "minLength": 1, "maxLength": 128 } },
+        "sequence_gap_record_ids": { "type": "array", "maxItems": 100, "items": { "type": "string", "minLength": 1, "maxLength": 128 } },
+        "missing_event_audit_ids": { "type": "array", "maxItems": 100, "items": { "$ref": "#/$defs/uuid" } },
+        "diagnostics_truncated": { "type": "boolean" },
+        "issues": {
+          "type": "array",
+          "maxItems": 7,
+          "uniqueItems": true,
+          "items": { "type": "string", "enum": ["empty_chain", "invalid_records", "hash_gaps", "forks", "orphan_records", "sequence_gaps", "incomplete_event_chain"] }
+        }
+      }
+    },
+    "eventApprovalDecisionApi": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["decision_id", "actor_id", "role", "decision", "payload_hash", "decided_at"],
+      "properties": {
+        "decision_id": { "$ref": "#/$defs/uuid" },
+        "actor_id": { "$ref": "#/$defs/uuid" },
+        "role": { "type": "string", "enum": ["operations", "security"] },
+        "decision": { "type": "string", "enum": ["approve", "deny"] },
+        "payload_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "decided_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "eventApprovalApi": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["approval_id", "tenant_id", "event_id", "requester_id", "payload_hash", "event_version", "graph_snapshot_version", "graph_snapshot_hash", "status", "required_roles", "decisions", "reason", "created_at", "expires_at", "approval_kind", "audit_evidence"],
+      "properties": {
+        "approval_id": { "$ref": "#/$defs/uuid" },
+        "tenant_id": { "$ref": "#/$defs/uuid" },
+        "event_id": { "$ref": "#/$defs/uuid" },
+        "requester_id": { "$ref": "#/$defs/uuid" },
+        "payload_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "event_version": { "type": "integer", "minimum": 1, "description": "Reviewed event version frozen into this approval; it is not the current graph projection version." },
+        "graph_snapshot_version": { "type": "integer", "minimum": 1, "description": "Shared tenant projection version frozen by review." },
+        "graph_snapshot_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$", "description": "Canonical shared-projection state hash frozen with graph_snapshot_version and checked at reality application." },
+        "status": { "type": "string", "enum": ["pending", "approved", "denied", "executed", "cancelled"] },
+        "required_roles": { "type": "array", "maxItems": 2, "uniqueItems": true, "items": { "type": "string", "enum": ["operations", "security"] } },
+        "decisions": { "type": "array", "maxItems": 2, "items": { "$ref": "#/$defs/eventApprovalDecisionApi" } },
+        "reason": { "type": "string", "minLength": 8, "maxLength": 500 },
+        "created_at": { "type": "string", "format": "date-time" },
+        "expires_at": { "type": "string", "format": "date-time" },
+        "approval_kind": { "type": "string", "enum": ["dual_human", "scenario_policy"] },
+        "audit_evidence": { "$ref": "#/$defs/eventAuditEvidenceApi" }
+      }
+    },
+    "eventEvidenceApi": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["evidence_id", "kind", "summary", "confidence"],
+      "properties": {
+        "evidence_id": { "$ref": "#/$defs/uuid" },
+        "kind": { "type": "string", "enum": ["user_statement", "synthetic_graph_fact", "conflict"] },
+        "summary": { "type": "string", "minLength": 1, "maxLength": 2048 },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "intelligenceEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["event_id", "interpretation_id", "tenant_id", "version", "status", "event_type", "source", "statement", "occurred_at", "recorded_at", "location", "confidence", "verification_status", "mode", "entity_resolutions", "related_entities", "evidence", "attachments", "historical_references", "impacts", "causal_graph", "gate", "conflicts", "unknown_effects", "safety", "graph_snapshot_version", "graph_snapshot_hash", "review_notes", "reviewed_payload_hash", "applied_payload_hash", "branch_id", "external_write", "synthetic_projection_only", "audit_evidence", "etag"],
+      "properties": {
+        "event_id": { "$ref": "#/$defs/uuid" },
+        "interpretation_id": { "$ref": "#/$defs/uuid" },
+        "tenant_id": { "$ref": "#/$defs/uuid" },
+        "version": { "type": "integer", "minimum": 1 },
+        "status": { "type": "string", "enum": ["interpreted", "needs_resolution", "reviewed", "approval_pending", "approved", "applied", "rolled_back", "rejected"] },
+        "event_type": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["code", "category", "label"],
+          "properties": {
+            "code": { "type": "string", "pattern": "^[a-z][a-z0-9_.-]{2,127}$" },
+            "category": { "type": "string", "enum": ["people", "project", "technology", "business", "operations", "external", "unknown"] },
+            "label": { "type": "string", "maxLength": 256 }
+          }
+        },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "creator_id", "source_text_hash"],
+          "properties": {
+            "kind": { "const": "manual_natural_language" },
+            "creator_id": { "$ref": "#/$defs/uuid" },
+            "source_text_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+          }
+        },
+        "statement": { "type": "string", "minLength": 3, "maxLength": 4000 },
+        "occurred_at": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["value", "precision", "confidence"],
+          "properties": {
+            "value": { "type": "string", "format": "date-time" },
+            "precision": { "type": "string", "enum": ["exact", "day", "relative", "unknown"] },
+            "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+          }
+        },
+        "recorded_at": { "type": "string", "format": "date-time" },
+        "location": { "type": ["string", "null"], "maxLength": 256 },
+        "confidence": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["score", "level", "rationale"],
+          "properties": {
+            "score": { "type": "number", "minimum": 0, "maximum": 1 },
+            "level": { "$ref": "#/$defs/confidenceBand" },
+            "rationale": { "type": "array", "maxItems": 16, "items": { "type": "string", "maxLength": 512 } }
+          }
+        },
+        "verification_status": { "type": "string", "enum": ["unverified", "confirmed", "rejected"] },
+        "mode": { "type": "string", "enum": ["reality", "scenario"] },
+        "entity_resolutions": { "type": "array", "maxItems": 32, "items": { "$ref": "#/$defs/entityResolutionApi" } },
+        "related_entities": {
+          "type": "array",
+          "maxItems": 96,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["entity_id", "display_name", "resolution_confidence"],
+            "properties": {
+              "entity_id": { "$ref": "#/$defs/uuid" },
+              "display_name": { "type": "string", "maxLength": 256 },
+              "resolution_confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+            }
+          }
+        },
+        "evidence": { "type": "array", "minItems": 1, "maxItems": 64, "items": { "$ref": "#/$defs/eventEvidenceApi" } },
+        "attachments": {
+          "type": "array",
+          "maxItems": 16,
+          "description": "Immutable scanned object metadata only. H1 manual interpretation returns an empty array and accepts no URL or upload field.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["attachment_id", "media_type", "object_ref", "content_hash"],
+            "properties": {
+              "attachment_id": { "$ref": "#/$defs/uuid" },
+              "media_type": { "type": "string", "maxLength": 128 },
+              "object_ref": { "type": "string", "maxLength": 512 },
+              "content_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+            }
+          }
+        },
+        "historical_references": {
+          "type": "array",
+          "maxItems": 32,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["event_id", "relation"],
+            "properties": {
+              "event_id": { "$ref": "#/$defs/uuid" },
+              "relation": { "type": "string", "enum": ["conflicts_with", "supersedes", "reverses"] }
+            }
+          }
+        },
+        "impacts": { "type": "array", "maxItems": 50, "items": { "$ref": "#/$defs/eventImpactApi" } },
+        "causal_graph": { "$ref": "#/$defs/causalGraphApi" },
+        "gate": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["route", "live_mutation_allowed", "blockers", "required_approvals", "policy_version", "rationale"],
+          "properties": {
+            "route": { "type": "string", "enum": ["reality_update", "scenario_branch", "rejected"] },
+            "live_mutation_allowed": { "type": "boolean" },
+            "blockers": { "type": "array", "maxItems": 32, "items": { "type": "string", "maxLength": 256 } },
+            "required_approvals": { "type": "array", "maxItems": 2, "items": { "type": "string", "enum": ["operations", "security"] } },
+            "policy_version": { "type": "string", "maxLength": 128 },
+            "rationale": { "type": "string", "maxLength": 1024 }
+          }
+        },
+        "conflicts": { "type": "array", "maxItems": 32, "items": { "type": "object" } },
+        "unknown_effects": { "type": "array", "maxItems": 32, "items": { "type": "string", "maxLength": 1024 } },
+        "safety": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["untrusted_input", "prompt_injection_detected", "confidential_data_redacted", "quarantined", "flags"],
+          "properties": {
+            "untrusted_input": { "const": true },
+            "prompt_injection_detected": { "type": "boolean" },
+            "confidential_data_redacted": { "type": "boolean" },
+            "quarantined": { "type": "boolean" },
+            "flags": { "type": "array", "maxItems": 32, "items": { "type": "string", "maxLength": 256 } }
+          }
+        },
+        "graph_snapshot_version": { "type": "integer", "minimum": 1, "description": "Version of the shared tenant projection captured by review and copied into approval." },
+        "graph_snapshot_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$", "description": "Canonical shared-projection state hash used with graph_snapshot_version for compare-and-swap." },
+        "review_notes": { "type": ["string", "null"], "maxLength": 1000 },
+        "reviewed_payload_hash": { "type": ["string", "null"], "pattern": "^[a-f0-9]{64}$" },
+        "applied_payload_hash": { "type": ["string", "null"], "pattern": "^[a-f0-9]{64}$" },
+        "branch_id": { "oneOf": [{ "$ref": "#/$defs/uuid" }, { "type": "null" }] },
+        "external_write": { "const": false },
+        "synthetic_projection_only": { "const": true },
+        "audit_evidence": { "$ref": "#/$defs/eventAuditEvidenceApi" },
+        "etag": { "type": "string", "minLength": 3, "maxLength": 200 }
+      }
+    },
+    "evidenceRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["evidence_id", "source_type", "locator", "observed_at"],
+      "properties": {
+        "evidence_id": { "$ref": "#/$defs/uuid" },
+        "source_type": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "locator": { "type": "string", "minLength": 1, "maxLength": 512 },
+        "observed_at": { "type": "string", "format": "date-time" },
+        "classification": { "type": "string", "maxLength": 64 },
+        "content_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      }
+    },
+    "entityCandidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mention", "entity_id", "entity_type", "display_label", "confidence", "reason", "requires_confirmation"],
+      "properties": {
+        "mention": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "entity_id": { "$ref": "#/$defs/uuid" },
+        "entity_type": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "display_label": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "reason": { "type": "string", "minLength": 1, "maxLength": 1024 },
+        "conflicts": { "type": "array", "maxItems": 16, "items": { "type": "string", "maxLength": 512 } },
+        "requires_confirmation": { "type": "boolean" }
+      }
+    },
+    "impact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["impact_id", "depth", "target_kind", "target_ref", "operation", "impact_type", "severity", "confidence", "time_horizon", "explanation", "evidence", "recommended_action", "derivation"],
+      "properties": {
+        "impact_id": { "$ref": "#/$defs/uuid" },
+        "parent_impact_id": { "oneOf": [{ "$ref": "#/$defs/uuid" }, { "type": "null" }] },
+        "depth": { "type": "integer", "minimum": 0, "maximum": 3 },
+        "target_kind": { "type": "string", "enum": ["node", "relationship", "workflow", "risk", "prediction", "simulation", "knowledge", "unknown"] },
+        "target_ref": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "operation": { "type": "string", "enum": ["create", "update", "remove", "flag", "none"] },
+        "impact_type": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "before": {},
+        "after": {},
+        "severity": { "type": "string", "enum": ["critical", "high", "medium", "low", "informational", "unknown"] },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "time_horizon": { "type": "string", "enum": ["immediate", "near_term", "medium_term", "long_term", "unknown"] },
+        "explanation": { "type": "string", "minLength": 1, "maxLength": 2048 },
+        "evidence": { "type": "array", "maxItems": 32, "items": { "$ref": "#/$defs/evidenceRef" } },
+        "recommended_action": { "type": "string", "minLength": 1, "maxLength": 1024 },
+        "derivation": { "type": "string", "enum": ["observed", "rule_derived", "simulated", "unknown"] },
+        "rule_version": { "type": "string", "maxLength": 128 },
+        "uncertainty": { "type": "string", "maxLength": 1024 }
+      }
+    },
+    "eventActionReceiptApi": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["receipt_id", "tenant_id", "event_id", "approval_id", "action", "actor_id", "before_version", "after_version", "graph_version_before", "graph_version_after", "payload_hash", "before_state_hash", "after_state_hash", "applied_changes", "branch_id", "status", "replayed", "outbox_position", "provider", "external_write", "prohibited_actions_not_executed", "recorded_at", "audit_evidence"],
+      "properties": {
+        "receipt_id": { "$ref": "#/$defs/uuid" },
+        "tenant_id": { "$ref": "#/$defs/uuid" },
+        "event_id": { "$ref": "#/$defs/uuid" },
+        "approval_id": { "$ref": "#/$defs/uuid" },
+        "action": { "type": "string", "enum": ["apply_reality", "apply_scenario", "rollback"] },
+        "actor_id": { "$ref": "#/$defs/uuid" },
+        "before_version": { "type": "integer", "minimum": 1 },
+        "after_version": { "type": "integer", "minimum": 2 },
+        "graph_version_before": { "type": "integer", "minimum": 1, "description": "Shared tenant projection version immediately before this action." },
+        "graph_version_after": { "type": "integer", "minimum": 1, "description": "Shared tenant projection version after the action; scenario actions retain the base version." },
+        "payload_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "before_state_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "after_state_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "applied_changes": { "type": "array", "maxItems": 50, "items": { "type": "object" } },
+        "branch_id": { "oneOf": [{ "$ref": "#/$defs/uuid" }, { "type": "null" }] },
+        "status": { "const": "succeeded" },
+        "replayed": { "type": "boolean" },
+        "outbox_position": { "type": "integer", "minimum": 1, "description": "Position allocated by the same commit that persisted the receipt, audit evidence, application snapshot, and outbox envelope." },
+        "provider": { "const": "synthetic_event_projection" },
+        "external_write": { "const": false },
+        "prohibited_actions_not_executed": { "type": "array", "minItems": 1, "maxItems": 16, "items": { "type": "string", "maxLength": 128 } },
+        "recorded_at": { "type": "string", "format": "date-time" },
+        "audit_evidence": { "$ref": "#/$defs/eventAuditEvidenceApi" }
+      }
+    },
+    "eventTimelineEntryApi": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["timeline_entry_id", "tenant_id", "event_id", "branch_id", "sequence", "occurred_at", "recorded_at", "action", "summary", "before_state_hash", "after_state_hash", "graph_version_before", "graph_version_after", "receipt_id", "reversible"],
+      "properties": {
+        "timeline_entry_id": { "$ref": "#/$defs/uuid" },
+        "tenant_id": { "$ref": "#/$defs/uuid" },
+        "event_id": { "$ref": "#/$defs/uuid" },
+        "branch_id": { "$ref": "#/$defs/uuid" },
+        "sequence": { "type": "integer", "minimum": 0 },
+        "occurred_at": { "type": "string", "format": "date-time" },
+        "recorded_at": { "type": "string", "format": "date-time" },
+        "action": { "type": "string", "enum": ["baseline", "event_applied", "event_rolled_back"] },
+        "summary": { "type": "string", "minLength": 1, "maxLength": 1024 },
+        "before_state_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "after_state_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "graph_version_before": { "type": "integer", "minimum": 1 },
+        "graph_version_after": { "type": "integer", "minimum": 1 },
+        "receipt_id": { "oneOf": [{ "$ref": "#/$defs/uuid" }, { "type": "null" }] },
+        "reversible": { "type": "boolean" }
+      }
+    },
+    "eventBranchApi": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["branch_id", "tenant_id", "name", "parent_branch_id", "created_by_event_id", "created_at", "mode", "status", "event_ids", "base_graph_version", "base_state_hash", "state_hash"],
+      "properties": {
+        "branch_id": { "$ref": "#/$defs/uuid" },
+        "tenant_id": { "$ref": "#/$defs/uuid" },
+        "name": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "parent_branch_id": { "oneOf": [{ "$ref": "#/$defs/uuid" }, { "type": "null" }] },
+        "created_by_event_id": { "oneOf": [{ "$ref": "#/$defs/uuid" }, { "type": "null" }] },
+        "created_at": { "type": "string", "format": "date-time" },
+        "mode": { "type": "string", "enum": ["baseline", "scenario"] },
+        "status": { "type": "string", "enum": ["active", "rolled_back"] },
+        "event_ids": { "type": "array", "maxItems": 100, "items": { "$ref": "#/$defs/uuid" } },
+        "base_graph_version": { "type": "integer", "minimum": 1 },
+        "base_state_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "state_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      }
+    },
+    "eventReplayApi": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["event_id", "mode", "current_status", "reconstructable", "graph", "entity_changes", "relationship_changes", "receipts", "timeline", "branch"],
+      "properties": {
+        "event_id": { "$ref": "#/$defs/uuid" },
+        "mode": { "type": "string", "enum": ["reality", "scenario"] },
+        "current_status": { "type": "string", "enum": ["interpreted", "needs_resolution", "reviewed", "approval_pending", "approved", "applied", "rolled_back", "rejected"] },
+        "reconstructable": { "type": "boolean" },
+        "graph": {
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["before_version", "after_version", "before_state_hash", "after_state_hash"],
+              "properties": {
+                "before_version": { "type": "integer", "minimum": 1 },
+                "after_version": { "type": "integer", "minimum": 1 },
+                "before_state_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+                "after_state_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+              }
+            }
+          ]
+        },
+        "entity_changes": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["entity_id", "display_name", "before", "after"],
+            "properties": {
+              "entity_id": { "$ref": "#/$defs/uuid" },
+              "display_name": { "type": "string", "minLength": 1, "maxLength": 256 },
+              "before": { "type": ["object", "null"] },
+              "after": { "type": ["object", "null"] }
+            }
+          }
+        },
+        "relationship_changes": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["relationship_id", "type", "from_entity_id", "to_entity_id", "before_state", "after_state"],
+            "properties": {
+              "relationship_id": { "$ref": "#/$defs/uuid" },
+              "type": { "type": "string", "minLength": 1, "maxLength": 128 },
+              "from_entity_id": { "$ref": "#/$defs/uuid" },
+              "to_entity_id": { "$ref": "#/$defs/uuid" },
+              "before_state": { "type": ["string", "null"], "maxLength": 128 },
+              "after_state": { "type": ["string", "null"], "maxLength": 128 }
+            }
+          }
+        },
+        "receipts": { "type": "array", "maxItems": 100, "items": { "$ref": "#/$defs/eventActionReceiptApi" } },
+        "timeline": { "type": "array", "maxItems": 100, "items": { "$ref": "#/$defs/eventTimelineEntryApi" } },
+        "branch": { "oneOf": [{ "$ref": "#/$defs/eventBranchApi" }, { "type": "null" }] }
+      }
+    },
+    "branchComparisonApi": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["left", "right", "same_base_snapshot", "common_event_ids", "left_only_event_ids", "right_only_event_ids", "state_hash_equal", "timeline"],
+      "properties": {
+        "left": { "$ref": "#/$defs/eventBranchApi" },
+        "right": { "$ref": "#/$defs/eventBranchApi" },
+        "same_base_snapshot": { "type": "boolean" },
+        "common_event_ids": { "type": "array", "maxItems": 100, "uniqueItems": true, "items": { "$ref": "#/$defs/uuid" } },
+        "left_only_event_ids": { "type": "array", "maxItems": 100, "uniqueItems": true, "items": { "$ref": "#/$defs/uuid" } },
+        "right_only_event_ids": { "type": "array", "maxItems": 100, "uniqueItems": true, "items": { "$ref": "#/$defs/uuid" } },
+        "state_hash_equal": { "type": "boolean" },
+        "timeline": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["left", "right"],
+          "properties": {
+            "left": { "type": "array", "maxItems": 100, "items": { "$ref": "#/$defs/eventTimelineEntryApi" } },
+            "right": { "type": "array", "maxItems": 100, "items": { "$ref": "#/$defs/eventTimelineEntryApi" } }
+          }
+        }
+      }
+    },
+    "eventInterpretation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "event_id", "tenant_id", "event_type", "taxonomy_version", "source", "creator_id", "occurred_at", "recorded_at", "confidence_band", "confidence", "verification_status", "mode", "related_entities", "evidence", "impacts", "graph_snapshot_version", "graph_snapshot_hash", "payload_sha256", "status", "synthetic", "external_write"],
+      "properties": {
+        "schema_version": { "const": 1 },
+        "event_id": { "$ref": "#/$defs/uuid" },
+        "tenant_id": { "$ref": "#/$defs/uuid" },
+        "event_type": { "type": "string", "pattern": "^[a-z][a-z0-9_.-]{2,127}$" },
+        "taxonomy_version": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "source": { "type": "string", "enum": ["manual", "connector", "system", "external_public"] },
+        "source_reference": { "type": "string", "maxLength": 512 },
+        "creator_id": { "$ref": "#/$defs/uuid" },
+        "occurred_at": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["earliest", "latest", "precision"],
+          "properties": {
+            "earliest": { "type": "string", "format": "date-time" },
+            "latest": { "type": "string", "format": "date-time" },
+            "precision": { "type": "string", "enum": ["exact", "day", "range", "unknown"] }
+          }
+        },
+        "recorded_at": { "type": "string", "format": "date-time" },
+        "location": { "type": "string", "maxLength": 256 },
+        "confidence_band": { "$ref": "#/$defs/confidenceBand" },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "verification_status": { "$ref": "#/$defs/verificationStatus" },
+        "mode": { "type": "string", "enum": ["reality_update", "scenario"] },
+        "related_entities": { "type": "array", "maxItems": 32, "items": { "$ref": "#/$defs/entityCandidate" } },
+        "evidence": { "type": "array", "maxItems": 32, "items": { "$ref": "#/$defs/evidenceRef" } },
+        "attachment_refs": { "type": "array", "maxItems": 16, "items": { "type": "string", "maxLength": 512 } },
+        "historical_event_refs": { "type": "array", "maxItems": 32, "items": { "$ref": "#/$defs/uuid" } },
+        "impacts": { "type": "array", "maxItems": 100, "items": { "$ref": "#/$defs/impact" } },
+        "unknowns": { "type": "array", "maxItems": 32, "items": { "type": "string", "maxLength": 1024 } },
+        "graph_snapshot_version": { "type": "integer", "minimum": 1 },
+        "graph_snapshot_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "payload_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "status": { "type": "string", "enum": ["draft", "needs_review", "reviewed", "approval_requested", "applied", "rejected", "rolled_back", "conflicted", "expired"] },
+        "synthetic": { "const": true },
+        "external_write": { "const": false }
+      }
+    },
+    "eventReview": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "review_id", "event_id", "reviewer_id", "decision", "reviewed_payload_sha256", "graph_snapshot_version", "graph_snapshot_hash", "reviewed_at", "status"],
+      "properties": {
+        "schema_version": { "const": 1 },
+        "review_id": { "$ref": "#/$defs/uuid" },
+        "event_id": { "$ref": "#/$defs/uuid" },
+        "reviewer_id": { "$ref": "#/$defs/uuid" },
+        "decision": { "type": "string", "enum": ["accept", "reject", "request_changes"] },
+        "rationale": { "type": "string", "maxLength": 2048 },
+        "reviewed_payload_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "graph_snapshot_version": { "type": "integer", "minimum": 1 },
+        "graph_snapshot_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "reviewed_at": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["accepted", "rejected", "changes_requested"] }
+      }
+    },
+    "eventMutationReceipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "receipt_id", "event_id", "tenant_id", "idempotency_key", "payload_sha256", "before_graph_version", "after_graph_version", "before_state_hash", "after_state_hash", "outbox_position", "mutations", "recorded_at", "audit_event_id", "synthetic", "external_write", "status"],
+      "properties": {
+        "schema_version": { "const": 1 },
+        "receipt_id": { "$ref": "#/$defs/uuid" },
+        "event_id": { "$ref": "#/$defs/uuid" },
+        "tenant_id": { "$ref": "#/$defs/uuid" },
+        "idempotency_key": { "type": "string", "minLength": 8, "maxLength": 128 },
+        "payload_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "before_graph_version": { "type": "integer", "minimum": 1 },
+        "after_graph_version": { "type": "integer", "minimum": 1 },
+        "before_state_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "after_state_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "outbox_position": { "type": "integer", "minimum": 1 },
+        "mutations": { "type": "array", "maxItems": 100, "items": { "$ref": "#/$defs/impact" } },
+        "recorded_at": { "type": "string", "format": "date-time" },
+        "audit_event_id": { "$ref": "#/$defs/uuid" },
+        "synthetic": { "const": true },
+        "external_write": { "const": false },
+        "status": { "type": "string", "enum": ["applied", "replayed", "rolled_back"] }
+      }
+    },
+    "eventBranch": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "branch_id", "tenant_id", "base_graph_version", "base_state_hash", "event_id", "confidence_band", "assumptions", "created_at", "status"],
+      "properties": {
+        "schema_version": { "const": 1 },
+        "branch_id": { "$ref": "#/$defs/uuid" },
+        "tenant_id": { "$ref": "#/$defs/uuid" },
+        "base_graph_version": { "type": "integer", "minimum": 1 },
+        "base_state_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "event_id": { "$ref": "#/$defs/uuid" },
+        "confidence_band": { "$ref": "#/$defs/confidenceBand" },
+        "assumptions": { "type": "array", "maxItems": 32, "items": { "type": "string", "maxLength": 1024 } },
+        "created_at": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["draft", "active", "archived", "promoted_by_new_confirmed_event"] }
+      }
+    }
+  }
+}

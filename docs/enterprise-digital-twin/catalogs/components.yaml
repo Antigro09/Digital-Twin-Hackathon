@@ -30,6 +30,12 @@ components:
     owner: ai-platform
     authority: Typed proposals and derived analytical results; never policy or external authority.
     interfaces: [Temporal-activities, model-gateway, PostgreSQL, Neo4j, S3]
+  - id: CMP-EVENT-INTELLIGENCE
+    name: Event intelligence and causal impact engine
+    workload: api-and-ai-simulation-worker
+    owner: knowledge-graph
+    authority: Typed event interpretations bounded evidence-linked impact proposals scenario branches and exact version-and-hash synthetic graph-mutation plans over the shared rebuildable projection; never external or employment authority.
+    interfaces: [OpenAPI, event-intelligence-schema, shared-event-projection, PostgreSQL, transactional-outbox, CloudEvents, Neo4j, Temporal, audit-event-schema]
   - id: CMP-WORKFLOW
     name: Durable workflow control plane
     workload: Temporal
@@ -77,7 +83,7 @@ components:
     workload: ai-simulation-worker
     owner: ai-platform
     authority: Approved model snapshots, budgets, structured schemas, fallbacks, and evaluation gates.
-    interfaces: [OpenAI-Responses-API, OpenAI-Agents-SDK]
+    interfaces: [AIProvider, Llama-Chat-Completions-API, OpenAI-Responses-API]
   - id: CMP-OBS
     name: Observability and audit pipeline
     workload: platform-services

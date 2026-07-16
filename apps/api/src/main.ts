@@ -6,10 +6,13 @@ import { AppModule } from './app.module';
 
 async function bootstrap(): Promise<void> {
   const adapter = new FastifyAdapter({
-    bodyLimit: 1_048_576,
+    // A 5 MiB document becomes just under 7 MiB when represented as canonical
+    // base64 in the JSON-only AI import contract. Endpoint services still apply
+    // their own substantially smaller field and object limits.
+    bodyLimit: 7_100_000,
     requestTimeout: 10_000,
     trustProxy: false,
-    ignoreTrailingSlash: false,
+    routerOptions: { ignoreTrailingSlash: false },
     ajv: { customOptions: { removeAdditional: false, coerceTypes: false, allErrors: true } },
   });
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, adapter, { bufferLogs: true });
@@ -17,7 +20,7 @@ async function bootstrap(): Promise<void> {
   app.enableCors({
     origin: (process.env.WEB_ORIGIN ?? 'http://localhost:3000').split(','),
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['content-type', 'authorization', 'idempotency-key', 'if-match', 'last-event-id', 'x-demo-actor', 'x-edt-context', 'x-request-id'],
+    allowedHeaders: ['content-type', 'authorization', 'idempotency-key', 'if-match', 'last-event-id', 'x-demo-auth-key', 'x-edt-context', 'x-request-id'],
     exposedHeaders: ['etag', 'ratelimit-limit', 'ratelimit-remaining', 'ratelimit-reset'],
     credentials: true,
     maxAge: 600,

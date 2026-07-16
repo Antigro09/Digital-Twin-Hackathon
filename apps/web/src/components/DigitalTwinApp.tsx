@@ -21,16 +21,21 @@ import type {
 import { ApiProblem } from "@/lib/api/types";
 import { formatDateTime } from "@/lib/format";
 import { ActionWorkspace } from "./ActionWorkspace";
+import { AIControlCenter } from "./AIControlCenter";
 import { AssetTwin } from "./AssetTwin";
 import { CopilotPanel } from "./CopilotPanel";
+import { EventIntelligence } from "./EventIntelligence";
 import { GraphExplorer } from "./GraphExplorer";
+import { LocalDemoUnlock } from "./LocalDemoUnlock";
 import { Overview } from "./Overview";
 import { ScenarioWorkspace } from "./ScenarioWorkspace";
 import { Button, Skeleton, StatePanel, StatusPill } from "./ui";
 
-type View = "overview" | "asset" | "graph" | "copilot" | "scenario" | "action";
+type View = "overview" | "event" | "ai" | "asset" | "graph" | "copilot" | "scenario" | "action";
 
 const navigation: Array<{ id: View; label: string; eyebrow: string; glyph: string }> = [
+  { id: "ai", label: "AI Control Center", eyebrow: "Agents + knowledge", glyph: "AI" },
+  { id: "event", label: "Event intelligence", eyebrow: "Causal impact", glyph: "◎" },
   { id: "asset", label: "Asset twin", eyebrow: "Physical operations", glyph: "◉" },
   { id: "overview", label: "Control room", eyebrow: "Launch posture", glyph: "⌂" },
   { id: "graph", label: "Evidence graph", eyebrow: "Bounded traversal", glyph: "⌘" },
@@ -40,6 +45,8 @@ const navigation: Array<{ id: View; label: string; eyebrow: string; glyph: strin
 ];
 
 const viewTitles: Record<View, string> = {
+  ai: "AI provider and agent control center",
+  event: "Event intelligence and causal impact",
   asset: "Interactive physical asset twin",
   overview: "Orion launch control room",
   graph: "Evidence-backed graph",
@@ -67,11 +74,13 @@ export function DigitalTwinApp() {
   const [problem, setProblem] = useState<string>();
   const [demoState, setDemoState] = useState<DemoState>("live");
   const [announcement, setAnnouncement] = useState("");
+  const [demoAuthLocked, setDemoAuthLocked] = useState(false);
   const demoEnabled = process.env.NEXT_PUBLIC_ENABLE_DEMO_DATA === "true";
 
   const bootstrap = useCallback(async () => {
     setLoading(true);
     setProblem(undefined);
+    setDemoAuthLocked(false);
     try {
       const api = getDigitalTwinApi();
       apiRef.current = api;
@@ -86,7 +95,8 @@ export function DigitalTwinApp() {
       setGraph(graphResult);
       setAnswer(answerResult);
     } catch (error) {
-      setProblem(toMessage(error));
+      if (isDemoAuthLocked(error)) setDemoAuthLocked(true);
+      else setProblem(toMessage(error));
     } finally {
       setLoading(false);
     }
@@ -104,6 +114,8 @@ export function DigitalTwinApp() {
   );
   const canSimulate = activeMembership?.capabilities.includes("scenario:write") ?? false;
   const canPropose = activeMembership?.capabilities.includes("action:propose") ?? false;
+  const canReviewEvents = activeMembership?.capabilities.includes("event:review") ?? false;
+  const canApplyEvents = activeMembership?.capabilities.includes("event:apply") ?? false;
   const isAsterContext = activeMembership?.tenantAlias === "tnt_aster";
   const workspaceLabel = isAsterContext ? "Orion launch" : "Beacon workspace";
   const currentViewTitle = view === "overview" && !isAsterContext ? "Beacon operations control room" : viewTitles[view];
@@ -117,7 +129,8 @@ export function DigitalTwinApp() {
       const result = await work(api);
       apply(result);
     } catch (error) {
-      setProblem(toMessage(error));
+      if (isDemoAuthLocked(error)) setDemoAuthLocked(true);
+      else setProblem(toMessage(error));
     } finally {
       setBusy(null);
     }
@@ -149,7 +162,8 @@ export function DigitalTwinApp() {
       setAnnouncement(`Active context changed to ${membership?.tenantName}. Tenant-scoped state was cleared.`);
       setView("overview");
     } catch (error) {
-      setProblem(toMessage(error));
+      if (isDemoAuthLocked(error)) setDemoAuthLocked(true);
+      else setProblem(toMessage(error));
     } finally {
       setBusy(null);
     }
@@ -164,6 +178,10 @@ export function DigitalTwinApp() {
     : connectors;
 
   if (loading) return <InitialLoading />;
+
+  if (demoAuthLocked && apiRef.current?.sourceMode === "connected") {
+    return <LocalDemoUnlock onUnlocked={bootstrap} />;
+  }
 
   if ((!actor || !graph || !answer) && problem) {
     return (
@@ -200,8 +218,11 @@ export function DigitalTwinApp() {
           <div className="mobile-brand"><span className="brand-mark" aria-hidden="true">DT</span><strong>Digital Twin</strong></div>
           <div className="breadcrumb"><span>{activeMembership?.tenantName ?? "Tenant"}</span><i aria-hidden="true">/</i><strong>{currentViewTitle}</strong></div>
           <div className="topbar-actions">
+            <StatusPill tone={apiRef.current?.sourceMode === "connected" ? "positive" : "violet"}>
+              {apiRef.current?.sourceMode === "connected" ? "Connected API · trusted local demo auth" : "Local demo data"}
+            </StatusPill>
             {demoEnabled ? (
-              <label className="state-lab"><span>Preview state</span><select aria-label="Preview interface state" value={demoState} onChange={(event) => setDemoState(event.target.value as DemoState)}><option value="live">Live</option><option value="loading">Loading</option><option value="empty">Empty</option><option value="error">Error</option><option value="stale">Stale</option><option value="revoked">Revoked</option></select></label>
+              <label className="state-lab"><span>Preview state</span><select aria-label="Preview interface state" value={demoState} onChange={(event) => setDemoState(event.target.value as DemoState)}><option value="live">Normal</option><option value="loading">Loading</option><option value="empty">Empty</option><option value="error">Error</option><option value="stale">Stale</option><option value="revoked">Revoked</option></select></label>
             ) : null}
             <div className="context-picker">
               <label htmlFor="membership-context">Active membership</label>
@@ -239,6 +260,9 @@ export function DigitalTwinApp() {
             busy,
             canSimulate,
             canPropose,
+            canReviewEvents,
+            canApplyEvents,
+            sourceMode: apiRef.current!.sourceMode,
             navigate,
             onAsk: async (question, mode) => withBusy("question", (api) => api.askLaunchRisk(question, mode), setAnswer),
             onCompile: async (delta) => withBusy("compile", (api) => api.createScenario(delta), (result) => { setScenario(result); setSimulation(undefined); }),
@@ -274,6 +298,9 @@ type RenderViewProps = {
   busy: string | null;
   canSimulate: boolean;
   canPropose: boolean;
+  canReviewEvents: boolean;
+  canApplyEvents: boolean;
+  sourceMode: DigitalTwinApi["sourceMode"];
   navigate: (view: View) => void;
   onAsk: (question: string, mode: AnswerMode) => Promise<void>;
   onCompile: (delta: number) => Promise<void>;
@@ -291,6 +318,8 @@ type RenderViewProps = {
 
 function renderView(props: RenderViewProps) {
   switch (props.view) {
+    case "ai": return <AIControlCenter api={props.api} sourceMode={props.sourceMode} />;
+    case "event": return <EventIntelligence api={props.api} canReview={props.canReviewEvents} canApply={props.canApplyEvents} sourceMode={props.sourceMode} />;
     case "overview": return <Overview graph={props.graph} answer={props.answer} connectors={props.connectors} onNavigate={props.navigate} />;
     case "asset": return <AssetTwin api={props.api} />;
     case "graph": return <GraphExplorer graph={props.graph} />;
@@ -303,7 +332,7 @@ function renderView(props: RenderViewProps) {
 function InitialLoading() {
   return (
     <div className="initial-loading" aria-busy="true" aria-label="Loading Digital Twin">
-      <aside><div className="brand-lockup"><span className="brand-mark">DT</span><div><strong>Digital Twin</strong><span>Enterprise control plane</span></div></div>{Array.from({ length: 6 }, (_, index) => <span className="loading-nav" key={index} />)}</aside>
+      <aside><div className="brand-lockup"><span className="brand-mark">DT</span><div><strong>Digital Twin</strong><span>Enterprise control plane</span></div></div>{Array.from({ length: navigation.length }, (_, index) => <span className="loading-nav" key={index} />)}</aside>
       <main><Skeleton lines={2} /><div className="loading-grid"><Skeleton lines={4} /><Skeleton lines={4} /></div><Skeleton lines={5} /></main>
     </div>
   );
@@ -317,4 +346,8 @@ function toMessage(error: unknown) {
   if (error instanceof ApiProblem) return `${error.message}${error.retryable ? " You can retry safely." : ""}`;
   if (error instanceof Error) return error.message;
   return "An unexpected error occurred.";
+}
+
+function isDemoAuthLocked(error: unknown): error is ApiProblem {
+  return error instanceof ApiProblem && error.status === 401 && error.code === "demo_auth_locked";
 }

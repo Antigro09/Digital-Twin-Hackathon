@@ -6,7 +6,7 @@ version: 1.0.0
 owners:
   - Architecture
   - Developer Platform
-last_reviewed: 2026-07-13
+last_reviewed: 2026-07-15
 ---
 
 # Technology Stack
@@ -47,7 +47,7 @@ Exact package and image versions are pinned by lockfiles and image digests in th
 | Orchestration | Docker Compose for local/H1; Kubernetes and Helm adopted at H2 | Standard scheduling, policy, rollout, and availability for the committed design-partner topology | Production stateful services should be managed outside the cluster |
 | Infrastructure as code | OpenTofu with provider-neutral modules | Declarative cloud and Kubernetes resources without dual IaC sources | Remote encrypted state, locking, plan review |
 | Identity | External OIDC; SAML and SCIM at H2 boundary | Enterprise IdP remains authentication authority | Local development can use a disposable OIDC provider |
-| AI | OpenAI Responses API and Python Agents SDK behind a model gateway | Capability-oriented model calls, structured tools, traceable runs | Pinned evaluated snapshots; no provider call bypasses gateway |
+| AI | Provider-neutral Python AI Gateway; Meta Llama API primary; OpenAI Responses optional | Capability-oriented model calls, strict schemas, permission-aware retrieval, traceable runs | Exact evaluated model configuration; no provider call bypasses gateway; no simulated production response |
 
 ### 2.1 Language and data-access rules
 
@@ -62,13 +62,13 @@ Exact package and image versions are pinned by lockfiles and image digests in th
 
 The gateway exposes capabilities, not raw model names, to application code:
 
-| Capability | H1 family default | Required gate |
+| Capability | H1 route | Required gate |
 |---|---|---|
-| difficult orchestration and evaluation | gpt-5.6-sol | Tool and argument accuracy, groundedness, safety, latency, and cost evaluation |
-| balanced grounded analysis | gpt-5.6-terra | Citation support, abstention, ACL and injection evaluation |
-| high-volume extraction | gpt-5.6-luna | Structured extraction precision/recall and cost evaluation |
+| difficult grounded reasoning | Configured `AI_REASONING_PROVIDER`; Llama by default | Argument accuracy, groundedness, safety, latency, and cost evaluation |
+| balanced grounded analysis | Configured Llama model | Citation support, abstention, ACL, injection, and schema evaluation |
+| high-volume extraction | Configured Llama model | Structured extraction precision/recall, provenance, latency, and cost evaluation |
 
-These names are configuration defaults from the approved architecture, not permission to use a floating provider alias. Before deployment, the platform owner must confirm account availability and record the exact snapshot in the model registry. If no available snapshot passes the capability evaluation, that capability is disabled. Fallbacks are independently evaluated and cannot silently reduce safety. The Responses API is the interface for new agentic integrations, as documented by [OpenAI](https://developers.openai.com/api/docs/guides/migrate-to-responses).
+The model identifier is never guessed or embedded in application features. Before deployment, the platform owner records the exact account-available model/configuration and evaluation evidence in the model registry. If no route passes the capability evaluation, that capability is disabled. Fallbacks are independently evaluated and cannot silently reduce safety. Meta documents its hosted Llama API and official SDKs in the [Llama API announcement](https://ai.meta.com/blog/llamacon-llama-news/) and [official Python SDK](https://github.com/meta-llama/llama-api-python). OpenAI Responses remains an optional adapter and follows its [structured-output contract](https://developers.openai.com/api/docs/guides/structured-outputs).
 
 ## 3. Technology portfolio matrix
 

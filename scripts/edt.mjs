@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 
 import { spawnSync } from "node:child_process";
-import { existsSync } from "node:fs";
+import { randomBytes } from "node:crypto";
+import { appendFileSync, existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 const root = resolve(import.meta.dirname, "..");
@@ -36,16 +37,53 @@ async function waitFor(url, label, timeoutMs = 180_000) {
   throw new Error(`${label} did not become ready within ${timeoutMs / 1000} seconds`);
 }
 
-async function post(url, body) {
+async function post(url, body, headers = {}) {
   const response = await fetch(url, {
     method: "POST",
-    headers: { "content-type": "application/json" },
+    headers: { "content-type": "application/json", ...headers },
     body: JSON.stringify(body),
     signal: AbortSignal.timeout(30_000),
   });
   const value = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(`${url} returned ${response.status}: ${JSON.stringify(value)}`);
   return value;
+}
+
+function ensureLocalDemoAuth() {
+  const envPath = resolve(root, ".env");
+  const source = existsSync(envPath) ? readFileSync(envPath, "utf8") : "";
+  const fromFile = (name) => {
+    const matches = [...source.matchAll(new RegExp(`^${name}=(.*)$`, "gm"))];
+    return matches.at(-1)?.[1]?.trim().replace(/^(["'])(.*)\1$/, "$2") ?? "";
+  };
+  const generated = [];
+  for (const name of ["EDT_DEMO_AUTH_SECRET", "EDT_DEMO_AUTH_BOOTSTRAP_KEY", "EDT_DEMO_UI_ACCESS_KEY", "AI_WORKER_SHARED_SECRET", "AI_DATABASE_PASSWORD"]) {
+    let value = process.env[name] ?? fromFile(name);
+    if (!value) {
+      value = randomBytes(48).toString("base64url");
+      generated.push(`${name}=${value}`);
+    } else if (value.length < 32) {
+      throw new Error(`${name} must contain at least 32 characters.`);
+    }
+    process.env[name] = value;
+  }
+  if (generated.length) {
+    const prefix = source.length && !source.endsWith("\n") ? "\n" : "";
+    appendFileSync(envPath, `${prefix}\n# Generated local-demo authentication and internal-service credentials. Do not commit this file.\n${generated.join("\n")}\n`, { encoding: "utf8", mode: 0o600 });
+    process.stdout.write("Generated signed local-demo authentication and internal-service credentials in the ignored .env file.\n");
+  }
+}
+
+async function issueDemoToken(actorAlias) {
+  if (!actorAlias) throw new Error("Provide a fixture actor alias, for example: npm run demo:token -- usr_aster_analyst");
+  ensureLocalDemoAuth();
+  const port = process.env.EDT_API_PORT ?? "8080";
+  const session = await post(
+    `http://127.0.0.1:${port}/v1/demo-auth/sessions`,
+    { actor_alias: actorAlias },
+    { "x-demo-auth-key": process.env.EDT_DEMO_AUTH_BOOTSTRAP_KEY },
+  );
+  process.stdout.write(`${session.access_token}\n`);
 }
 
 async function seed() {
@@ -58,6 +96,7 @@ async function seed() {
 }
 
 async function start() {
+  ensureLocalDemoAuth();
   compose("up", "--detach", "--build", "--remove-orphans");
   const apiPort = process.env.EDT_API_PORT ?? "8080";
   const webPort = process.env.EDT_WEB_PORT ?? "3000";
@@ -78,7 +117,11 @@ async function main() {
   switch (command) {
     case "start": await start(); break;
     case "seed": await seed(); break;
-    case "verify": run(process.execPath, ["scripts/verify_live.mjs"], { env: { ...process.env, EDT_API_URL: process.env.EDT_API_URL ?? `http://127.0.0.1:${process.env.EDT_API_PORT ?? "8080"}` } }); break;
+    case "verify":
+      ensureLocalDemoAuth();
+      run(process.execPath, ["scripts/verify_live.mjs"], { env: { ...process.env, EDT_API_URL: process.env.EDT_API_URL ?? `http://127.0.0.1:${process.env.EDT_API_PORT ?? "8080"}` } });
+      break;
+    case "auth-token": await issueDemoToken(extra[0]); break;
     case "test": run("npm", ["test"]); break;
     case "status": compose("ps"); break;
     case "logs": compose("logs", "--follow", "--tail", "200", ...extra); break;
@@ -90,7 +133,7 @@ async function main() {
       break;
     case "help":
     default:
-      process.stdout.write("Usage: node scripts/edt.mjs <start|seed|verify|test|status|logs|stop|reset --yes>\n");
+      process.stdout.write("Usage: node scripts/edt.mjs <start|seed|verify|auth-token ACTOR|test|status|logs|stop|reset --yes>\n");
       if (command !== "help") process.exitCode = 2;
   }
 }

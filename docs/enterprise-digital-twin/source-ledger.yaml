@@ -95,3 +95,15 @@ sources:
     url: https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-rest-api-3-issue-issueidorkey-put
     accessed: 2026-07-13
     authority: informative-provider-contract
+  - id: SRC-017
+    title: Meta Llama API announcement
+    type: primary-technical-source
+    url: https://ai.meta.com/blog/llamacon-llama-news/
+    accessed: 2026-07-15
+    authority: informative-current-product-fact
+  - id: SRC-018
+    title: Official Meta Llama API Python SDK
+    type: primary-technical-source
+    url: https://github.com/meta-llama/llama-api-python
+    accessed: 2026-07-15
+    authority: informative-provider-contract

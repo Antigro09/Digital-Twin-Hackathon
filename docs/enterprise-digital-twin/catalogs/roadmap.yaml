@@ -19,6 +19,11 @@ horizons:
       - REQ-PHY-003
       - REQ-PHY-004
       - REQ-PHY-005
+      - REQ-EVT-001
+      - REQ-EVT-002
+      - REQ-EVT-003
+      - REQ-EVT-004
+      - REQ-EVT-005
       - REQ-ARCH-001
       - REQ-ARCH-002
       - REQ-ARCH-003

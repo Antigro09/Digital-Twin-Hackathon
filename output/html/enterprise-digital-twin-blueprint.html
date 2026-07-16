@@ -8895,6 +8895,7 @@ X-EDT-Signature: v1=&lt;hex HMAC-SHA256(secret, timestamp + &quot;.&quot; + raw_
 <p>The <code>1.0.0-rc.1</code> architecture is suitable as the normative implementation blueprint for the bounded H1 reference workload and as a gated reference architecture for H2. It does not become final <code>1.0.0</code> until every convergence criterion in this chapter is evidenced. H3 and H4 remain Provisional where telemetry, benchmarks, customer constraints, or deployment evidence are required. H5 remains Research.</p>
 <p>No Critical or High architecture finding remains open in the design. Three Medium risks are explicitly accepted with owners, compensating controls, expiry dates, and revisit triggers. Other registered risks are mitigated but remain subject to implementation evidence. This opinion does not assert that the software has been built, that a control has operated effectively, that a compliance certification exists, or that synthetic simulation has external predictive validity.</p>
 <p>The <code>CH-17</code> synthetic physical-asset amendment was added after the review passes listed in section 2.3. Its scope is deliberately limited to an in-process simulator and reuses the established tenant, API, exact-payload, idempotency, audit, deterministic-model, and accessibility boundaries. This amendment does not claim a completed architecture review or release gate: <code>TST-PHY-001</code>, <code>AC-PHY-001</code>, contract validation, and independent review remain required before publication evidence can describe the amended H1 scope as passed.</p>
+<p>The <code>CH-18</code> event-intelligence amendment adds a synthetic causal-analysis and reversible graph-mutation path after those same review passes. Its major hazards are false-event graph poisoning, causal overclaim, unbounded propagation, sensitive workforce use, and stale or conflicting history. The amendment narrows those hazards through untrusted-content separation, resolvable evidence and entity review, reality-versus-scenario routing, three-hop and fixed-size expansion limits, confidence decay, exact graph-version-and-hash compare-and-swap, atomic receipt/audit/outbox persistence, restart hydration, compensation, and the existing workforce-inference prohibition. <code>RSK-020</code> through <code>RSK-022</code>, <code>CTRL-EVT-001</code>, <code>TST-EVT-001</code>, <code>AC-EVT-001</code>, contract validation, and independent review remain release evidence; this self-audit does not mark them operationally proven.</p>
 <p>The architecture reached this opinion by narrowing unbounded claims, assigning authority and data ownership, converting ambiguous autonomy into bounded capability contracts, making projection and action failure semantics explicit, and defining a finite release gate. An independent build-readiness review and generated validation evidence remain mandatory release evidence under <code>AC-REV-001</code> and <code>AC-REV-002</code>; this self-audit does not substitute for them.</p>
 <h4 id="2-audit-scope-and-method">2. Audit scope and method<a class="headerlink" href="#2-audit-scope-and-method" title="Permanent link">&para;</a></h4>
 <h5 id="21-scope">2.1 Scope<a class="headerlink" href="#21-scope" title="Permanent link">&para;</a></h5>
@@ -9438,6 +9439,123 @@ X-EDT-Signature: v1=&lt;hex HMAC-SHA256(secret, timestamp + &quot;.&quot; + raw_
 <li>UI, API examples, logs, and generated editions never describe the simulator as a connected physical asset.</li>
 </ul>
 <p>This capability proves product interaction and guardrail behavior only. It does not establish industrial reliability, real-time determinism, functional safety, cybersecurity certification, model accuracy, asset fitness, maintenance efficacy, or authority to operate physical equipment.</p>
+<h2 id="ch-18-event-intelligence-and-causal-impact-engine">CH-18 - Event Intelligence and Causal Impact Engine<a class="headerlink" href="#ch-18-event-intelligence-and-causal-impact-engine" title="Permanent link">&para;</a></h2>
+<p>Status: <strong>committed</strong> | Owners: knowledge-graph, ai-platform, product-engineering, security-engineering | Last reviewed: 2026-07-15</p>
+<h3 id="event-intelligence-and-causal-impact-engine">Event Intelligence and Causal Impact Engine<a class="headerlink" href="#event-intelligence-and-causal-impact-engine" title="Permanent link">&para;</a></h3>
+<h4 id="1-purpose-and-h1-truth-boundary">1. Purpose and H1 truth boundary<a class="headerlink" href="#1-purpose-and-h1-truth-boundary" title="Permanent link">&para;</a></h4>
+<p>The Event Intelligence and Causal Impact Engine converts a reported change in reality into a reviewable, evidence-linked event interpretation, resolves its subjects against the authorized tenant graph, computes bounded direct and downstream consequences, and either creates a scenario branch or applies an exact reversible mutation to the synthetic H1 graph. It answers what changed, why, which relationships are affected, which risks or forecasts move, which consequences remain unknown, and what process-level remediation should be considered.</p>
+<p>H1 is a deterministic product demonstration over the synthetic Aster and Beacon fixtures. It does not claim learned causal discovery, calibrated business prediction, autonomous organizational control, or connection to an HRIS, IAM provider, cloud control plane, industrial system, or other external system. Event application changes a shared tenant-scoped synthetic projection used by the entity catalog, bounded traversal, and simulation snapshot assembly. The Compose profile durably records the event workflow and projection snapshot in PostgreSQL; isolated tests may use the same persistence contract with an in-memory adapter but do not claim restart durability. No path revokes a real permission, edits a real employee record, controls production, or creates a real hiring decision.</p>
+<p>Factual workforce events may be represented when supplied and authorized, but the engine MUST NOT score an individual, infer attrition or productivity, recommend an employment decision, or execute an HR action. A departure example may recommend ownership review, access-review workflow, documentation continuity, or a separately governed staffing scenario; it may not decide whom to hire, promote, remove, or evaluate.</p>
+<table>
+<thead>
+<tr>
+<th>Requirement</th>
+<th>Commitment</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>REQ-EVT-001</code></td>
+<td>Convert untrusted natural-language reports into typed event interpretations with provenance, confidence, verification, evidence, entity candidates, and explicit unknowns.</td>
+</tr>
+<tr>
+<td><code>REQ-EVT-002</code></td>
+<td>Produce bounded, explainable direct, indirect, second-order, third-order, and unknown impacts without graph cycles or unbounded fan-out.</td>
+</tr>
+<tr>
+<td><code>REQ-EVT-003</code></td>
+<td>Route confirmed facts to a reviewable reality-update path and uncertain claims to isolated scenario branches without silently changing current truth.</td>
+</tr>
+<tr>
+<td><code>REQ-EVT-004</code></td>
+<td>Bind any synthetic graph update to tenant authority, exact payload and version, human review, idempotency, audit evidence, and rollback.</td>
+</tr>
+<tr>
+<td><code>REQ-EVT-005</code></td>
+<td>Provide an accessible event workspace with interpretation, resolution, causal graph, before/after state, timeline, branch, recommendation, and rollback views.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="2-canonical-event-envelope-and-taxonomy">2. Canonical event envelope and taxonomy<a class="headerlink" href="#2-canonical-event-envelope-and-taxonomy" title="Permanent link">&para;</a></h4>
+<p>An event envelope contains an immutable tenant-qualified event ID, schema version, type and taxonomy version, source class and source reference, reporting actor, creator, occurred-at interval, recorded-at timestamp, optional location, confidence band and numeric support score, verification state, related entity references, evidence references, attachment metadata, prior-event references, classification, retention policy, and trace context. Time is an interval when the report says <code>yesterday</code>, <code>recently</code>, or another imprecise phrase; the engine does not invent precision.</p>
+<p>The core taxonomy is versioned and extensible:</p>
+<ul>
+<li>people: hire, promotion, transfer, departure, leave, role change, contractor addition/removal, reorganization, and manager change;</li>
+<li>project: start, delay, cancellation, requirement or milestone change, budget or priority change, and scope increase/reduction;</li>
+<li>technology: outage, migration, discovered vulnerability, deprecated dependency, launch, removal, architecture change, and repository archive;</li>
+<li>business: customer acquisition/loss/risk, contract, vendor, market, competitor, regulatory, and funding change;</li>
+<li>operations: equipment, supply, process, production, facility, and natural-hazard events; and</li>
+<li>external: economic, weather, regulation, competitor, and industry-security events.</li>
+</ul>
+<p>Customer ontology packages may add namespaced event types but cannot weaken required fields, confidence routing, security controls, or mutation policy. One input can yield multiple interpretations with explicit ordering or simultaneity. A potential statement such as <code>we might lose our largest customer</code> is classified as a risk hypothesis, not a completed customer-loss fact.</p>
+<h4 id="3-interpretation-and-entity-resolution-pipeline">3. Interpretation and entity resolution pipeline<a class="headerlink" href="#3-interpretation-and-entity-resolution-pipeline" title="Permanent link">&para;</a></h4>
+<p>The pipeline is: authenticated input acceptance, content quarantine and redaction, event extraction, schema validation, event classification, tenant-bounded entity resolution, impact expansion, deterministic policy checks, optional simulation, human review, exact mutation, projection and transactional-outbox commit, and audit. Each stage receives typed data and a least-authority capability envelope. Event text remains a quoted data field and is never concatenated into privileged instructions or tool definitions.</p>
+<p>Entity resolution returns ranked candidates with entity ID, display-safe label, confidence, matching features, conflicting features, and whether confirmation is required. Aliases, abbreviations, historic names, reversible merges, and source identities may support a candidate. An unknown entity stays unresolved; it is not auto-created or merged. Ambiguous candidates block reality application until a reviewer selects a candidate or marks the reference unknown. Tenant boundaries are applied before candidate generation so identifiers, counts, and rejected candidates cannot disclose another tenant.</p>
+<p>Conflicting reports create a linked conflict set. Neither report overwrites the other. Source reliability, evidence strength, valid time, and reviewer decisions are recorded independently; confidence is not a substitute for proof. Corrections supersede the earlier interpretation while retaining history.</p>
+<h4 id="4-bounded-causal-impact-analysis">4. Bounded causal impact analysis<a class="headerlink" href="#4-bounded-causal-impact-analysis" title="Permanent link">&para;</a></h4>
+<p>The engine starts from the resolved event subjects and applies a versioned library of typed cause-and-effect rules over an authorized snapshot. An impact contains its affected node or relationship, operation (<code>create</code>, <code>update</code>, <code>remove</code>, or <code>flag</code>), impact kind, before and proposed-after values, severity, confidence band, time horizon, causal depth, explanation, evidence, rule/model version, recommended process action, and uncertainty or missing-data note. Every impact evidence entry is an actual tenant-authorized <code>evidence_id</code> present in that event envelope; display clients resolve the identifier to its source kind, summary, and confidence rather than rendering an invented or dangling citation.</p>
+<p>H1 separates four classes:</p>
+<ol>
+<li>direct effects are definitional consequences of the event, such as a synthetic person state changing from active to departed;</li>
+<li>relationship effects update or flag ownership, work, approval, dependency, or affected-by relationships;</li>
+<li>derived risk and forecast effects are hypotheses with confidence decay and explicit assumptions; and</li>
+<li>unknown effects are recorded when evidence, ontology coverage, or the traversal budget is insufficient.</li>
+</ol>
+<p>Propagation is deterministic and capped at depth three, 100 impact nodes, 250 impact edges, 25 outgoing rules per source, and a fixed execution budget in H1. A visited key of event, rule, entity, property, and snapshot version prevents loops. Repeated effects are deduplicated by canonical payload; mutually contradictory effects become a conflict, not last-write-wins. Cycles in the company graph may be traversed once but never cause recursive expansion. When a cap is reached, the result is <code>partial</code> with a continuation/review reason and a visible unknown-impact record; it is never presented as complete.</p>
+<p>The displayed causal graph is an explanation graph, not proof of real-world causality. Each edge distinguishes <code>observed</code>, <code>rule-derived</code>, <code>simulated</code>, or <code>unknown</code>; confidence decays across derived hops and cannot exceed its weakest evidence or policy input. Recommendations are bounded workflow proposals such as assign an interim service owner, review access, validate a runbook, contact an affected customer, or run a schedule scenario.</p>
+<h4 id="5-confidence-verification-and-truth-routing">5. Confidence, verification, and truth routing<a class="headerlink" href="#5-confidence-verification-and-truth-routing" title="Permanent link">&para;</a></h4>
+<p>The confidence bands are <code>confirmed</code>, <code>likely</code>, <code>possible</code>, <code>speculative</code>, and <code>rejected</code>. A numeric score aids ranking but never independently authorizes a write.</p>
+<table>
+<thead>
+<tr>
+<th>Band</th>
+<th>Default behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Confirmed</td>
+<td>May enter reality-update review only with required evidence, resolved entities, authorized reviewer, exact snapshot version, and all deterministic checks passing.</td>
+</tr>
+<tr>
+<td>Likely</td>
+<td>Creates or updates a scenario branch; human verification can later produce a distinct confirmed interpretation.</td>
+</tr>
+<tr>
+<td>Possible</td>
+<td>Scenario only, with assumptions and missing evidence made prominent.</td>
+</tr>
+<tr>
+<td>Speculative</td>
+<td>Saved only as an isolated hypothesis when policy permits; no live graph or prediction baseline changes.</td>
+</tr>
+<tr>
+<td>Rejected</td>
+<td>Retained as restricted audit/conflict evidence and excluded from current truth and simulations unless explicitly re-reviewed.</td>
+</tr>
+</tbody>
+</table>
+<p>Events involving employment, legal, financial, identity, production, security control, destructive operations, or external writes never receive autonomous execution authority. H1 synthetic reality application requires a human review decision and exact preview; production designs may add dual control based on risk classification but cannot weaken <code>REQ-ACT-004</code>.</p>
+<h4 id="6-review-application-idempotency-and-rollback">6. Review, application, idempotency, and rollback<a class="headerlink" href="#6-review-application-idempotency-and-rollback" title="Permanent link">&para;</a></h4>
+<p>Interpretation creates a draft with an ETag, graph snapshot version and state hash, canonical payload hash, expiry, impact summary, and unresolved blockers. Review records <code>accept</code>, <code>reject</code>, or <code>request_changes</code>, the authenticated reviewer, selected resolution candidates, rationale, and reviewed hash. Review refreshes the authorized shared projection snapshot; its version and canonical state hash are included in the reviewed payload. Applied, rolled-back, and rejected events are terminal immutable history: review returns a conflict and a correction must create a superseding event rather than overwrite application, receipt, branch, timeline, or audit evidence. Requesting approval freezes the accepted payload, proposed mutations, event version, graph snapshot version, and graph state hash. Reality application requires <code>If-Match</code>, an <code>Idempotency-Key</code>, execution-time authorization, unexpired approval, identical payload hash, and a compare-and-swap match on both graph version and state hash. A graph change after approval makes the approval stale even when the event version has not changed. Scenario application retains the approved immutable base version and hash without modifying current truth.</p>
+<p>For the H1 event slice, one PostgreSQL transaction records the updated event, executed approval, action receipt, before/after application snapshot, branch, timeline entry, idempotency record, hash-linked audit evidence, current event-projection snapshot, and CloudEvents-compatible outbox envelope. Before writing, it serializes the tenant audit tail, reserves the <code>(tenant, operation, Idempotency-Key)</code> row in <code>edt.idempotency</code>, row-locks the authoritative event and projection records, and compares the exact event version/status/ETag plus projection version/state hash. These database predicates—not a replica-local map—decide the winner; an identical retry returns the original persisted receipt and a different request under the same key fails. The shared projection performs the exact version-and-hash transition; a failed database commit restores its pre-application snapshot and exposes no successful receipt. Reality receipts contain only impacts explicitly marked <code>live_mutation_eligible</code> whose operation is in the authoritative allowlist (<code>set_state</code>, <code>modify_relationship</code>, <code>remove_relationship</code>, or <code>append_outage</code>). Risk, prediction, workflow, annotation, synthetic relationship-creation, and recommendation proposals remain non-authoritative scenario inputs. An empty reality mutation set or any unsupported operation fails closed; the projection neither advances its version nor stores the rejected operation as a fact. The returned receipt identifies the authorizing approval, event versions, graph versions, before/after state hashes, exact mutations, audit record, and allocated outbox position. The outbox envelope receives the same transaction-assigned position. Its <code>dataschema</code> is the <code>$id</code> of the source-controlled <code>event-intelligence-event-changed.v1.schema.json</code> contract, and <code>schema_hash</code> is the SHA-256 of that schema&rsquo;s canonical JSON value rather than a digest of its URI. All results remain labeled <code>synthetic: true</code> and <code>external_write: false</code>.</p>
+<p>At API startup the Compose profile hydrates tenant events, interpretations, approvals, receipts, applications, branches, timeline entries, every audit record, the idempotency ledger, and latest projection snapshot from PostgreSQL before serving the event workflow. Payload tenant assertions are checked again after RLS reads. Audit hydration validates record shape and content hash, discovers missing predecessors, multiple children of one predecessor, unreachable records, and tenant-sequence gaps, and exposes counts plus bounded record/hash references through the audit endpoint. It does not discard corruption by selecting one path and declaring the chain valid. An empty chain is a valid bootstrap only when the tenant has no persisted event workflow; an existing event with no complete audit evidence is unhealthy. Invalid, gapped, forked, empty-for-existing-state, or event-incomplete audit evidence sets <code>chain_valid: false</code> and blocks new audited mutations until repair. Historical graph bindings are never invented during hydration: a legacy event without them is forced back to review, while an approval, receipt, application, branch, timeline entry, or idempotency record with missing, inconsistent, or cross-tenant bindings is excluded from executable state. The persisted idempotency record therefore returns the original receipt after a restart; it does not execute the mutation again. Reusing an idempotency key with different input fails. A stale graph version or hash, missing or dangling evidence, unresolved identity, changed payload, expired review, invalid cycle, fan-out limit, unauthorized field, unsupported projection operation, audit-health failure, or cross-tenant reference has zero committed effects.</p>
+<p>The receipt retains before and after state hashes, event and graph versions, mutation list, projection status, outbox position, event/receipt IDs, and audit reference; the persisted application record retains the corresponding snapshots needed for replay and compensation. Rollback is a compensating event, not deletion of history. It uses a new monotonic graph version and is allowed only when both the current synthetic graph version and state hash equal the recorded post-application version and hash; returning to the same content at a later graph version does not make an older compensation safe. Otherwise a new conflict review is required. Rollback is itself authorized, exact, version-and-hash checked, idempotent, atomically persisted with audit and outbox evidence, and restart-safe.</p>
+<h4 id="7-timeline-replay-and-alternate-futures">7. Timeline, replay, and alternate futures<a class="headerlink" href="#7-timeline-replay-and-alternate-futures" title="Permanent link">&para;</a></h4>
+<p>The event timeline orders valid time separately from recorded/system time and shows state before the event, the reported occurrence, immediate effects, later derived effects, corrections, rollback, and branch points. Every applied or rolled-back entry carries its receipt ID, before/after graph versions, and before/after state hashes so the persisted application can be replayed and audited after process restart. History replay reads an authorized persisted snapshot and immutable event evidence; it never rewrites the current graph. Out-of-order events trigger recomputation against their valid-time location and create a reviewable delta to later derived impacts.</p>
+<p>Scenario branches reference an immutable base graph version and state hash, event interpretation, assumptions, rule/model versions, and branch status. Users can compare baseline, confirmed history, and alternate future without copying claims into live truth. Simultaneous events use a deterministic ordering key and a batch-level conflict pass. Branches expose prediction deltas only when an approved simulation model supports the affected outcome; otherwise the engine reports that no validated forecast is available.</p>
+<h4 id="8-agents-and-authority">8. Agents and authority<a class="headerlink" href="#8-agents-and-authority" title="Permanent link">&para;</a></h4>
+<p>The bounded capability profiles are event extraction, entity resolution, impact analysis, causal explanation, simulation, risk analysis, verification, and graph mutation. They exchange schema-valid envelopes and retain structured rationales, evidence references, rule/model versions, and action traces rather than private chain of thought. No handoff widens tenant, data, tool, budget, or mutation authority. The graph-mutation profile is deterministic middleware: it cannot reinterpret text or invent mutations.</p>
+<p>Model failure, unavailable approved fallback, schema-invalid output, prompt injection, insufficient evidence, or budget exhaustion produces abstention or human review. AI-derived impact suggestions remain proposals until deterministic validators accept their types, targets, ontology constraints, provenance, and authorization.</p>
+<h4 id="9-security-privacy-consistency-and-scale">9. Security, privacy, consistency, and scale<a class="headerlink" href="#9-security-privacy-consistency-and-scale" title="Permanent link">&para;</a></h4>
+<p><code>CTRL-EVT-001</code> requires authentication, server-derived tenant context, field and relationship authorization, input-size and attachment limits, content/instruction separation, malware and secret handling, sensitive-field classification/redaction, evidence ACL intersection, rate limits, bounded expansion, exact-payload review, audit, and rollback. Event creation never grants permission and an event claiming that a user is an administrator cannot change policy. Attachments are immutable scanned objects; H1 accepts metadata only.</p>
+<p>The OpenAPI <code>event.read</code>, <code>event.create</code>, <code>event.review</code>, <code>event.approve</code>, <code>event.apply</code>, and <code>event.rollback</code> names are product scopes at the gateway boundary. H1 maps reads to an authorized <code>evidence.read.*</code> capability, creation/review/application to <code>scenario.create</code> plus creator binding, approval to the distinct <code>action.approve.operations</code> or <code>action.approve.security</code> capability, and rollback to either authorized approval capability. The platform operator and limited synthetic actor remain explicitly denied. This mapping is policy configuration, not an authority expansion performed by an agent or event payload.</p>
+<p>An event cannot delete critical ownership silently. Removal rules create an explicit gap such as <code>NEEDS_OWNER</code> and route it to review. Required ontology constraints run against the complete proposed mutation set. A proposed relationship mutation is eligible only when its exact before relationship exists in the approved snapshot; absent facts become explicit unknowns or recommendations rather than fabricated edges. Events that would affect millions of nodes are compiled into a durable, chunked, resumable impact plan with sampled preview and aggregate counts in H2; H1 rejects any proposal above its fixed cap. Projection outages leave PostgreSQL authoritative and report stale projections. Events arriving faster than processing are durably queued, deduplicated, backpressured, and ordered per tenant/aggregate; H1 exposes the semantics without claiming production throughput.</p>
+<p>Confidential event text is minimized in logs, notifications, traces, model context, and audit. Evidence permissions constrain the event, impacts, explanations, counts, timeline, and exports. Cross-company events may reference an external public entity but cannot read or mutate another customer tenant. Dates before the tenant/company existence, future dates represented as completed facts, invalid intervals, and impossible state transitions are blocked or routed to scenario review.</p>
+<h4 id="10-h1-interface-and-acceptance">10. H1 interface and acceptance<a class="headerlink" href="#10-h1-interface-and-acceptance" title="Permanent link">&para;</a></h4>
+<p>The Event Intelligence workspace provides event entry, extracted interpretations, confidence and verification controls, candidate resolution, selectable causal graph plus structured impact list, before/after comparison, risks and prediction deltas, recommendations, scenario/reality routing, timeline, branch comparison, review/application state, receipts, and rollback. Color is never the only confidence or severity signal; all graph information has a keyboard-operable list/table equivalent.</p>
+<p>The REST surface under <code>/v1/event-intelligence</code> defines taxonomy, interpretation, paginated event listing and detail, review, approval request and decision, application, rollback, audit, replay, timeline, branch listing, and branch comparison resources. Tenant context is server-derived and pagination cursors are bound to the active authorization fingerprint. Mutating routes require idempotency; state transitions require ETags; all responses are private and non-cacheable. Approval resources expose their reviewed event version plus bound graph version and hash; receipts and timeline entries distinguish event versions from graph versions and expose approval, receipt, and outbox linkage required for durable replay.</p>
+<p><code>AC-EVT-001</code> and <code>TST-EVT-001</code> require deterministic coverage of multi-event extraction, vague time, uncertainty, entity ambiguity, resolvable impact evidence, bounded cycle-safe propagation, conflict and injection handling, payload/version/hash rejection, tenant isolation, scenario routing, shared entity/traversal/simulation projection visibility, atomic receipt/audit/outbox persistence, restart hydration, one-time apply, replay, rollback, and audit-chain verification. The oracle confirms no real external change or individual employment recommendation.</p>
 <h1 id="part-iii-architecture-decision-records">Part III - Architecture Decision Records<a class="headerlink" href="#part-iii-architecture-decision-records" title="Permanent link">&para;</a></h1>
 <h2 id="adr-001-documentation-as-a-versioned-product">ADR-001 - Documentation as a Versioned Product<a class="headerlink" href="#adr-001-documentation-as-a-versioned-product" title="Permanent link">&para;</a></h2>
 <p>Status: <strong>accepted</strong> | Owners: enterprise-architecture</p>
@@ -9836,6 +9954,41 @@ X-EDT-Signature: v1=&lt;hex HMAC-SHA256(secret, timestamp + &quot;.&quot; + raw_
 <td>REQ-PHY-005</td>
 <td>Guarded simulator control</td>
 <td>H1 MUST restrict asset commands to tenant-authorized allowlisted simulator-only previews with expected-version range transition idempotency and audit checks and no device egress.</td>
+<td>H1</td>
+<td>committed</td>
+</tr>
+<tr>
+<td>REQ-EVT-001</td>
+<td>Structured event interpretation</td>
+<td>H1 MUST convert untrusted natural-language reports into typed evidence-linked event interpretations with explicit time confidence verification entity candidates and unknowns.</td>
+<td>H1</td>
+<td>committed</td>
+</tr>
+<tr>
+<td>REQ-EVT-002</td>
+<td>Bounded causal impact</td>
+<td>H1 MUST derive explainable direct relationship second-order third-order and unknown impacts with confidence decay cycle prevention fan-out limits and honest partial results.</td>
+<td>H1</td>
+<td>committed</td>
+</tr>
+<tr>
+<td>REQ-EVT-003</td>
+<td>Reality and scenario separation</td>
+<td>Confirmed authorized facts MAY enter exact reality-update review while likely possible and speculative reports MUST remain isolated scenario branches until separately verified.</td>
+<td>H1</td>
+<td>committed</td>
+</tr>
+<tr>
+<td>REQ-EVT-004</td>
+<td>Reversible event mutation</td>
+<td>Every H1 synthetic graph update MUST bind tenant authority human review exact payload evidence snapshot version and hash compare-and-swap idempotency atomic receipt audit and outbox persistence restart hydration and compensating rollback with zero external write.</td>
+<td>H1</td>
+<td>committed</td>
+</tr>
+<tr>
+<td>REQ-EVT-005</td>
+<td>Explainable event workspace</td>
+<td>H1 MUST expose interpretation resolution causal graph structured impacts before-after comparison confidence recommendations timeline branches review receipts and rollback accessibly.</td>
 <td>H1</td>
 <td>committed</td>
 </tr>
@@ -10528,6 +10681,15 @@ X-EDT-Signature: v1=&lt;hex HMAC-SHA256(secret, timestamp + &quot;.&quot; + raw_
 <td>AC-PHY-001</td>
 </tr>
 <tr>
+<td>REQ-EVT-</td>
+<td>chapters/18-event-intelligence-causal-impact.md<br>chapters/05-data-knowledge-graph.md<br>chapters/07-ai-agents-reasoning.md<br>chapters/08-simulation-prediction.md<br>chapters/09-security-privacy-compliance.md<br>chapters/11-ux-visualizations.md<br>chapters/12-apis-developer-platform.md</td>
+<td>ADR-004<br>ADR-006<br>ADR-009<br>ADR-010<br>ADR-011<br>ADR-012</td>
+<td>CMP-WEB<br>CMP-API<br>CMP-EVENT-INTELLIGENCE<br>CMP-AI<br>CMP-POLICY<br>CMP-WORKFLOW<br>CMP-POSTGRES<br>CMP-GRAPH<br>CMP-OBS</td>
+<td>contracts/openapi/enterprise-digital-twin.openapi.yaml<br>contracts/asyncapi/events.asyncapi.yaml<br>contracts/schemas/event-intelligence.schema.json</td>
+<td>CTRL-AI-001<br>CTRL-AI-002<br>CTRL-AI-004<br>CTRL-IAM-003<br>CTRL-TEN-001<br>CTRL-AUD-001<br>CTRL-PRV-002<br>CTRL-EVT-001</td>
+<td>AC-EVT-001</td>
+</tr>
+<tr>
 <td>REQ-ARCH-</td>
 <td>chapters/03-system-architecture.md<br>chapters/04-technology-stack.md<br>chapters/13-deployment-operations.md</td>
 <td>ADR-003<br>ADR-004<br>ADR-005<br>ADR-015</td>
@@ -10832,6 +10994,14 @@ X-EDT-Signature: v1=&lt;hex HMAC-SHA256(secret, timestamp + &quot;.&quot; + raw_
 <td>ai-platform</td>
 <td>Typed proposals and derived analytical results; never policy or external authority.</td>
 <td>Temporal-activities<br>model-gateway<br>PostgreSQL<br>Neo4j<br>S3</td>
+</tr>
+<tr>
+<td>CMP-EVENT-INTELLIGENCE</td>
+<td>Event intelligence and causal impact engine</td>
+<td>api-and-ai-simulation-worker</td>
+<td>knowledge-graph</td>
+<td>Typed event interpretations bounded evidence-linked impact proposals scenario branches and exact version-and-hash synthetic graph-mutation plans over the shared rebuildable projection; never external or employment authority.</td>
+<td>OpenAPI<br>event-intelligence-schema<br>shared-event-projection<br>PostgreSQL<br>transactional-outbox<br>CloudEvents<br>Neo4j<br>Temporal<br>audit-event-schema</td>
 </tr>
 <tr>
 <td>CMP-WORKFLOW</td>
@@ -12781,6 +12951,51 @@ merge: Duplicate edges combine evidence but never broaden ACLs; conflicting sema
 <td>Evidence-backed assessment with uncertainty or abstention.</td>
 </tr>
 <tr>
+<td>AGENT-EVENT-EXTRACT</td>
+<td>Event extraction specialist</td>
+<td>H1</td>
+<td>Convert untrusted reports into schema-valid event candidates without treating content as instructions.</td>
+<td>classify_event_text<br>identify_time_interval<br>propose_entity_mentions<br>attach_evidence_refs</td>
+<td>EventInterpretationBatch</td>
+<td>Typed candidates with unknowns or quarantined abstention.</td>
+</tr>
+<tr>
+<td>AGENT-EVENT-RESOLVE</td>
+<td>Event entity-resolution specialist</td>
+<td>H1</td>
+<td>Rank authorized tenant-local entities and explain matches conflicts and confirmation requirements.</td>
+<td>search_authorized_entities<br>read_alias_history<br>propose_resolution</td>
+<td>EventResolutionSet</td>
+<td>Confirmed reviewer selection unresolved reference or explicit conflict.</td>
+</tr>
+<tr>
+<td>AGENT-IMPACT</td>
+<td>Bounded impact analysis specialist</td>
+<td>H1</td>
+<td>Apply versioned causal rules to propose direct relationship and downstream effects within fixed graph budgets.</td>
+<td>read_graph_snapshot<br>apply_impact_rules<br>record_unknown_effect</td>
+<td>CausalImpactGraph</td>
+<td>Complete bounded graph or honest partial result at a configured limit.</td>
+</tr>
+<tr>
+<td>AGENT-EVENT-VERIFY</td>
+<td>Event verification specialist</td>
+<td>H1</td>
+<td>Check evidence authorization ontology constraints conflicts confidence routing and exact mutation eligibility.</td>
+<td>read_event_draft<br>validate_evidence<br>validate_ontology<br>open_review_case</td>
+<td>EventVerificationReport</td>
+<td>Verified scenario-only rejected or human-review-required.</td>
+</tr>
+<tr>
+<td>AGENT-GRAPH-MUTATE</td>
+<td>Event graph mutation executor</td>
+<td>H1</td>
+<td>Deterministically apply or compensate only an exact approved synthetic mutation plan.</td>
+<td>verify_event_review<br>apply_synthetic_mutation<br>compensate_synthetic_mutation</td>
+<td>EventMutationReceipt</td>
+<td>Applied once replayed denied expired conflicted or compensated.</td>
+</tr>
+<tr>
 <td>AGENT-WORKFLOW-OPT</td>
 <td>Workflow optimization specialist</td>
 <td>H3</td>
@@ -13299,6 +13514,15 @@ certification: Contract tests synthetic fixture permission tests replay tests fa
 <td></td>
 </tr>
 <tr>
+<td>UX-EVENT-INTELLIGENCE</td>
+<td>Event intelligence workspace</td>
+<td>H1</td>
+<td>Interpret untrusted event reports resolve entities inspect bounded causal impacts compare before and after route scenarios review synthetic mutations and roll them back.</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
 <td>UX-ADMIN</td>
 <td>Tenant administration</td>
 <td>H2</td>
@@ -13448,6 +13672,12 @@ evidence: Source provenance time confidence classification and permission explan
 <td>VIS-PHYSICAL-3D</td>
 <td>Procedural 3D-style physical-asset view</td>
 <td>Spatially locate a synthetic component condition in a rotatable perspective SVG while preserving a complete keyboard-operable structured alternative.</td>
+<td>H1</td>
+</tr>
+<tr>
+<td>VIS-CAUSAL-IMPACT</td>
+<td>Causal impact graph</td>
+<td>Explain direct and downstream event consequences with depth evidence confidence time horizon and a complete keyboard-operable impact list.</td>
 <td>H1</td>
 </tr>
 </tbody>
@@ -13765,6 +13995,12 @@ governance: State intended use prohibited use calibration evidence human confirm
 <td>H1 asset telemetry and controls remain inside the tenant-scoped simulator and every preview receipt and user-visible result discloses that no physical read or write occurred.</td>
 </tr>
 <tr>
+<td>CTRL-EVT-001</td>
+<td>event-intelligence</td>
+<td>Untrusted event and graph-mutation boundary</td>
+<td>Event text and attachments remain untrusted data and every interpretation resolution expansion review mutation and rollback is tenant-bound permission-trimmed resource-bounded evidence-resolvable version-and-hash checked idempotent atomically persisted with audit and outbox evidence restart-safe and externally inert.</td>
+</tr>
+<tr>
 <td>CTRL-AUD-001</td>
 <td>audit</td>
 <td>Tamper-evident audit</td>
@@ -13994,6 +14230,33 @@ governance: State intended use prohibited use calibration evidence human confirm
 <td>developer-platform</td>
 <td>Next.js publishes a compatible PostCSS pin or any untrusted style or template input is proposed</td>
 </tr>
+<tr>
+<td>RSK-020</td>
+<td>high</td>
+<td>mitigated</td>
+<td>False or malicious event poisons current truth</td>
+<td>Untrusted-content separation evidence and resolution review confidence routing exact-payload authorization scenario isolation audit and compensating rollback</td>
+<td>knowledge-graph</td>
+<td></td>
+</tr>
+<tr>
+<td>RSK-021</td>
+<td>medium</td>
+<td>mitigated</td>
+<td>Explanation graph is mistaken for proven causality</td>
+<td>Observed rule-derived simulated and unknown edges are labeled confidence decays across hops predictions require approved models and the UI exposes assumptions and missing evidence</td>
+<td>ai-platform</td>
+<td></td>
+</tr>
+<tr>
+<td>RSK-022</td>
+<td>medium</td>
+<td>mitigated</td>
+<td>Event propagation exhausts graph or workflow capacity</td>
+<td>Fixed depth node edge fan-out and runtime budgets cycle suppression deduplication backpressure partial-result labels and durable chunking gate beyond H1</td>
+<td>reliability</td>
+<td></td>
+</tr>
 </tbody>
 </table>
 <h2 id="acceptance">Acceptance<a class="headerlink" href="#acceptance" title="Permanent link">&para;</a></h2>
@@ -14108,6 +14371,11 @@ governance: State intended use prohibited use calibration evidence human confirm
 <td>Deterministic fixture telemetry procedural perspective and structured component selection analytics lifecycle history and guarded simulator commands reproduce with zero device egress and explicit synthetic labels.</td>
 </tr>
 <tr>
+<td>AC-EVT-001</td>
+<td>Event intelligence causal journey</td>
+<td>An untrusted report deterministically produces a typed interpretation tenant-bounded resolution evidence-resolvable bounded causal graph and scenario or exact snapshot-bound synthetic mutation visible through shared graph consumers with atomic receipt audit outbox persistence restart-safe replay rollback and zero external effect.</td>
+</tr>
+<tr>
 <td>AC-SEC-001</td>
 <td>Secrets containment</td>
 <td>Scans of logs traces prompts errors exports and artifacts contain no injected canary secrets.</td>
@@ -14184,6 +14452,7 @@ governance: State intended use prohibited use calibration evidence human confirm
 <th>Oracle</th>
 <th>Evidence</th>
 <th>Covers</th>
+<th>Dataset</th>
 </tr>
 </thead>
 <tbody>
@@ -14197,6 +14466,7 @@ governance: State intended use prohibited use calibration evidence human confirm
 <td>Zero validation findings; generated artifacts match the manifest; each exact covered identifier has all mandatory trace dimensions.</td>
 <td>output/test-evidence/TST-GOV-001.json</td>
 <td>REQ-GOV-001<br>REQ-GOV-002<br>REQ-GOV-003<br>REQ-GOV-004</td>
+<td></td>
 </tr>
 <tr>
 <td>TST-PROD-001</td>
@@ -14208,6 +14478,7 @@ governance: State intended use prohibited use calibration evidence human confirm
 <td>Every claimed outcome has a measurable metric and source or is explicitly labeled an assumption; excluded workforce scoring remains absent.</td>
 <td>output/test-evidence/TST-PROD-001.json</td>
 <td>REQ-PROD-001<br>REQ-PROD-002<br>REQ-PROD-003<br>REQ-PROD-004<br>REQ-PROD-005</td>
+<td></td>
 </tr>
 <tr>
 <td>TST-ARCH-001</td>
@@ -14219,6 +14490,7 @@ governance: State intended use prohibited use calibration evidence human confirm
 <td>The four H1 workloads deploy with only adopted dependencies; conditional technologies have measurable triggers and no undeclared authority.</td>
 <td>output/test-evidence/TST-ARCH-001.json</td>
 <td>REQ-ARCH-001<br>REQ-ARCH-002<br>REQ-ARCH-003<br>REQ-ARCH-004<br>REQ-ARCH-005<br>REQ-ARCH-006<br>REQ-ARCH-007</td>
+<td></td>
 </tr>
 <tr>
 <td>TST-PHY-001</td>
@@ -14230,6 +14502,19 @@ governance: State intended use prohibited use calibration evidence human confirm
 <td>Identical fixture sequence state and model version reproduce canonical results every invalid command has zero effect a valid preview executes once replay returns its receipt audit hashes verify and no network or device write occurs.</td>
 <td>output/test-evidence/TST-PHY-001.json</td>
 <td>REQ-PHY-001<br>REQ-PHY-002<br>REQ-PHY-003<br>REQ-PHY-004<br>REQ-PHY-005</td>
+<td></td>
+</tr>
+<tr>
+<td>TST-EVT-001</td>
+<td>Event intelligence and causal mutation conformance</td>
+<td>security_test</td>
+<td>H1</td>
+<td>knowledge-graph<br>ai-platform<br>product-engineering<br>security-engineering</td>
+<td>Interpret the frozen reports through tenant-bound resolution and bounded causal expansion then resolve every impact evidence identifier and exercise scenario routing exact review snapshot-version-and-hash approval compare-and-swap shared entity traversal and simulation visibility atomic PostgreSQL receipt audit and outbox commit stale and mutated payload rejection process restart idempotent replay rollback audit verification and cross-tenant denial.</td>
+<td>Interpretations preserve uncertainty and all impact evidence resolves within the authorized event entity candidates never cross tenants causal expansion terminates at configured budgets non-confirmed reports stay in branches exact reviewed payload applies once to every shared graph consumer stale snapshot or failed commit has zero committed effect restart restores projection timeline application approval idempotency and audit state replay returns the original receipt rollback compensates with a monotonic graph version and no external or employment action occurs.</td>
+<td>output/test-evidence/TST-EVT-001.json</td>
+<td>REQ-EVT-001<br>REQ-EVT-002<br>REQ-EVT-003<br>REQ-EVT-004<br>REQ-EVT-005</td>
+<td>Deterministic Aster and Beacon event reports including multiple vague uncertain conflicting malicious stale cyclic excessive and reversible cases.</td>
 </tr>
 <tr>
 <td>TST-TEN-001</td>
@@ -14241,6 +14526,7 @@ governance: State intended use prohibited use calibration evidence human confirm
 <td>Zero cross-tenant existence or content disclosure and no authorization decision derived from caller-supplied tenant context.</td>
 <td>output/test-evidence/TST-TEN-001.json</td>
 <td>REQ-TEN-001<br>REQ-TEN-002<br>REQ-TEN-003<br>REQ-TEN-004<br>REQ-TEN-005</td>
+<td></td>
 </tr>
 <tr>
 <td>TST-DATA-001</td>
@@ -14252,6 +14538,7 @@ governance: State intended use prohibited use calibration evidence human confirm
 <td>Replays are byte-identical, projections rebuild from PostgreSQL/object storage, provenance is complete, and deletion/revocation removes every serving path within the declared SLO.</td>
 <td>output/test-evidence/TST-DATA-001.json</td>
 <td>REQ-DATA-001<br>REQ-DATA-002<br>REQ-DATA-003<br>REQ-DATA-004<br>REQ-DATA-005<br>REQ-DATA-006<br>REQ-DATA-007<br>REQ-DATA-008<br>REQ-DATA-009<br>QAR-PRV-001</td>
+<td></td>
 </tr>
 <tr>
 <td>TST-CON-001</td>
@@ -14263,6 +14550,7 @@ governance: State intended use prohibited use calibration evidence human confirm
 <td>Only frozen allowlists validate; retries and recovery produce deterministic observations; invalid, replayed, oversized, or misbound input has no canonical effect.</td>
 <td>output/test-evidence/TST-CON-001.json</td>
 <td>REQ-CON-001<br>REQ-CON-002<br>REQ-CON-003<br>REQ-CON-004<br>REQ-CON-005<br>QAR-SYNC-001<br>QAR-COR-001</td>
+<td></td>
 </tr>
 <tr>
 <td>TST-AI-001</td>
@@ -14274,6 +14562,7 @@ governance: State intended use prohibited use calibration evidence human confirm
 <td>Thresholds in the acceptance catalog pass on pinned snapshots; inaccessible evidence never enters context; no unapproved fallback or tool authority is exercised.</td>
 <td>output/test-evidence/TST-AI-001.json</td>
 <td>REQ-AI-001<br>REQ-AI-002<br>REQ-AI-003<br>REQ-AI-004<br>REQ-AI-005<br>REQ-AI-006<br>REQ-AI-007<br>REQ-AI-008<br>QAR-AI-001<br>QAR-AI-002<br>QAR-COST-001</td>
+<td></td>
 </tr>
 <tr>
 <td>TST-ACT-001</td>
@@ -14285,6 +14574,7 @@ governance: State intended use prohibited use calibration evidence human confirm
 <td>Every negative case performs zero writes; the approved fixture performs one field-limited PUT; replay returns the original receipt; rollback is idempotent and audited.</td>
 <td>output/test-evidence/TST-ACT-001.json</td>
 <td>REQ-ACT-001<br>REQ-ACT-002<br>REQ-ACT-003<br>REQ-ACT-004</td>
+<td></td>
 </tr>
 <tr>
 <td>TST-SIM-001</td>
@@ -14296,6 +14586,7 @@ governance: State intended use prohibited use calibration evidence human confirm
 <td>Identical snapshots and seeds produce byte-identical forecasts; expected p50/p80/p95 and critical paths match the frozen oracle within declared tolerances.</td>
 <td>output/test-evidence/TST-SIM-001.json</td>
 <td>REQ-SIM-001<br>REQ-SIM-002<br>REQ-SIM-003<br>REQ-SIM-004<br>REQ-SIM-005<br>QAR-SIM-001</td>
+<td></td>
 </tr>
 <tr>
 <td>TST-UX-001</td>
@@ -14307,6 +14598,7 @@ governance: State intended use prohibited use calibration evidence human confirm
 <td>WCAG-aligned interactions preserve provenance and uncertainty, inaccessible content is not disclosed, and sensitive actions require explicit confirmation states.</td>
 <td>output/test-evidence/TST-UX-001.json</td>
 <td>REQ-UX-001<br>REQ-UX-002<br>REQ-UX-003<br>REQ-UX-004<br>QAR-ACC-001</td>
+<td></td>
 </tr>
 <tr>
 <td>TST-SEC-001</td>
@@ -14318,6 +14610,7 @@ governance: State intended use prohibited use calibration evidence human confirm
 <td>Critical controls fail closed, secrets and restricted content are absent from telemetry, deletion evidence is complete, and no prohibited workforce inference is emitted.</td>
 <td>output/test-evidence/TST-SEC-001.json</td>
 <td>REQ-SEC-001<br>REQ-SEC-002<br>REQ-SEC-003<br>REQ-SEC-004<br>REQ-SEC-005<br>REQ-SEC-006<br>REQ-SEC-007<br>REQ-SEC-008<br>QAR-SEC-001<br>QAR-SEC-002<br>QAR-SEC-003</td>
+<td></td>
 </tr>
 <tr>
 <td>TST-REL-001</td>
@@ -14329,6 +14622,7 @@ governance: State intended use prohibited use calibration evidence human confirm
 <td>H1/H2 SLOs and recovery objectives pass; authoritative data is not lost; degraded projections fail safely; research-scale claims remain gated.</td>
 <td>output/test-evidence/TST-REL-001.json</td>
 <td>REQ-REL-001<br>REQ-REL-002<br>REQ-REL-003<br>REQ-REL-004<br>REQ-REL-005<br>REQ-REL-006<br>QAR-AVL-001<br>QAR-DR-001<br>QAR-PERF-001<br>QAR-PERF-002<br>QAR-PERF-003<br>QAR-OBS-001</td>
+<td></td>
 </tr>
 <tr>
 <td>TST-DEV-001</td>
@@ -14340,6 +14634,7 @@ governance: State intended use prohibited use calibration evidence human confirm
 <td>Normative contracts are valid and backward-compatible within their declared window; plugins cannot exceed tenant policy; adopted deployment profiles use only portable boundaries.</td>
 <td>output/test-evidence/TST-DEV-001.json</td>
 <td>REQ-DEV-001<br>REQ-DEV-002<br>REQ-DEV-003<br>QAR-PORT-001</td>
+<td></td>
 </tr>
 <tr>
 <td>TST-VER-001</td>
@@ -14351,6 +14646,7 @@ governance: State intended use prohibited use calibration evidence human confirm
 <td>The frozen oracle and every acceptance identifier pass; coverage is 100 percent across all mandatory dimensions; no Critical/High or unowned committed decision remains.</td>
 <td>output/test-evidence/TST-VER-001.json</td>
 <td>REQ-VER-001<br>REQ-VER-002<br>REQ-VER-003<br>REQ-VER-004<br>REQ-VER-005</td>
+<td></td>
 </tr>
 </tbody>
 </table>
@@ -14381,7 +14677,7 @@ governance: State intended use prohibited use calibration evidence human confirm
 <td>committed</td>
 <td>hackathon-delivery-lead</td>
 <td>output/test-evidence/H1-release.json</td>
-<td>REQ-GOV-001<br>REQ-GOV-002<br>REQ-GOV-003<br>REQ-GOV-004<br>REQ-PROD-002<br>REQ-PROD-003<br>REQ-PROD-004<br>REQ-PHY-001<br>REQ-PHY-002<br>REQ-PHY-003<br>REQ-PHY-004<br>REQ-PHY-005<br>REQ-ARCH-001<br>REQ-ARCH-002<br>REQ-ARCH-003<br>REQ-TEN-001<br>REQ-TEN-002<br>REQ-TEN-003<br>REQ-TEN-004<br>REQ-TEN-005<br>REQ-DATA-001<br>REQ-DATA-002<br>REQ-DATA-003<br>REQ-DATA-004<br>REQ-DATA-005<br>REQ-CON-001<br>REQ-CON-002<br>REQ-CON-003<br>REQ-CON-004<br>REQ-AI-001<br>REQ-AI-002<br>REQ-AI-003<br>REQ-AI-004<br>REQ-AI-005<br>REQ-AI-006<br>REQ-AI-007<br>REQ-AI-008<br>REQ-ACT-001<br>REQ-ACT-002<br>REQ-ACT-003<br>REQ-SIM-001<br>REQ-SIM-002<br>REQ-SIM-003<br>REQ-SIM-004<br>REQ-UX-001<br>REQ-UX-002<br>REQ-UX-003<br>REQ-UX-004<br>REQ-SEC-001<br>REQ-SEC-002<br>REQ-SEC-003<br>REQ-SEC-004<br>REQ-REL-001<br>REQ-REL-003<br>REQ-REL-004<br>REQ-REL-005<br>REQ-DEV-002<br>REQ-VER-001<br>REQ-VER-002<br>REQ-VER-003<br>REQ-VER-004<br>REQ-VER-005</td>
+<td>REQ-GOV-001<br>REQ-GOV-002<br>REQ-GOV-003<br>REQ-GOV-004<br>REQ-PROD-002<br>REQ-PROD-003<br>REQ-PROD-004<br>REQ-PHY-001<br>REQ-PHY-002<br>REQ-PHY-003<br>REQ-PHY-004<br>REQ-PHY-005<br>REQ-EVT-001<br>REQ-EVT-002<br>REQ-EVT-003<br>REQ-EVT-004<br>REQ-EVT-005<br>REQ-ARCH-001<br>REQ-ARCH-002<br>REQ-ARCH-003<br>REQ-TEN-001<br>REQ-TEN-002<br>REQ-TEN-003<br>REQ-TEN-004<br>REQ-TEN-005<br>REQ-DATA-001<br>REQ-DATA-002<br>REQ-DATA-003<br>REQ-DATA-004<br>REQ-DATA-005<br>REQ-CON-001<br>REQ-CON-002<br>REQ-CON-003<br>REQ-CON-004<br>REQ-AI-001<br>REQ-AI-002<br>REQ-AI-003<br>REQ-AI-004<br>REQ-AI-005<br>REQ-AI-006<br>REQ-AI-007<br>REQ-AI-008<br>REQ-ACT-001<br>REQ-ACT-002<br>REQ-ACT-003<br>REQ-SIM-001<br>REQ-SIM-002<br>REQ-SIM-003<br>REQ-SIM-004<br>REQ-UX-001<br>REQ-UX-002<br>REQ-UX-003<br>REQ-UX-004<br>REQ-SEC-001<br>REQ-SEC-002<br>REQ-SEC-003<br>REQ-SEC-004<br>REQ-REL-001<br>REQ-REL-003<br>REQ-REL-004<br>REQ-REL-005<br>REQ-DEV-002<br>REQ-VER-001<br>REQ-VER-002<br>REQ-VER-003<br>REQ-VER-004<br>REQ-VER-005</td>
 <td>QAR-SEC-001<br>QAR-SEC-002<br>QAR-SEC-003<br>QAR-PERF-001<br>QAR-PERF-002<br>QAR-PERF-003<br>QAR-SYNC-001<br>QAR-COR-001<br>QAR-AI-001<br>QAR-AI-002<br>QAR-SIM-001<br>QAR-OBS-001<br>QAR-ACC-001<br>QAR-COST-001</td>
 </tr>
 <tr>
@@ -14439,15 +14735,15 @@ governance: State intended use prohibited use calibration evidence human confirm
 <td>contracts/openapi/enterprise-digital-twin.openapi.yaml</td>
 <td>OpenAPI</td>
 <td>3.1.0</td>
-<td>69499</td>
-<td>aca470034c123bbe</td>
+<td>90302</td>
+<td>2a705f5527c39e93</td>
 </tr>
 <tr>
 <td>contracts/asyncapi/events.asyncapi.yaml</td>
 <td>AsyncAPI</td>
 <td>3.0.0</td>
-<td>11053</td>
-<td>40134ecc5e79f084</td>
+<td>11584</td>
+<td>e2890a41a2ffc414</td>
 </tr>
 <tr>
 <td>contracts/graphql/schema.graphql</td>
@@ -14483,6 +14779,20 @@ governance: State intended use prohibited use calibration evidence human confirm
 <td>schema</td>
 <td>6829</td>
 <td>9327595d390c11df</td>
+</tr>
+<tr>
+<td>contracts/schemas/event-intelligence.schema.json</td>
+<td>JSON Schema</td>
+<td>schema</td>
+<td>41707</td>
+<td>c6bdb7b696a59522</td>
+</tr>
+<tr>
+<td>contracts/schemas/event-intelligence-event-changed.v1.schema.json</td>
+<td>JSON Schema</td>
+<td>schema</td>
+<td>4840</td>
+<td>cb994d57740ebd12</td>
 </tr>
 <tr>
 <td>contracts/schemas/connector-manifest.schema.json</td>
@@ -15945,7 +16255,7 @@ tenant_isolation:
 <h4 id="residual-risk">Residual risk<a class="headerlink" href="#residual-risk" title="Permanent link">&para;</a></h4>
 <p>Pooled graph isolation remains weaker than PostgreSQL RLS. H1 accepts this only with bounded server-owned query templates, tenant-qualified projection assertions, two-tenant tests, and no arbitrary Cypher. Failure of any control blocks release and triggers isolated graph deployment analysis.</p>
 <h1 id="build-provenance">Build Provenance<a class="headerlink" href="#build-provenance" title="Permanent link">&para;</a></h1>
-<p>Manifest SHA-256: <code>dfadd51ad2d5f328b5f8a5753f97620a521d11a15f8126993639097a402d799d</code></p>
+<p>Manifest SHA-256: <code>e1f17b58c501cb97f8aca9201379fa56cf1930406b353b980e72891b9609eaa9</code></p>
 <p>Generated by <code>scripts/build_blueprint.py</code>; generated editions are not edited directly.</p>
 </body>
 </html>

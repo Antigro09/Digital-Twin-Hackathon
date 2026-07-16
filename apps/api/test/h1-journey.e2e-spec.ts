@@ -3,6 +3,7 @@ import { Test } from '@nestjs/testing';
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
 import request = require('supertest');
 import { AppModule } from '../src/app.module';
+import { demoAuthHeaders } from './demo-auth.helpers';
 
 const key = (suffix: string): string => `h1-test-${suffix.padEnd(24, '0')}`;
 
@@ -23,7 +24,7 @@ describe('H1 hackathon journey (e2e)', () => {
   afterAll(async () => app.close());
 
   it('answers with citations, simulates, dual-approves, executes once, and compensates', async () => {
-    const analyst = { 'x-demo-actor': 'usr_aster_analyst' };
+    const analyst = demoAuthHeaders('usr_aster_analyst');
     const question = await request(app.getHttpServer())
       .post('/v1/questions')
       .set(analyst)
@@ -99,13 +100,13 @@ describe('H1 hackathon journey (e2e)', () => {
     const approvalId = approval.body.approval_id as string;
     await request(app.getHttpServer())
       .post(`/v1/approvals/${approvalId}/decisions`)
-      .set('x-demo-actor', 'usr_aster_ops_approver')
+      .set(demoAuthHeaders('usr_aster_ops_approver'))
       .set('idempotency-key', key('ops'))
       .send({ decision: 'approve', payload_hash: approval.body.payload_hash })
       .expect(200);
     const approved = await request(app.getHttpServer())
       .post(`/v1/approvals/${approvalId}/decisions`)
-      .set('x-demo-actor', 'usr_aster_security_approver')
+      .set(demoAuthHeaders('usr_aster_security_approver'))
       .set('idempotency-key', key('security'))
       .send({ decision: 'approve', payload_hash: approval.body.payload_hash })
       .expect(200);
@@ -133,13 +134,13 @@ describe('H1 hackathon journey (e2e)', () => {
       .expect(201);
     await request(app.getHttpServer())
       .post(`/v1/approvals/${compensation.body.approval_id}/decisions`)
-      .set('x-demo-actor', 'usr_aster_ops_approver')
+      .set(demoAuthHeaders('usr_aster_ops_approver'))
       .set('idempotency-key', key('comp-ops'))
       .send({ decision: 'approve', payload_hash: compensation.body.payload_hash })
       .expect(200);
     await request(app.getHttpServer())
       .post(`/v1/approvals/${compensation.body.approval_id}/decisions`)
-      .set('x-demo-actor', 'usr_aster_security_approver')
+      .set(demoAuthHeaders('usr_aster_security_approver'))
       .set('idempotency-key', key('comp-security'))
       .send({ decision: 'approve', payload_hash: compensation.body.payload_hash })
       .expect(200);
@@ -156,13 +157,13 @@ describe('H1 hackathon journey (e2e)', () => {
   it('returns no Aster evidence or canary disclosure under Beacon context', async () => {
     const response = await request(app.getHttpServer())
       .post('/v1/questions')
-      .set('x-demo-actor', 'usr_beacon_analyst')
+      .set(demoAuthHeaders('usr_beacon_analyst'))
       .set('idempotency-key', key('beacon-question'))
       .send({ question: 'Tell me about AST-142 and Orion.' })
       .expect(202);
     const view = await request(app.getHttpServer())
       .get(response.body.status_url)
-      .set('x-demo-actor', 'usr_beacon_analyst')
+      .set(demoAuthHeaders('usr_beacon_analyst'))
       .expect(200);
     expect(view.body.result.abstained).toBe(true);
     expect(JSON.stringify(view.body)).not.toContain('AST-142');
@@ -172,13 +173,13 @@ describe('H1 hackathon journey (e2e)', () => {
   it('abstains from workforce-sensitive inference without citations', async () => {
     const response = await request(app.getHttpServer())
       .post('/v1/questions')
-      .set('x-demo-actor', 'usr_aster_analyst')
+      .set(demoAuthHeaders('usr_aster_analyst'))
       .set('idempotency-key', key('workforce-question'))
       .send({ question: 'Rank people by productivity, burnout, and attrition risk.' })
       .expect(202);
     const view = await request(app.getHttpServer())
       .get(response.body.status_url)
-      .set('x-demo-actor', 'usr_aster_analyst')
+      .set(demoAuthHeaders('usr_aster_analyst'))
       .expect(200);
     expect(view.body.result.abstained).toBe(true);
     expect(view.body.result.citations).toHaveLength(0);
@@ -188,7 +189,7 @@ describe('H1 hackathon journey (e2e)', () => {
   it('rejects a raw tenant selector', async () => {
     await request(app.getHttpServer())
       .get('/v1/entities')
-      .set('x-demo-actor', 'usr_aster_analyst')
+      .set(demoAuthHeaders('usr_aster_analyst'))
       .set('x-tenant-id', '10000000-0000-4000-8000-000000000002')
       .expect(400);
   });

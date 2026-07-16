@@ -13,13 +13,14 @@ acceptance_criteria:
   - {id: AC-AI-001, title: Citation quality, evidence: Golden set citation precision is at least 0.95 and material unsupported claim rate is below 0.01.}
   - {id: AC-AI-002, title: Abstention, evidence: Missing conflicting restricted and stale evidence cases produce calibrated uncertainty or abstention.}
   - {id: AC-AI-003, title: Prompt-injection resistance, evidence: Adversarial connector content cannot change policy reveal other data or invoke unauthorized tools.}
-  - {id: AC-AI-004, title: Tool accuracy, evidence: Tool choice and exact argument accuracy meet the approved task rubric on golden and adversarial cases.}
+  - {id: AC-AI-004, title: Provider and agent integrity, evidence: The real Llama route plus every specialized agent meets schema evidence authority numeric-preservation routing retry timeout token-cost and exact-argument rubrics; no model or review directly mutates state.}
   - {id: AC-ACT-001, title: Dual approval, evidence: Requester self-approval single approval expired approval changed payload and wrong-policy approval all fail.}
   - {id: AC-ACT-002, title: Single external effect, evidence: Concurrent duplicate and replayed execution creates or updates exactly one Jira remediation issue.}
   - {id: AC-ACT-003, title: Compensation, evidence: Authorized rollback restores the captured prior state or records a human-action-required terminal state.}
   - {id: AC-SIM-001, title: Reproducible simulation, evidence: Same snapshot input model and seed yield the identical canonical p50 p80 p95 and sensitivity digest.}
   - {id: AC-SIM-002, title: Simulation edge cases, evidence: Cycles missing estimates impossible capacity disconnected work and contradictory interventions produce explicit validation outcomes.}
   - {id: AC-PHY-001, title: Synthetic physical-asset journey, evidence: Deterministic fixture telemetry procedural perspective and structured component selection analytics lifecycle history and guarded simulator commands reproduce with zero device egress and explicit synthetic labels.}
+  - {id: AC-EVT-001, title: Event intelligence causal journey, evidence: An untrusted report deterministically produces a typed interpretation tenant-bounded resolution evidence-resolvable bounded causal graph and scenario or exact snapshot-bound synthetic mutation visible through shared graph consumers with atomic receipt audit outbox persistence restart-safe replay rollback and zero external effect.}
   - {id: AC-SEC-001, title: Secrets containment, evidence: Scans of logs traces prompts errors exports and artifacts contain no injected canary secrets.}
   - {id: AC-SEC-002, title: ACL revocation, evidence: Revoked source access is unavailable to all query and agent paths within the committed freshness objective.}
   - {id: AC-PRV-001, title: Deletion completeness, evidence: Deletion inventory proves removal across authoritative graph vector search cache object trace and backup-expiry workflows.}

@@ -26,6 +26,7 @@ documents:
   - chapters/15-roadmap-research.md
   - chapters/16-architecture-audit.md
   - chapters/17-synthetic-physical-asset-twin.md
+  - chapters/18-event-intelligence-causal-impact.md
 normative_catalogs:
   - source-ledger.yaml
   - catalogs/requirements.yaml
@@ -51,6 +52,9 @@ normative_contracts:
   - contracts/schemas/canonical.schema.json
   - contracts/schemas/scenario.schema.json
   - contracts/schemas/simulation-snapshot.schema.json
+  - contracts/schemas/event-intelligence.schema.json
+  - contracts/schemas/event-intelligence-event-changed.v1.schema.json
+  - contracts/schemas/ai-intelligence.schema.json
   - contracts/schemas/connector-manifest.schema.json
   - contracts/schemas/ontology-package.schema.json
   - contracts/schemas/plugin-manifest.schema.json

@@ -10,7 +10,8 @@ flowchart TB
   Connectors --> Objects[(S3 compatible objects)]
   AI --> PG
   AI --> Graph
-  AI --> OpenAI[OpenAI Responses API]
+  AI --> Llama[Meta Llama API primary]
+  AI -. evaluated optional route .-> OpenAI[OpenAI Responses API]
   PG -->|Transactional outbox| Relay[Event Relay]
   Relay --> Graph
   Relay --> Search[Search Projection]
@@ -18,4 +19,3 @@ flowchart TB
   API -. telemetry .-> OTel
   Connectors -. telemetry .-> OTel
   AI -. telemetry .-> OTel
-

@@ -7,7 +7,7 @@ owners:
   - AI Platform
   - Applied AI
   - Security
-last_reviewed: 2026-07-13
+last_reviewed: 2026-07-15
 ---
 
 # AI Agents, Reasoning, and Evaluations
@@ -20,7 +20,7 @@ Agents are bounded capability profiles, not artificial executives. Labels such a
 
 | ID | Requirement |
 |---|---|
-| REQ-AI-001 | AI workloads MUST use the Responses API and Agents SDK behind capability, policy, budget, and evaluation interfaces. |
+| REQ-AI-001 | AI workloads MUST use the centralized provider-neutral gateway; Llama is the primary H1 provider and every route is capability-, policy-, budget-, schema-, and evaluation-gated. |
 | REQ-AI-002 | Agents MUST be versioned capability profiles with explicit tools, memory, context limits, handoffs, retries, evaluation, and termination. |
 | REQ-AI-003 | Deterministic authorization, retrieval, validation, execution, verification, citation, approval, and audit MUST surround model behavior. |
 | REQ-AI-004 | Connector/user content MUST NOT become privileged instructions or grant tools, and model output MUST be schema-validated. |
@@ -38,9 +38,9 @@ Agents are bounded capability profiles, not artificial executives. Labels such a
 
 ## 2. Runtime architecture
 
-The Python AI worker uses the OpenAI Responses API through an internal `ModelGateway`. The OpenAI Agents SDK supplies the server-owned agent loop, tool dispatch, handoffs, guardrails, and traces; PostgreSQL and Temporal remain authoritative for durable run state and approvals. The public API never exposes provider response IDs, API keys, raw prompts, or provider-specific tool objects.
+The Python AI worker implements the only `ModelGateway`/`AIProvider` boundary. Its default `LlamaProvider` uses the hosted Meta Llama API; an `OpenAIProvider` uses the Responses API only when independently configured and evaluated. PostgreSQL and Temporal remain authoritative for durable run/workflow state and approvals. The public API never exposes provider response IDs, API keys, internal service credentials, raw prompts, or provider-specific tool objects.
 
-OpenAI describes the Responses API as the agentic interface for multi-turn and tool-using applications, and its current model guidance recommends Responses for reasoning and tool calling. See [Responses API migration guidance](https://developers.openai.com/api/docs/guides/migrate-to-responses) and [current model guidance](https://developers.openai.com/api/docs/guides/latest-model). The [Agents SDK guide](https://developers.openai.com/api/docs/guides/agents) explicitly supports server ownership of deployment, tools, storage, and approval decisions, which is the boundary used here.
+Meta documents API-key creation, official Python/TypeScript SDKs, and OpenAI-SDK compatibility in its [Llama API announcement](https://ai.meta.com/blog/llamacon-llama-news/). The [official Python SDK](https://github.com/meta-llama/llama-api-python) supplies the chat-completions transport, configurable base URL, timeouts, bounded retries, API error types, and structured response format used inside the adapter. OpenAI's [structured-output guidance](https://developers.openai.com/api/docs/guides/structured-outputs) governs the optional Responses adapter. All agent loops, retrieval, memory, validation, review, and audit remain application-owned.
 
 ### 2.1 Model gateway contract
 
@@ -58,19 +58,19 @@ OpenAI describes the Responses API as the agentic interface for multi-turn and t
 
 It returns `AgentRunResult` with structured output, model and revision actually used, usage, finish reason, tool-invocation references, validation results, citations, safety flags, and terminal state. Provider exceptions are normalized. Raw provider request/response payloads are not retained by default; an explicitly opted-in diagnostic sample may be encrypted under a restricted key, assigned a short TTL, and accessed only through time-limited break glass.
 
-The OpenAI request defaults to `store: false`; the application owns conversation state and supplies only the context required for that turn. Any use of provider-side storage requires an approved data-processing profile and tenant configuration. API credentials are server-side secret references, isolated per environment, never placed in a tool schema or prompt.
+The application owns conversation state and supplies only the context required for the turn. The optional OpenAI request defaults to `store: false`; no provider-side storage is assumed for Llama. Any provider retention/storage feature requires an approved data-processing profile and tenant configuration. API credentials are server-side secret references, isolated per environment, never placed in a tool schema or prompt.
 
 ### 2.2 Model policy
 
-| Workload | H1 family default | Starting reasoning | Promotion objective |
+| Workload | H1 route | Sampling policy | Promotion objective |
 |---|---|---|---|
-| High-volume extraction and classification | `gpt-5.6-luna` | `none` or `low` | Schema validity, field accuracy, cost, and latency |
-| Entity-resolution explanation and graph verification | `gpt-5.6-terra` | `low` | Pairwise decision accuracy and evidence use |
-| Grounded query/research and mitigation drafting | `gpt-5.6-terra` | `medium` | Citation, abstention, usefulness, and latency |
-| Scenario compilation and explanation | `gpt-5.6-terra` | `medium` | Operation accuracy and unsupported-change rejection |
-| Difficult orchestration, adjudication, and eval grading | `gpt-5.6-sol` | `high`; `max` only after measurement | Quality-first benchmark with explicit cost ceiling |
+| Knowledge/technical extraction and event understanding | Configured Llama model | Low temperature | Schema validity, field accuracy, provenance, cost, and latency |
+| Entity resolution | Configured Llama model | Near-deterministic | Pairwise decision accuracy, conflict disclosure, and evidence use |
+| Causal and prediction explanation | Configured Llama reasoning model | Low temperature | Citation, abstention, numeric preservation, usefulness, and latency |
+| Scenario planning | Configured Llama reasoning model | Low temperature | Registered-operation accuracy and unsupported-change rejection |
+| Explicitly promoted difficult reasoning | Evaluated `AI_REASONING_PROVIDER` route | Task-specific | Quality-first benchmark with an explicit cost ceiling |
 
-OpenAI currently identifies `gpt-5.6-sol` for frontier capability, `gpt-5.6-terra` for balanced capability and cost, and `gpt-5.6-luna` for efficient high-volume work in [model guidance](https://developers.openai.com/api/docs/guides/latest-model). These are workload defaults, not unconditional production aliases. Production configuration records an explicitly evaluated model revision where available, the prompt and tool-schema hashes, reasoning setting, and fallback set.
+`LLAMA_MODEL`, optional `LLAMA_REASONING_MODEL`, endpoint, prompt/schema hashes, sampling settings, and evaluated fallback set are versioned deployment configuration. Application features never name a floating model. The status surface reports the actual configured route without exposing credentials.
 
 A fallback is eligible only if it has passed the same capability eval gate and data-control requirements. The gateway may fall back for transient availability or rate-limit failure, never to bypass a safety refusal, tool denial, data residency rule, or output validation error. If no approved candidate remains, the run fails closed with a retryable or terminal status.
 
@@ -136,7 +136,7 @@ The citation verifier checks accessibility again, locator integrity, evidence ex
 
 ### 6.1 Tool schemas
 
-Tools use JSON Schema with `additionalProperties: false`, explicit enums, lengths, numeric bounds, and required fields. Structured Outputs enforce schema adherence for model responses, while function calling is used to bridge the model to application tools; this distinction follows [OpenAI structured output guidance](https://developers.openai.com/api/docs/guides/structured-outputs).
+Tools and agent results use JSON Schema with `additionalProperties: false`, explicit enums, lengths, numeric bounds, and required fields. Provider-native strict structured output is requested when supported and the same schema is enforced again locally. The Meta Llama adapter uses its chat-completions JSON-schema response format; the optional OpenAI adapter uses Responses `text.format`, following [OpenAI structured output guidance](https://developers.openai.com/api/docs/guides/structured-outputs).
 
 H1 tools are:
 
@@ -283,4 +283,4 @@ Promotion evidence also reports quality, safety, latency, and cost against the c
 | RSK-006 | Model output substitutes an approved payload or becomes a confused deputy. | Exact canonical digest, role-distinct humans, deterministic executor, one-time grant, and execution-time policy check. |
 | RSK-007 | Sensitive employment inference emerges from ordinary organizational data. | Prohibited-use schemas, aggregate-only simulation, tool/prompt controls, output classifiers, policy review, and security evals. |
 
-Native OpenAI multi-agent features, remote MCP, additional model providers, fine-tuning, persistent provider state, voice agents, and autonomous background actions are Provisional. Each requires a separate data-flow review, threat model, eval suite, cost envelope, rollback, and explicit product horizon. Autonomous organizations, AI executives, and workforce prediction remain Research and have no production authority.
+Provider-native multi-agent features, remote MCP, further provider adapters, fine-tuning, persistent provider state, voice agents, and autonomous background actions are Provisional. Each requires a separate data-flow review, threat model, eval suite, cost envelope, rollback, and explicit product horizon. Autonomous organizations, AI executives, and workforce prediction remain Research and have no production authority.

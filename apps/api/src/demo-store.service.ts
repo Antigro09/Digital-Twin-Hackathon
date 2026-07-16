@@ -23,6 +23,11 @@ import {
   traceId,
 } from './domain';
 import { DatabaseService } from './database.service';
+import {
+  EventProjectionReadOverlay,
+  EventProjectionService,
+  EventProjectionSnapshot,
+} from './event-projection.service';
 import { FixtureService } from './fixture.service';
 import { ProblemException } from './problem';
 
@@ -61,6 +66,7 @@ export class DemoStoreService implements OnModuleInit {
   constructor(
     private readonly fixtures: FixtureService,
     private readonly database: DatabaseService,
+    private readonly eventProjection: EventProjectionService,
   ) {}
 
   onModuleInit(): void {
@@ -76,23 +82,54 @@ export class DemoStoreService implements OnModuleInit {
   }
 
   listEntities(ctx: RequestContext, pageSize: number): Page<Record<string, unknown>> {
-    const sources = this.fixtures.visibleSources(ctx.actor).slice(0, pageSize);
+    const sourceEntities = this.fixtures.visibleSources(ctx.actor).map((source) => this.entityFromSource(source));
+    const overlay = this.eventProjectionOverlay(ctx);
+    const combined = [...sourceEntities, ...(overlay?.entities ?? [])]
+      .filter((entity, index, all) => all.findIndex((candidate) => candidate.entity_id === entity.entity_id) === index);
     return {
-      items: sources.map((source) => this.entityFromSource(source)),
+      items: combined.slice(0, pageSize),
       next_cursor: null,
-      has_more: false,
+      has_more: combined.length > pageSize,
       data_watermark: this.watermark(),
     };
   }
 
   getEntity(ctx: RequestContext, entityId: string): Record<string, unknown> {
     const source = this.fixtures.visibleSources(ctx.actor).find((item) => stableUuid(`${item.tenant_id}:${item.source_key}`) === entityId);
+    const overlay = this.eventProjectionOverlay(ctx);
+    const projected = overlay?.entities.find((entity) => entity.entity_id === entityId);
+    if (!source && !projected) throw this.notFound();
+    if (projected && overlay) {
+      const facts = overlay.facts.filter((fact) => this.factTouchesEntity(fact.mutation, entityId));
+      return {
+        entity: projected,
+        claims: facts.map((fact) => ({
+          claim_id: stableUuid(`event-projection-claim:${ctx.tenantId}:${fact.impact_id}`),
+          tenant_id: ctx.tenantId,
+          subject_id: entityId,
+          predicate: 'edt.event/projected_change',
+          object: { value: structuredClone(fact.mutation) },
+          source_revision: String(overlay.version),
+          confidence: 1,
+          evidence_ids: [],
+          status: 'accepted',
+        })),
+        provenance: [],
+        relationships: overlay.relationships.filter((edge) => edge.from === entityId || edge.to === entityId),
+        event_projection: { version: overlay.version, state_hash: overlay.state_hash },
+        data_watermark: this.watermark(),
+        etag: etag(sha256({ projected, projection_version: overlay.version, state_hash: overlay.state_hash })),
+      };
+    }
     if (!source) throw this.notFound();
     return {
       entity: this.entityFromSource(source),
       claims: [this.claimFromSource(source)],
       provenance: [this.citationFromSource(source)],
-      relationships: this.fixtures.tenantRelationships(ctx.tenantId).filter((edge) => edge.from === source.source_key || edge.to === source.source_key),
+      relationships: [
+        ...this.fixtures.tenantRelationships(ctx.tenantId).filter((edge) => edge.from === source.source_key || edge.to === source.source_key),
+        ...(overlay?.relationships.filter((edge) => edge.from === entityId || edge.to === entityId) ?? []),
+      ],
       data_watermark: this.watermark(),
       etag: etag(sha256(source)),
     };
@@ -106,12 +143,27 @@ export class DemoStoreService implements OnModuleInit {
     const maxNodes = Math.min(Number(input.max_nodes ?? 100), 500);
     const visible = this.fixtures.visibleSources(ctx.actor);
     const visibleKeys = new Set(visible.map((item) => item.source_key));
-    const relationships = this.fixtures
+    const sourceRelationships = this.fixtures
       .tenantRelationships(ctx.tenantId)
       .filter((edge) => visibleKeys.has(edge.from) || visibleKeys.has(edge.to))
       .slice(0, maxNodes * 4);
-    const nodes = visible.slice(0, maxNodes).map((source) => this.entityFromSource(source));
-    return { nodes, relationships, truncated: visible.length > maxNodes, projection_generation: 1, data_watermark: this.watermark() };
+    const overlay = this.eventProjectionOverlay(ctx);
+    const combinedNodes = [
+      ...visible.map((source) => this.entityFromSource(source)),
+      ...(overlay?.entities ?? []),
+    ].filter((entity, index, all) => all.findIndex((candidate) => candidate.entity_id === entity.entity_id) === index);
+    const nodes = combinedNodes.slice(0, maxNodes);
+    const returnedNodeIds = new Set(nodes.map((node) => String(node.entity_id)));
+    const eventRelationships = (overlay?.relationships ?? [])
+      .filter((edge) => edge.state === 'active' && returnedNodeIds.has(edge.from) && returnedNodeIds.has(edge.to));
+    const relationships = [...sourceRelationships, ...eventRelationships].slice(0, maxNodes * 4);
+    return {
+      nodes,
+      relationships,
+      truncated: combinedNodes.length > maxNodes || sourceRelationships.length + eventRelationships.length > maxNodes * 4,
+      projection_generation: overlay?.version ?? 1,
+      data_watermark: this.watermark(),
+    };
   }
 
   async createQuestion(ctx: RequestContext, question: string): Promise<Record<string, unknown>> {
@@ -173,6 +225,8 @@ export class DemoStoreService implements OnModuleInit {
       hours_per_workday: 8,
       holidays: [],
     };
+    const eventProjection = this.eventProjection.snapshot(ctx.tenantId);
+    const eventAssumptions = this.eventProjectionAssumptions(eventProjection);
     const snapshot: Record<string, unknown> = {
       schema_version: '1.0',
       snapshot_id: id,
@@ -200,8 +254,12 @@ export class DemoStoreService implements OnModuleInit {
         this.dependency(ast173, ast201, '75000000-0000-4000-8000-000000000003'),
       ],
       team_capacities: ['aster-identity', 'aster-release', 'aster-security'].map((team) => ({ team_id: stableUuid(`${ctx.tenantId}:${team}`), parallel_capacity: 1, availability: 1, evidence_ids: [stableUuid(`evidence:${team}`)] })),
-      assumptions: [],
-      warnings: ['Synthetic duration distributions have no external predictive validity.'],
+      assumptions: eventAssumptions,
+      warnings: [
+        'Synthetic duration distributions have no external predictive validity.',
+        `event_projection_version:${eventProjection.version}`,
+        `event_projection_state_hash:${eventProjection.state_hash}`,
+      ],
       evidence_ids: this.fixtures.visibleSources(ctx.actor).map((source) => stableUuid(`evidence:${source.source_object_id}`)),
       sealed_at: nowIso(),
     };
@@ -616,6 +674,33 @@ export class DemoStoreService implements OnModuleInit {
     return preview ? etag(preview.preview_hash) : undefined;
   }
 
+  private eventProjectionOverlay(ctx: RequestContext): EventProjectionReadOverlay | undefined {
+    const permitted = ctx.actor.capabilities.some((capability) => capability.startsWith('evidence.read.'))
+      || ctx.actor.capabilities.includes('scenario.create');
+    if (!permitted || ctx.actor.actor_alias === 'usr_platform_operator' || ctx.actor.actor_alias === 'usr_aster_limited') return undefined;
+    return this.eventProjection.readOverlay(ctx.tenantId);
+  }
+
+  private eventProjectionAssumptions(snapshot: EventProjectionSnapshot): string[] {
+    const relevantOperations = new Set(['scenario_delta', 'set_risk', 'create_scenario_task']);
+    const impactAssumptions = snapshot.facts
+      .filter((fact) => relevantOperations.has(String(fact.mutation.operation)))
+      .slice(0, 16)
+      .map((fact) => {
+        const operation = String(fact.mutation.operation).replaceAll('_', ' ');
+        const subject = fact.mutation.entity ?? fact.mutation.entity_id ?? fact.mutation.metric ?? 'the affected project plan';
+        return `Synthetic event impact ${fact.impact_id} contributes a ${operation} assumption for ${String(subject)}; it is not independent evidence or a calibrated forecast.`;
+      });
+    return [
+      `The simulation snapshot is bound to synthetic event projection version ${snapshot.version} and state hash ${snapshot.state_hash}.`,
+      ...impactAssumptions,
+    ];
+  }
+
+  private factTouchesEntity(mutation: Record<string, unknown>, entityId: string): boolean {
+    return [mutation.entity_id, mutation.from_entity_id, mutation.to_entity_id].some((value) => value === entityId);
+  }
+
   private entityFromSource(source: SourceObjectRecord): Record<string, unknown> {
     return {
       entity_id: stableUuid(`${source.tenant_id}:${source.source_key}`),
@@ -764,9 +849,15 @@ export class DemoStoreService implements OnModuleInit {
 
   private async callSimulationWorker(snapshot: Record<string, unknown>, scenario: ScenarioRecord): Promise<Record<string, unknown>> {
     const endpoint = process.env.AI_WORKER_URL ?? 'http://127.0.0.1:8010';
+    const internalHeaders: Record<string, string> = {
+      'content-type': 'application/json',
+      'x-internal-tenant-id': scenario.tenant_id,
+    };
+    const sharedSecret = process.env.AI_WORKER_SHARED_SECRET;
+    if (sharedSecret) internalHeaders['x-internal-service-token'] = sharedSecret;
     const response = await fetch(`${endpoint}/v1/simulations`, {
       method: 'POST',
-      headers: { 'content-type': 'application/json', 'x-internal-tenant-id': scenario.tenant_id },
+      headers: internalHeaders,
       body: JSON.stringify({ snapshot, scenario: this.publicScenario(scenario) }),
       signal: AbortSignal.timeout(12_000),
     });

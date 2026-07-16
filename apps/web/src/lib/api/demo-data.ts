@@ -229,14 +229,14 @@ export const MEMBERSHIPS: ActorContext = {
       tenantAlias: "tnt_aster",
       tenantName: "Aster Labs",
       role: "Program operator",
-      capabilities: ["graph:read", "questions:ask", "scenario:write", "action:propose", "asset:read", "asset:control.preview", "asset:control.execute"],
+      capabilities: ["graph:read", "questions:ask", "scenario:write", "action:propose", "asset:read", "asset:control.preview", "asset:control.execute", "event:read", "event:interpret", "event:review", "event:apply", "event:rollback"],
     },
     {
       membershipId: "mem_beacon_observer",
       tenantAlias: "tnt_beacon",
       tenantName: "Beacon Works",
       role: "Read-only observer",
-      capabilities: ["graph:read", "questions:ask", "asset:read"],
+      capabilities: ["graph:read", "questions:ask", "asset:read", "event:read", "event:interpret"],
     },
   ],
 };

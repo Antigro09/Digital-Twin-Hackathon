@@ -7,7 +7,7 @@ owners:
   - product-design
   - frontend-engineering
   - accessibility-engineering
-last_reviewed: 2026-07-13
+last_reviewed: 2026-07-15
 ---
 
 # User Experience and Visualization Specification
@@ -55,7 +55,7 @@ Desktop uses a visible left navigation rail and top context bar. Tablet uses a c
 
 | Group | Destinations | H1 visibility |
 |---|---|---|
-| Understand | Home, Ask, Explore, Timeline | Visible |
+| Understand | Home, Ask, Explore, Timeline, AI Control Center | Visible; model-backed actions show provider readiness and are disabled when unconfigured |
 | Plan | Scenarios, Simulation Runs | Visible |
 | Act | Proposed Actions, Approvals, Action Receipts | Visible to authorized roles; counts never reveal unauthorized items |
 | Operate | Connectors, Sync Runs, Audit | Visible by role |
@@ -98,6 +98,7 @@ Status values follow the architecture-wide `Committed`, `Provisional`, `Research
 | Entity detail `/:tenant/entities/:entityId` | Committed H1 | Authorized users | Canonical attributes, aliases, provenance, relationships, timeline, ACL summary, data-quality warnings, merge history, and report-correction entry. Hidden relations do not influence visible counts. |
 | Evidence detail `/:tenant/evidence/:evidenceId` | Committed H1 | Authorized users | Immutable source digest, normalized observation, transformation lineage, claims supported or contradicted, retention status, and source link. Raw payload requires separate scope and is redacted by default. |
 | Resolution review `/:tenant/resolution/:decisionId` | Committed H1 | Data stewards | Candidate records, match and non-match evidence, rule/model version, confidence, resulting canonical identity, split action, impact preview, and rebuild status. |
+| AI Control Center `/:tenant/ai` | Committed H1 | Authorized analysts, stewards, and reviewers | Real Llama/provider readiness, vector status, seven specialized-agent launchers, private document import, permission-trimmed retrieval, activity and token/cost metadata, Explain This, evidence and limitations, and PENDING_REVIEW suggestion decisions. It has no offline simulated AI response and every review receipt states `mutation_performed: false`. |
 
 ### 3.3 Explore and time
 

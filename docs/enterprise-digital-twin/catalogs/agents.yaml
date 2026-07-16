@@ -57,6 +57,46 @@ profiles:
     memory: Tenant-scoped approved risk cases.
     output: RiskAssessment
     termination: Evidence-backed assessment with uncertainty or abstention.
+  - id: AGENT-EVENT-EXTRACT
+    name: Event extraction specialist
+    horizon: H1
+    purpose: Convert untrusted reports into schema-valid event candidates without treating content as instructions.
+    tools: [classify_event_text, identify_time_interval, propose_entity_mentions, attach_evidence_refs]
+    memory: Immutable run input and tenant-scoped evidence references only.
+    output: EventInterpretationBatch
+    termination: Typed candidates with unknowns or quarantined abstention.
+  - id: AGENT-EVENT-RESOLVE
+    name: Event entity-resolution specialist
+    horizon: H1
+    purpose: Rank authorized tenant-local entities and explain matches conflicts and confirmation requirements.
+    tools: [search_authorized_entities, read_alias_history, propose_resolution]
+    memory: Run-local candidates only.
+    output: EventResolutionSet
+    termination: Confirmed reviewer selection unresolved reference or explicit conflict.
+  - id: AGENT-IMPACT
+    name: Bounded impact analysis specialist
+    horizon: H1
+    purpose: Apply versioned causal rules to propose direct relationship and downstream effects within fixed graph budgets.
+    tools: [read_graph_snapshot, apply_impact_rules, record_unknown_effect]
+    memory: One immutable event snapshot and visited-set state.
+    output: CausalImpactGraph
+    termination: Complete bounded graph or honest partial result at a configured limit.
+  - id: AGENT-EVENT-VERIFY
+    name: Event verification specialist
+    horizon: H1
+    purpose: Check evidence authorization ontology constraints conflicts confidence routing and exact mutation eligibility.
+    tools: [read_event_draft, validate_evidence, validate_ontology, open_review_case]
+    memory: Restricted review record only.
+    output: EventVerificationReport
+    termination: Verified scenario-only rejected or human-review-required.
+  - id: AGENT-GRAPH-MUTATE
+    name: Event graph mutation executor
+    horizon: H1
+    purpose: Deterministically apply or compensate only an exact approved synthetic mutation plan.
+    tools: [verify_event_review, apply_synthetic_mutation, compensate_synthetic_mutation]
+    memory: Durable workflow state receipts and audit references; no conversational memory.
+    output: EventMutationReceipt
+    termination: Applied once replayed denied expired conflicted or compensated.
   - id: AGENT-WORKFLOW-OPT
     name: Workflow optimization specialist
     horizon: H3
@@ -65,6 +105,62 @@ profiles:
     memory: Versioned optimization studies.
     output: OptimizationProposal
     termination: Proposal and evaluation record; never direct high-impact execution.
+  - id: AGENT-AI-KNOWLEDGE-INGESTION
+    name: AI knowledge ingestion specialist
+    horizon: H1
+    purpose: Convert supported authorized document extracts into evidence-bearing entity relationship and constraint suggestions.
+    tools: [retrieve_authorized_evidence, validate_knowledge_schema, create_review_suggestion]
+    memory: Run-local source chunks only; validated artifacts may enter enterprise memory after human review.
+    output: KnowledgeIngestionOutput
+    termination: Strict PENDING_REVIEW suggestion or fail-closed validation/provider error.
+  - id: AGENT-AI-ENTITY-RESOLUTION
+    name: AI entity resolution specialist
+    horizon: H1
+    purpose: Compare tenant-local authorized entity candidates and explain a duplicate or conflict proposal without merging.
+    tools: [retrieve_authorized_entities, validate_resolution_schema, create_review_suggestion]
+    memory: Run-local candidate evidence only.
+    output: EntityResolutionOutput
+    termination: PENDING_REVIEW match/conflict proposal or abstention; automatic_merge_allowed is always false.
+  - id: AGENT-AI-EVENT-UNDERSTANDING
+    name: AI event understanding specialist
+    horizon: H1
+    purpose: Convert natural-language reports into typed event candidates and possible impacts for deterministic event-engine review.
+    tools: [retrieve_authorized_context, validate_event_candidate, create_review_suggestion]
+    memory: Session scope only when explicitly selected; no employment or identity authority.
+    output: EventUnderstandingOutput
+    termination: PENDING_REVIEW event candidate; actual_effects_calculated is always false.
+  - id: AGENT-AI-CAUSAL-ANALYSIS
+    name: AI causal explanation specialist
+    horizon: H1
+    purpose: Explain supplied graph paths events and deterministic results while distinguishing evidence assumptions and unknowns.
+    tools: [retrieve_authorized_graph_context, validate_causal_chain, create_review_suggestion]
+    memory: Run-local evidence and supplied deterministic results.
+    output: CausalAnalysisOutput
+    termination: Evidence-linked PENDING_REVIEW explanation; probabilities_calculated is always false.
+  - id: AGENT-AI-SIMULATION-PLANNING
+    name: AI simulation planning specialist
+    horizon: H1
+    purpose: Propose bounded typed scenario inputs for confirmation and deterministic simulation.
+    tools: [retrieve_authorized_snapshot, validate_registered_scenario_operations, create_review_suggestion]
+    memory: Scenario-local draft and evidence only.
+    output: SimulationPlanningOutput
+    termination: PENDING_REVIEW scenario plan; simulation_executed is always false.
+  - id: AGENT-AI-PREDICTION-EXPLANATION
+    name: AI prediction explanation specialist
+    horizon: H1
+    purpose: Explain supplied validated prediction values drivers uncertainty and mitigations without recalculation.
+    tools: [retrieve_authorized_prediction_evidence, validate_numeric_preservation, create_review_suggestion]
+    memory: Run-local supplied prediction and evidence.
+    output: PredictionExplanationOutput
+    termination: PENDING_REVIEW explanation; prediction_recalculated is always false.
+  - id: AGENT-AI-TECHNICAL-KNOWLEDGE
+    name: AI technical knowledge specialist
+    horizon: H1
+    purpose: Extract cited capabilities limitations dependencies constraints and failure modes from technical sources.
+    tools: [retrieve_authorized_technical_evidence, validate_technical_schema, create_review_suggestion]
+    memory: Run-local source chunks; reviewed facts may enter enterprise memory.
+    output: TechnicalKnowledgeOutput
+    termination: Strict PENDING_REVIEW technical-fact suggestion or fail-closed validation/provider error.
 prohibited_personas:
   - Autonomous CEO CTO legal HR finance or security principal with implicit organizational authority.
   - Agent that can mint credentials change policy expand its toolset or delegate broader authority.
@@ -76,4 +172,3 @@ common_runtime:
   verification: Schema validation deterministic authorization evidence checks and task-specific evaluations.
   communication: Typed handoff envelopes containing purpose evidence references allowed tools budget and expiry.
   audit: Model prompt tool schema policy and dataset versions plus redacted action trace and outcome.
-

@@ -4,7 +4,9 @@ flowchart LR
   Web --> API[EDT API]
   API --> GitHub[GitHub]
   API --> Jira[Jira]
-  API --> OpenAI[OpenAI Responses API]
+  API --> AIGateway[Central AI Gateway]
+  AIGateway --> Llama[Meta Llama API primary]
+  AIGateway -. evaluated optional route .-> OpenAI[OpenAI Responses API]
   API --> Identity[OIDC SAML Identity Provider]
   API --> Audit[Restricted Audit Store]
   subgraph TenantData[Shared data plane with tenant fences]
@@ -15,4 +17,3 @@ flowchart LR
   API --> PG
   API --> Graph
   API --> Objects
-

@@ -12,28 +12,34 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ContextService = void 0;
 const common_1 = require("@nestjs/common");
 const node_crypto_1 = require("node:crypto");
+const demo_auth_service_1 = require("./demo-auth.service");
 const domain_1 = require("./domain");
 const fixture_service_1 = require("./fixture.service");
 const problem_1 = require("./problem");
 let ContextService = class ContextService {
     fixtures;
+    auth;
     handles = new Map();
-    constructor(fixtures) {
+    constructor(fixtures, auth) {
         this.fixtures = fixtures;
+        this.auth = auth;
     }
     resolve(request, allowBootstrap = false) {
         if (request.headers['x-tenant-id']) {
             throw new problem_1.ProblemException(common_1.HttpStatus.BAD_REQUEST, 'raw_tenant_selector_rejected', 'Tenant scope is derived by the server; X-Tenant-ID is never accepted.');
         }
-        const actorHeader = request.headers['x-demo-actor'];
-        if (process.env.EDT_DEMO_AUTH === 'false' && actorHeader) {
-            throw new problem_1.ProblemException(common_1.HttpStatus.UNAUTHORIZED, 'demo_auth_disabled', 'Synthetic actor selection is disabled.');
+        if (request.headers['x-demo-actor']) {
+            throw new problem_1.ProblemException(common_1.HttpStatus.BAD_REQUEST, 'legacy_actor_selector_rejected', 'X-Demo-Actor is not authentication and is never accepted.');
         }
+        const principal = this.auth.authenticate(request.headers.authorization);
         let actor;
         try {
-            actor = this.fixtures.getActor(typeof actorHeader === 'string' ? actorHeader : undefined);
+            actor = this.fixtures.getActor(principal.actorAlias);
         }
         catch {
+            throw new problem_1.ProblemException(common_1.HttpStatus.UNAUTHORIZED, 'invalid_actor', 'Authentication failed.');
+        }
+        if (actor.actor_id !== principal.actorId || actor.tenant_id !== principal.tenantId) {
             throw new problem_1.ProblemException(common_1.HttpStatus.UNAUTHORIZED, 'invalid_actor', 'Authentication failed.');
         }
         const membershipId = this.fixtures.membershipId(actor);
@@ -77,6 +83,7 @@ let ContextService = class ContextService {
 exports.ContextService = ContextService;
 exports.ContextService = ContextService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [fixture_service_1.FixtureService])
+    __metadata("design:paramtypes", [fixture_service_1.FixtureService,
+        demo_auth_service_1.DemoAuthService])
 ], ContextService);
 //# sourceMappingURL=context.service.js.map

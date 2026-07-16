@@ -37,6 +37,16 @@ tests_evaluations:
     oracle: Identical fixture sequence state and model version reproduce canonical results every invalid command has zero effect a valid preview executes once replay returns its receipt audit hashes verify and no network or device write occurs.
     evidence: output/test-evidence/TST-PHY-001.json
     covers: [REQ-PHY-001, REQ-PHY-002, REQ-PHY-003, REQ-PHY-004, REQ-PHY-005]
+  - id: TST-EVT-001
+    title: Event intelligence and causal mutation conformance
+    kind: security_test
+    horizons: [H1]
+    owners: [knowledge-graph, ai-platform, product-engineering, security-engineering]
+    dataset: Deterministic Aster and Beacon event reports including multiple vague uncertain conflicting malicious stale cyclic excessive and reversible cases.
+    method: Interpret the frozen reports through tenant-bound resolution and bounded causal expansion then resolve every impact evidence identifier and exercise scenario routing exact review snapshot-version-and-hash approval compare-and-swap shared entity traversal and simulation visibility atomic PostgreSQL receipt audit and outbox commit stale and mutated payload rejection process restart idempotent replay rollback audit verification and cross-tenant denial.
+    oracle: Interpretations preserve uncertainty and all impact evidence resolves within the authorized event entity candidates never cross tenants causal expansion terminates at configured budgets non-confirmed reports stay in branches exact reviewed payload applies once to every shared graph consumer stale snapshot or failed commit has zero committed effect restart restores projection timeline application approval idempotency and audit state replay returns the original receipt rollback compensates with a monotonic graph version and no external or employment action occurs.
+    evidence: output/test-evidence/TST-EVT-001.json
+    covers: [REQ-EVT-001, REQ-EVT-002, REQ-EVT-003, REQ-EVT-004, REQ-EVT-005]
   - id: TST-TEN-001
     title: Tenant isolation and authorization adversarial suite
     kind: security_test
@@ -69,8 +79,8 @@ tests_evaluations:
     kind: evaluation
     horizons: [H1]
     owners: [ai-platform, security-engineering]
-    method: Run golden and adversarial cases for citations, abstention, ACL-filtered context, tool selection and arguments, trace grading, prompt injection, workload routing, approved fallback, cost budgets, and model failure.
-    oracle: Thresholds in the acceptance catalog pass on pinned snapshots; inaccessible evidence never enters context; no unapproved fallback or tool authority is exercised.
+    method: Run provider transport failure retry timeout refusal and malformed-schema tests plus golden and adversarial cases for all seven agents citations abstention ACL-filtered lexical/vector retrieval tenant isolation prompt injection workload routing approved fallback controlled memory review-only suggestions token/cost accounting and model failure; include a separately enabled real Llama integration run.
+    oracle: Thresholds in the acceptance catalog pass on the exact evaluated configuration; inaccessible evidence never enters context; every knowledge-changing output remains PENDING_REVIEW with mutation_performed false; no unapproved fallback test double or tool authority satisfies live release evidence.
     evidence: output/test-evidence/TST-AI-001.json
     covers: [REQ-AI-001, REQ-AI-002, REQ-AI-003, REQ-AI-004, REQ-AI-005, REQ-AI-006, REQ-AI-007, REQ-AI-008, QAR-AI-001, QAR-AI-002, QAR-COST-001]
   - id: TST-ACT-001

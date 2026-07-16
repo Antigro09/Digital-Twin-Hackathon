@@ -1,11 +1,26 @@
 import { describe, expect, it } from "vitest";
-import { FetchDigitalTwinApi } from "./client";
+import { DemoTokenProvider, FetchDigitalTwinApi } from "./client";
 
 const liveUrl = process.env.EDT_LIVE_API_URL;
+const liveWebUrl = process.env.EDT_LIVE_WEB_URL?.replace(/\/$/, "");
+const liveTokenProvider: DemoTokenProvider = async (actorAlias, signal) => {
+  const bootstrapKey = process.env.EDT_DEMO_AUTH_BOOTSTRAP_KEY;
+  const response = await fetch(liveWebUrl ? `${liveWebUrl}/api/demo-auth/session` : `${liveUrl}/v1/demo-auth/sessions`, {
+    method: "POST",
+    headers: liveWebUrl
+      ? { "Content-Type": "application/json" }
+      : { "Content-Type": "application/json", "X-Demo-Auth-Key": bootstrapKey ?? "" },
+    body: JSON.stringify({ actor_alias: actorAlias }),
+    signal,
+  });
+  const session = await response.json() as { access_token?: string; expires_at?: string; detail?: string };
+  if (!response.ok || !session.access_token || !session.expires_at) throw new Error(session.detail ?? "Live demo-auth exchange failed.");
+  return { accessToken: session.access_token, expiresAt: session.expires_at };
+};
 
 describe.runIf(Boolean(liveUrl))("FetchDigitalTwinApi live H1 journey", () => {
   it("drives the canonical API and Python worker through dual-approved action and rollback", async () => {
-    const api = new FetchDigitalTwinApi(String(liveUrl));
+    const api = new FetchDigitalTwinApi(String(liveUrl), liveTokenProvider);
     const actor = await api.getActorContext();
     expect(actor.activeMembershipId).toBe("mem_aster_operator");
     expect(await api.getConnectorHealth()).toHaveLength(2);
@@ -60,7 +75,7 @@ describe.runIf(Boolean(liveUrl))("FetchDigitalTwinApi live H1 journey", () => {
   }, 30_000);
 
   it("maps the synthetic asset contract and preserves exact control replay across the live client", async () => {
-    const api = new FetchDigitalTwinApi(String(liveUrl));
+    const api = new FetchDigitalTwinApi(String(liveUrl), liveTokenProvider);
     await api.getActorContext();
 
     const [asset] = await api.getAssets();
@@ -119,5 +134,71 @@ describe.runIf(Boolean(liveUrl))("FetchDigitalTwinApi live H1 journey", () => {
     expect(beaconTwin.components.every((component) => component.status === "normal")).toBe(true);
     await expect(api.previewAssetCommand(beaconAsset.assetId, { type: "set_valve_pct", value: 72 }))
       .rejects.toMatchObject({ status: 403, code: "asset_control_denied" });
+  }, 15_000);
+
+  it("maps event intelligence, enforces exact dual approval, applies to the synthetic projection, and rolls back", async () => {
+    const api = new FetchDigitalTwinApi(String(liveUrl), liveTokenProvider);
+    await api.getActorContext();
+    const event = await api.interpretEvent("Sarah Kim, the lead backend engineer, definitely left the company today.", "auto");
+    expect(event.processingMode).toBe("reality_review");
+    expect(event.model.generativeModelUsed).toBe(false);
+    expect(event.graphSnapshotVersion).toBeGreaterThan(0);
+    expect(event.graphSnapshotHash).toMatch(/^sha256:[a-f0-9]{64}$/);
+    expect(event.externalWrite).toBe(false);
+    expect(event.nodes.some((node) => node.effectOrder === "direct")).toBe(true);
+    expect(event.nodes.some((node) => node.effectOrder === "long_term")).toBe(true);
+    expect(event.nodes.flatMap((node) => node.evidence).some((evidence) => evidence.includes("Evidence "))).toBe(true);
+    expect(event.unknowns.length).toBeGreaterThan(0);
+    const selectedIds = event.entityResolutions.flatMap((resolution) => resolution.requiredConfirmation
+      ? [resolution.candidates[0].entityId]
+      : resolution.candidates.filter((candidate) => candidate.selected).map((candidate) => candidate.entityId));
+    const review = await api.reviewEvent(event.previewId, event.digest, "reality", selectedIds);
+    expect(review.reviewedInterpretation.digest).toBe(review.reviewedPayloadHash);
+    expect(review.reviewedInterpretation.entityResolutions.every((resolution) => !resolution.requiredConfirmation || resolution.candidates.some((candidate) => candidate.selected))).toBe(true);
+    let approval = await api.requestEventApproval(review);
+    expect(approval.graphSnapshotVersion).toBe(event.graphSnapshotVersion);
+    expect(approval.graphSnapshotHash).toBe(event.graphSnapshotHash);
+    expect(approval.status).toBe("pending");
+    approval = await api.approveEvent(approval.approvalId, "operations", approval.payloadHash);
+    approval = await api.approveEvent(approval.approvalId, "security", approval.payloadHash);
+    expect(approval.status).toBe("approved");
+    expect(new Set(approval.decisions.map((decision) => decision.approverId)).size).toBe(2);
+
+    const receipt = await api.applyReviewedEvent(review, approval);
+    expect(receipt.decision).toBe("applied");
+    expect(receipt.externalWrite).toBe(false);
+    expect(receipt.eventVersionAfter).toBe(receipt.eventVersionBefore + 1);
+    expect(receipt.graphVersionAfter).toBe(receipt.graphVersionBefore + 1);
+    expect(receipt.eventVersionBefore).not.toBe(receipt.graphVersionBefore);
+    expect(receipt.outboxPosition).toBeGreaterThan(0);
+    const refreshedApi = new FetchDigitalTwinApi(String(liveUrl), liveTokenProvider);
+    await refreshedApi.getActorContext();
+    const timeline = await refreshedApi.getEventTimeline();
+    const appliedTimelineEntry = timeline.find((entry) => entry.eventId === event.eventId && entry.status === "applied");
+    expect(appliedTimelineEntry?.receiptId).toBe(receipt.receiptId);
+    expect(appliedTimelineEntry?.graphVersionAfter).toBe(receipt.graphVersionAfter);
+    const replay = await refreshedApi.getEventReplay(event.eventId);
+    expect(replay.reconstructable).toBe(true);
+    expect(replay.entityChanges.length).toBeGreaterThan(0);
+
+    const rollback = await refreshedApi.rollbackEvent(event.eventId, appliedTimelineEntry?.receiptId ?? "", `live-web-event-rollback-${globalThis.crypto.randomUUID()}`);
+    expect(rollback.decision).toBe("rolled_back");
+    expect(rollback.externalWrite).toBe(false);
+
+    const scenarioEvent = await refreshedApi.interpretEvent("We might lose our biggest customer because they are unhappy.", "auto");
+    const scenarioSelections = scenarioEvent.entityResolutions.flatMap((resolution) => resolution.requiredConfirmation
+      ? [resolution.candidates[0].entityId]
+      : resolution.candidates.filter((candidate) => candidate.selected).map((candidate) => candidate.entityId));
+    const scenarioReview = await refreshedApi.reviewEvent(scenarioEvent.previewId, scenarioEvent.digest, "scenario", scenarioSelections);
+    const scenarioApproval = await refreshedApi.requestEventApproval(scenarioReview);
+    const scenarioReceipt = await refreshedApi.applyReviewedEvent(scenarioReview, scenarioApproval);
+    const branches = await refreshedApi.getEventBranches();
+    const branch = branches.find((candidate) => candidate.createdByEventId === scenarioEvent.eventId);
+    expect(branch?.baseGraphVersion).toBe(scenarioReceipt.graphVersionBefore);
+    expect(branch?.baseGraphHash).toBe(scenarioReceipt.beforeStateHash);
+    const baseline = branches.find((candidate) => candidate.mode === "baseline");
+    const comparison = await refreshedApi.compareEventBranches(baseline?.branchId ?? "", branch?.branchId ?? "");
+    expect(comparison.left.branchId).toBe(baseline?.branchId);
+    expect(comparison.right.branchId).toBe(branch?.branchId);
   }, 15_000);
 });

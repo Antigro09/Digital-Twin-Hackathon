@@ -7,7 +7,7 @@
     "version": "1.0.0-rc.1"
   },
   "summary": {
-    "complete": 101,
+    "complete": 106,
     "coverage_percent": 100.0,
     "quality_attribute": {
       "complete": 18,
@@ -25,10 +25,10 @@
       "roadmap"
     ],
     "requirement": {
-      "complete": 83,
-      "total": 83
+      "complete": 88,
+      "total": 88
     },
-    "total": 101
+    "total": 106
   },
   "traces": [
     {
@@ -215,6 +215,7 @@
       ],
       "contracts": [
         "contracts/schemas/canonical.schema.json",
+        "contracts/schemas/ai-intelligence.schema.json",
         "contracts/mcp-manifest.json",
         "contracts/openapi/enterprise-digital-twin.openapi.yaml"
       ],
@@ -227,6 +228,7 @@
       ],
       "decisions": [
         "ADR-012",
+        "ADR-018",
         "ADR-013"
       ],
       "horizon": "H1",
@@ -239,7 +241,7 @@
       "tests_evaluations": [
         "TST-AI-001"
       ],
-      "title": "OpenAI-first gateway"
+      "title": "Central provider-neutral AI gateway"
     },
     {
       "acceptance": [
@@ -261,6 +263,7 @@
       ],
       "contracts": [
         "contracts/schemas/canonical.schema.json",
+        "contracts/schemas/ai-intelligence.schema.json",
         "contracts/mcp-manifest.json",
         "contracts/openapi/enterprise-digital-twin.openapi.yaml"
       ],
@@ -273,6 +276,7 @@
       ],
       "decisions": [
         "ADR-012",
+        "ADR-018",
         "ADR-013"
       ],
       "horizon": "H1",
@@ -307,6 +311,7 @@
       ],
       "contracts": [
         "contracts/schemas/canonical.schema.json",
+        "contracts/schemas/ai-intelligence.schema.json",
         "contracts/mcp-manifest.json",
         "contracts/openapi/enterprise-digital-twin.openapi.yaml"
       ],
@@ -319,6 +324,7 @@
       ],
       "decisions": [
         "ADR-012",
+        "ADR-018",
         "ADR-013"
       ],
       "horizon": "H1",
@@ -353,6 +359,7 @@
       ],
       "contracts": [
         "contracts/schemas/canonical.schema.json",
+        "contracts/schemas/ai-intelligence.schema.json",
         "contracts/mcp-manifest.json",
         "contracts/openapi/enterprise-digital-twin.openapi.yaml"
       ],
@@ -365,6 +372,7 @@
       ],
       "decisions": [
         "ADR-012",
+        "ADR-018",
         "ADR-013"
       ],
       "horizon": "H1",
@@ -399,6 +407,7 @@
       ],
       "contracts": [
         "contracts/schemas/canonical.schema.json",
+        "contracts/schemas/ai-intelligence.schema.json",
         "contracts/mcp-manifest.json",
         "contracts/openapi/enterprise-digital-twin.openapi.yaml"
       ],
@@ -411,6 +420,7 @@
       ],
       "decisions": [
         "ADR-012",
+        "ADR-018",
         "ADR-013"
       ],
       "horizon": "H1",
@@ -445,6 +455,7 @@
       ],
       "contracts": [
         "contracts/schemas/canonical.schema.json",
+        "contracts/schemas/ai-intelligence.schema.json",
         "contracts/mcp-manifest.json",
         "contracts/openapi/enterprise-digital-twin.openapi.yaml"
       ],
@@ -457,6 +468,7 @@
       ],
       "decisions": [
         "ADR-012",
+        "ADR-018",
         "ADR-013"
       ],
       "horizon": "H1",
@@ -491,6 +503,7 @@
       ],
       "contracts": [
         "contracts/schemas/canonical.schema.json",
+        "contracts/schemas/ai-intelligence.schema.json",
         "contracts/mcp-manifest.json",
         "contracts/openapi/enterprise-digital-twin.openapi.yaml"
       ],
@@ -503,6 +516,7 @@
       ],
       "decisions": [
         "ADR-012",
+        "ADR-018",
         "ADR-013"
       ],
       "horizon": "H1",
@@ -537,6 +551,7 @@
       ],
       "contracts": [
         "contracts/schemas/canonical.schema.json",
+        "contracts/schemas/ai-intelligence.schema.json",
         "contracts/mcp-manifest.json",
         "contracts/openapi/enterprise-digital-twin.openapi.yaml"
       ],
@@ -549,6 +564,7 @@
       ],
       "decisions": [
         "ADR-012",
+        "ADR-018",
         "ADR-013"
       ],
       "horizon": "H1",
@@ -1678,6 +1694,311 @@
         "TST-DEV-001"
       ],
       "title": "Deployment safety"
+    },
+    {
+      "acceptance": [
+        "AC-EVT-001"
+      ],
+      "artifacts": [
+        "chapters/18-event-intelligence-causal-impact.md",
+        "chapters/05-data-knowledge-graph.md",
+        "chapters/07-ai-agents-reasoning.md",
+        "chapters/08-simulation-prediction.md",
+        "chapters/09-security-privacy-compliance.md",
+        "chapters/11-ux-visualizations.md",
+        "chapters/12-apis-developer-platform.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-WEB",
+        "CMP-API",
+        "CMP-EVENT-INTELLIGENCE",
+        "CMP-AI",
+        "CMP-POLICY",
+        "CMP-WORKFLOW",
+        "CMP-POSTGRES",
+        "CMP-GRAPH",
+        "CMP-OBS"
+      ],
+      "contracts": [
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml",
+        "contracts/asyncapi/events.asyncapi.yaml",
+        "contracts/schemas/event-intelligence.schema.json"
+      ],
+      "controls": [
+        "CTRL-AI-001",
+        "CTRL-AI-002",
+        "CTRL-AI-004",
+        "CTRL-IAM-003",
+        "CTRL-TEN-001",
+        "CTRL-AUD-001",
+        "CTRL-PRV-002",
+        "CTRL-EVT-001"
+      ],
+      "decisions": [
+        "ADR-004",
+        "ADR-006",
+        "ADR-009",
+        "ADR-010",
+        "ADR-011",
+        "ADR-012",
+        "ADR-018"
+      ],
+      "horizon": "H1",
+      "id": "REQ-EVT-001",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-EVT-001"
+      ],
+      "title": "Structured event interpretation"
+    },
+    {
+      "acceptance": [
+        "AC-EVT-001"
+      ],
+      "artifacts": [
+        "chapters/18-event-intelligence-causal-impact.md",
+        "chapters/05-data-knowledge-graph.md",
+        "chapters/07-ai-agents-reasoning.md",
+        "chapters/08-simulation-prediction.md",
+        "chapters/09-security-privacy-compliance.md",
+        "chapters/11-ux-visualizations.md",
+        "chapters/12-apis-developer-platform.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-WEB",
+        "CMP-API",
+        "CMP-EVENT-INTELLIGENCE",
+        "CMP-AI",
+        "CMP-POLICY",
+        "CMP-WORKFLOW",
+        "CMP-POSTGRES",
+        "CMP-GRAPH",
+        "CMP-OBS"
+      ],
+      "contracts": [
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml",
+        "contracts/asyncapi/events.asyncapi.yaml",
+        "contracts/schemas/event-intelligence.schema.json"
+      ],
+      "controls": [
+        "CTRL-AI-001",
+        "CTRL-AI-002",
+        "CTRL-AI-004",
+        "CTRL-IAM-003",
+        "CTRL-TEN-001",
+        "CTRL-AUD-001",
+        "CTRL-PRV-002",
+        "CTRL-EVT-001"
+      ],
+      "decisions": [
+        "ADR-004",
+        "ADR-006",
+        "ADR-009",
+        "ADR-010",
+        "ADR-011",
+        "ADR-012",
+        "ADR-018"
+      ],
+      "horizon": "H1",
+      "id": "REQ-EVT-002",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-EVT-001"
+      ],
+      "title": "Bounded causal impact"
+    },
+    {
+      "acceptance": [
+        "AC-EVT-001"
+      ],
+      "artifacts": [
+        "chapters/18-event-intelligence-causal-impact.md",
+        "chapters/05-data-knowledge-graph.md",
+        "chapters/07-ai-agents-reasoning.md",
+        "chapters/08-simulation-prediction.md",
+        "chapters/09-security-privacy-compliance.md",
+        "chapters/11-ux-visualizations.md",
+        "chapters/12-apis-developer-platform.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-WEB",
+        "CMP-API",
+        "CMP-EVENT-INTELLIGENCE",
+        "CMP-AI",
+        "CMP-POLICY",
+        "CMP-WORKFLOW",
+        "CMP-POSTGRES",
+        "CMP-GRAPH",
+        "CMP-OBS"
+      ],
+      "contracts": [
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml",
+        "contracts/asyncapi/events.asyncapi.yaml",
+        "contracts/schemas/event-intelligence.schema.json"
+      ],
+      "controls": [
+        "CTRL-AI-001",
+        "CTRL-AI-002",
+        "CTRL-AI-004",
+        "CTRL-IAM-003",
+        "CTRL-TEN-001",
+        "CTRL-AUD-001",
+        "CTRL-PRV-002",
+        "CTRL-EVT-001"
+      ],
+      "decisions": [
+        "ADR-004",
+        "ADR-006",
+        "ADR-009",
+        "ADR-010",
+        "ADR-011",
+        "ADR-012",
+        "ADR-018"
+      ],
+      "horizon": "H1",
+      "id": "REQ-EVT-003",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-EVT-001"
+      ],
+      "title": "Reality and scenario separation"
+    },
+    {
+      "acceptance": [
+        "AC-EVT-001"
+      ],
+      "artifacts": [
+        "chapters/18-event-intelligence-causal-impact.md",
+        "chapters/05-data-knowledge-graph.md",
+        "chapters/07-ai-agents-reasoning.md",
+        "chapters/08-simulation-prediction.md",
+        "chapters/09-security-privacy-compliance.md",
+        "chapters/11-ux-visualizations.md",
+        "chapters/12-apis-developer-platform.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-WEB",
+        "CMP-API",
+        "CMP-EVENT-INTELLIGENCE",
+        "CMP-AI",
+        "CMP-POLICY",
+        "CMP-WORKFLOW",
+        "CMP-POSTGRES",
+        "CMP-GRAPH",
+        "CMP-OBS"
+      ],
+      "contracts": [
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml",
+        "contracts/asyncapi/events.asyncapi.yaml",
+        "contracts/schemas/event-intelligence.schema.json"
+      ],
+      "controls": [
+        "CTRL-AI-001",
+        "CTRL-AI-002",
+        "CTRL-AI-004",
+        "CTRL-IAM-003",
+        "CTRL-TEN-001",
+        "CTRL-AUD-001",
+        "CTRL-PRV-002",
+        "CTRL-EVT-001"
+      ],
+      "decisions": [
+        "ADR-004",
+        "ADR-006",
+        "ADR-009",
+        "ADR-010",
+        "ADR-011",
+        "ADR-012",
+        "ADR-018"
+      ],
+      "horizon": "H1",
+      "id": "REQ-EVT-004",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-EVT-001"
+      ],
+      "title": "Reversible event mutation"
+    },
+    {
+      "acceptance": [
+        "AC-EVT-001"
+      ],
+      "artifacts": [
+        "chapters/18-event-intelligence-causal-impact.md",
+        "chapters/05-data-knowledge-graph.md",
+        "chapters/07-ai-agents-reasoning.md",
+        "chapters/08-simulation-prediction.md",
+        "chapters/09-security-privacy-compliance.md",
+        "chapters/11-ux-visualizations.md",
+        "chapters/12-apis-developer-platform.md"
+      ],
+      "complete": true,
+      "components": [
+        "CMP-WEB",
+        "CMP-API",
+        "CMP-EVENT-INTELLIGENCE",
+        "CMP-AI",
+        "CMP-POLICY",
+        "CMP-WORKFLOW",
+        "CMP-POSTGRES",
+        "CMP-GRAPH",
+        "CMP-OBS"
+      ],
+      "contracts": [
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml",
+        "contracts/asyncapi/events.asyncapi.yaml",
+        "contracts/schemas/event-intelligence.schema.json"
+      ],
+      "controls": [
+        "CTRL-AI-001",
+        "CTRL-AI-002",
+        "CTRL-AI-004",
+        "CTRL-IAM-003",
+        "CTRL-TEN-001",
+        "CTRL-AUD-001",
+        "CTRL-PRV-002",
+        "CTRL-EVT-001"
+      ],
+      "decisions": [
+        "ADR-004",
+        "ADR-006",
+        "ADR-009",
+        "ADR-010",
+        "ADR-011",
+        "ADR-012",
+        "ADR-018"
+      ],
+      "horizon": "H1",
+      "id": "REQ-EVT-005",
+      "kind": "requirement",
+      "roadmap": [
+        "H1"
+      ],
+      "status": "committed",
+      "tests_evaluations": [
+        "TST-EVT-001"
+      ],
+      "title": "Explainable event workspace"
     },
     {
       "acceptance": [
@@ -3812,6 +4133,7 @@
       ],
       "decisions": [
         "ADR-012",
+        "ADR-018",
         "ADR-013"
       ],
       "horizon": "H1",
@@ -3855,6 +4177,7 @@
       ],
       "decisions": [
         "ADR-012",
+        "ADR-018",
         "ADR-013"
       ],
       "horizon": "H1",
@@ -3978,6 +4301,7 @@
       ],
       "decisions": [
         "ADR-012",
+        "ADR-018",
         "ADR-013"
       ],
       "horizon": "H1",

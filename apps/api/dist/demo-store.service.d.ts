@@ -1,6 +1,7 @@
 import { OnModuleInit } from '@nestjs/common';
 import { AuditRecord, ReceiptRecord, RequestContext } from './domain';
 import { DatabaseService } from './database.service';
+import { EventProjectionService } from './event-projection.service';
 import { FixtureService } from './fixture.service';
 interface Page<T> {
     items: T[];
@@ -11,6 +12,7 @@ interface Page<T> {
 export declare class DemoStoreService implements OnModuleInit {
     private readonly fixtures;
     private readonly database;
+    private readonly eventProjection;
     private readonly logger;
     private readonly agentRuns;
     private readonly snapshots;
@@ -22,7 +24,7 @@ export declare class DemoStoreService implements OnModuleInit {
     private readonly executionReplay;
     private readonly audits;
     private jiraIssue;
-    constructor(fixtures: FixtureService, database: DatabaseService);
+    constructor(fixtures: FixtureService, database: DatabaseService, eventProjection: EventProjectionService);
     onModuleInit(): void;
     watermark(): Record<string, unknown>;
     listEntities(ctx: RequestContext, pageSize: number): Page<Record<string, unknown>>;
@@ -49,6 +51,9 @@ export declare class DemoStoreService implements OnModuleInit {
     connectors(ctx: RequestContext): Page<Record<string, unknown>>;
     getScenarioEtag(scenarioId: string): string | undefined;
     getPreviewEtag(previewId: string): string | undefined;
+    private eventProjectionOverlay;
+    private eventProjectionAssumptions;
+    private factTouchesEntity;
     private entityFromSource;
     private claimFromSource;
     private citationFromSource;

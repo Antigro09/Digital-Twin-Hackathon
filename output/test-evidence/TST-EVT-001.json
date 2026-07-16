@@ -1,0 +1,138 @@
+{
+  "schema_version": 1,
+  "test_id": "TST-EVT-001",
+  "acceptance_id": "AC-EVT-001",
+  "status": "passed",
+  "completed_at": "2026-07-15T15:43:27.1362483Z",
+  "environment": {
+    "profile": "h1_synthetic_compose",
+    "api": "http://127.0.0.1:8080",
+    "web": "http://127.0.0.1:3000",
+    "authoritative_store": "postgresql",
+    "authoritative_database": "edt_hardened",
+    "external_write": false
+  },
+  "automated_results": {
+    "repository_test_command": "npm test",
+    "api": {
+      "suites_passed": 7,
+      "tests_passed": 37,
+      "tests_failed": 0
+    },
+    "sync_worker": {
+      "files_passed": 1,
+      "tests_passed": 2,
+      "tests_failed": 0
+    },
+    "web": {
+      "files_passed": 6,
+      "files_skipped": 1,
+      "tests_passed": 34,
+      "tests_skipped": 3,
+      "tests_failed": 0
+    },
+    "ai_worker": {
+      "tests_passed": 25,
+      "tests_failed": 0
+    },
+    "production_build": "passed",
+    "documentation_validation": {
+      "markdown_files": 46,
+      "machine_readable_artifacts": 62,
+      "errors": 0,
+      "warnings": 0,
+      "traceability_percent": 100.0
+    }
+  },
+  "event_intelligence_results": {
+    "focused_api_suites": [
+      "event-intelligence.e2e-spec.ts",
+      "event-intelligence-restart.e2e-spec.ts",
+      "event-projection.e2e-spec.ts",
+      "database-event-mutation.e2e-spec.ts"
+    ],
+    "verified_behaviors": [
+      "deterministic multi-event extraction and complete taxonomy",
+      "tenant-scoped ambiguous entity resolution and reviewer rebinding",
+      "resolvable evidence references on every impact",
+      "bounded depth, fan-out, and cycle suppression",
+      "uncertain facts routed to isolated scenarios",
+      "prompt-like instructions quarantined as untrusted data",
+      "signed short-lived bearer authentication with server-derived tenant context",
+      "snapshot-bound exact-payload review and approval",
+      "two distinct authenticated approval roles for reality updates",
+      "stale reality and scenario approvals rejected with zero effects",
+      "relationship mutations compiled only from active graph evidence",
+      "atomic event, receipt, audit, projection, idempotency, and outbox commit",
+      "database-authoritative CAS guards and replay-safe receipt recovery",
+      "numeric audit-tail serialization across the sequence 9-to-10 boundary",
+      "invalid, gapped, forked, orphaned, empty, and incomplete audit chains fail closed",
+      "terminal applied, rolled-back, and rejected event records are immutable",
+      "unsupported projection operations fail closed",
+      "shared entity catalog, traversal, and simulation visibility",
+      "history replay and baseline-versus-scenario branch comparison",
+      "idempotent apply and rollback",
+      "restart hydration and rollback from persisted snapshots",
+      "tenant isolation and authorization-bound pagination cursors"
+    ]
+  },
+  "live_compose_verification": {
+    "command": "EDT_VERIFY_RESTART_API=true npm run demo:verify",
+    "status": "verified",
+    "event_id": "3d49ac9f-0a28-51d4-842b-5e81a794e7a7",
+    "causal_depth": 3,
+    "impact_count": 10,
+    "history_reconstructable": true,
+    "shared_projection_visible": true,
+    "apply_replay_safe": true,
+    "rollback_replay_safe": true,
+    "restart_hydration_verified": true,
+    "committed_outbox_position": 11,
+    "cross_tenant_disclosure_count": 0,
+    "citation_count": 4,
+    "simulation_engine": "pert-mt19937-beta/2.0.0"
+  },
+  "live_restart_verification": {
+    "status": "verified",
+    "event_id": "3d49ac9f-0a28-51d4-842b-5e81a794e7a7",
+    "apply_receipt_id": "438155ec-c4a2-4181-8ea3-30eb69d5d0d7",
+    "rollback_receipt_id": "fed2e801-ed22-4424-8707-11ab53baacdc",
+    "apply_outbox_position": 11,
+    "rollback_outbox_position": 12,
+    "hydrated_status": "applied",
+    "history_reconstructable_after_restart": true,
+    "idempotent_after_restart": true,
+    "projection_visible_after_restart": true,
+    "restored_availability": "healthy",
+    "audit_chain_valid": true,
+    "outbox_payload_positions_match_rows": true,
+    "approval_link_preserved_on_apply_and_rollback": true,
+    "post_restart_receipt_identity_preserved": true,
+    "post_restart_outbox_position_preserved": true
+  },
+  "live_authentication_verification": {
+    "locked_session_status": 401,
+    "unlock_status": 200,
+    "authenticated_session_status": 201,
+    "http_only_cookie": true,
+    "same_site_strict_cookie": true,
+    "server_derived_tenant": true,
+    "browser_receives_bootstrap_key": false
+  },
+  "audit_sequence_verification": {
+    "tenant_id": "10000000-0000-4000-8000-000000000001",
+    "first_sequence": 1,
+    "last_sequence": 19,
+    "record_count": 19,
+    "sequence_gaps": 0,
+    "sequence_10_boundary_regression_test": "passed"
+  },
+  "safety_boundary": {
+    "synthetic_only": true,
+    "external_graph_write": false,
+    "hris_write": false,
+    "identity_or_permission_write": false,
+    "production_control_write": false,
+    "individual_employment_scoring": false
+  }
+}

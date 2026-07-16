@@ -16,6 +16,8 @@ screens:
   - {id: UX-CONNECTORS, name: Connector administration, horizon: H1, purpose: Scope freshness cursors errors revocation and reconciliation.}
   - {id: UX-AUDIT, name: Audit explorer, horizon: H1, purpose: Filter export verify and correlate security and action evidence.}
   - {id: UX-ASSET-TWIN, name: Synthetic physical-asset twin, horizon: H1, purpose: Live synthetic telemetry spatial component inspection deterministic analytics lifecycle history and simulator-only control.}
+  - {id: UX-EVENT-INTELLIGENCE, name: Event intelligence workspace, horizon: H1, purpose: Interpret untrusted event reports resolve entities inspect bounded causal impacts compare before and after route scenarios review synthetic mutations and roll them back.}
+  - {id: UX-AI-CONTROL, name: AI Control Center, horizon: H1, purpose: Inspect provider and vector readiness run seven bounded agents import private evidence search permission-trimmed knowledge explain results review suggestions and inspect token cost provenance and failures without exposing credentials or permitting model mutations.}
   - {id: UX-ADMIN, name: Tenant administration, horizon: H2, purpose: SSO SCIM membership policy retention residency keys and break-glass.}
   - {id: UX-ONTOLOGY, name: Ontology studio, horizon: H2, purpose: Versioned domain packages constraints mappings migrations and impact preview.}
   - {id: UX-WORKFLOW, name: Workflow builder, horizon: H3, purpose: Typed steps policies approvals budgets simulation and test fixtures.}
@@ -35,3 +37,4 @@ visualizations:
   - {id: VIS-PLAYBACK, name: Simulation playback, purpose: Reproducible scenario progression distributions and intervention points.}
   - {id: VIS-3D, name: 3D organizational view, purpose: Optional storytelling view with no exclusive information., horizon: H4}
   - {id: VIS-PHYSICAL-3D, name: Procedural 3D-style physical-asset view, purpose: Spatially locate a synthetic component condition in a rotatable perspective SVG while preserving a complete keyboard-operable structured alternative., horizon: H1}
+  - {id: VIS-CAUSAL-IMPACT, name: Causal impact graph, purpose: Explain direct and downstream event consequences with depth evidence confidence time horizon and a complete keyboard-operable impact list., horizon: H1}

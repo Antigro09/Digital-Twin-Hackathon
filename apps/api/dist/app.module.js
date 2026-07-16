@@ -11,11 +11,18 @@ const common_1 = require("@nestjs/common");
 const action_controller_1 = require("./action.controller");
 const admin_controller_1 = require("./admin.controller");
 const agent_controller_1 = require("./agent.controller");
+const ai_gateway_controller_1 = require("./ai-gateway.controller");
+const ai_gateway_service_1 = require("./ai-gateway.service");
 const asset_twin_controller_1 = require("./asset-twin.controller");
 const asset_twin_service_1 = require("./asset-twin.service");
 const context_service_1 = require("./context.service");
 const database_service_1 = require("./database.service");
 const demo_store_service_1 = require("./demo-store.service");
+const demo_auth_controller_1 = require("./demo-auth.controller");
+const demo_auth_service_1 = require("./demo-auth.service");
+const event_intelligence_controller_1 = require("./event-intelligence.controller");
+const event_intelligence_service_1 = require("./event-intelligence.service");
+const event_projection_service_1 = require("./event-projection.service");
 const fixture_service_1 = require("./fixture.service");
 const knowledge_controller_1 = require("./knowledge.controller");
 const simulation_controller_1 = require("./simulation.controller");
@@ -26,8 +33,8 @@ let AppModule = class AppModule {
 exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
-        controllers: [admin_controller_1.AdminController, knowledge_controller_1.KnowledgeController, agent_controller_1.AgentController, simulation_controller_1.SimulationController, action_controller_1.ActionController, asset_twin_controller_1.AssetTwinController],
-        providers: [fixture_service_1.FixtureService, context_service_1.ContextService, database_service_1.DatabaseService, demo_store_service_1.DemoStoreService, asset_twin_service_1.AssetTwinService],
+        controllers: [demo_auth_controller_1.DemoAuthController, admin_controller_1.AdminController, knowledge_controller_1.KnowledgeController, agent_controller_1.AgentController, simulation_controller_1.SimulationController, action_controller_1.ActionController, asset_twin_controller_1.AssetTwinController, event_intelligence_controller_1.EventIntelligenceController, ai_gateway_controller_1.AiGatewayController],
+        providers: [fixture_service_1.FixtureService, demo_auth_service_1.DemoAuthService, context_service_1.ContextService, database_service_1.DatabaseService, event_projection_service_1.EventProjectionService, demo_store_service_1.DemoStoreService, asset_twin_service_1.AssetTwinService, event_intelligence_service_1.EventIntelligenceService, ai_gateway_service_1.AiGatewayService],
     })
 ], AppModule);
 //# sourceMappingURL=app.module.js.map

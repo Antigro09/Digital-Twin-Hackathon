@@ -45,7 +45,8 @@ export interface EventMutationIdempotencyGuard {
 export interface EventMutationExpectedRecord {
     kind: string;
     id: string;
-    expected: Record<string, JsonPrimitive>;
+    expected?: Record<string, JsonPrimitive>;
+    absent?: true;
 }
 export interface EventMutationGuard {
     idempotency: EventMutationIdempotencyGuard;
@@ -65,10 +66,20 @@ export interface InMemoryOutboxEntry {
     readonly aggregateVersion: number;
     readonly payload: JsonValue;
 }
+export interface RecordListPageOptions {
+    filters?: Record<string, JsonPrimitive>;
+    limit?: number;
+    cursor?: string;
+}
+export interface RecordListPage<T> {
+    items: T[];
+    nextCursor: string | null;
+}
 export declare class DatabaseService implements OnModuleInit, OnModuleDestroy {
     private readonly logger;
     private readonly inMemoryOutboxByTenant;
     private readonly inMemoryRecords;
+    private readonly inMemoryRecordCreatedAt;
     private readonly inMemoryIdempotency;
     private readonly inMemoryAuditTail;
     private nextInMemoryOutboxPosition;
@@ -82,6 +93,7 @@ export declare class DatabaseService implements OnModuleInit, OnModuleDestroy {
     put(tenantId: string, kind: string, id: string, payload: unknown): Promise<void>;
     get<T>(tenantId: string, kind: string, id: string): Promise<T | undefined>;
     list<T>(tenantId: string, kind: string): Promise<T[]>;
+    listPage<T>(tenantId: string, kind: string, options?: RecordListPageOptions): Promise<RecordListPage<T>>;
     commitEventMutation<TRecordPayload = unknown, TOutboxPayload = unknown>(tenantId: string, records: readonly EventMutationRecord<TRecordPayload>[], audit: EventMutationAudit, outbox: EventMutationOutbox<TOutboxPayload>, guard?: EventMutationGuard): Promise<EventMutationCommitResult>;
     getInMemoryOutbox(tenantId: string): readonly InMemoryOutboxEntry[];
     health(): Promise<'connected' | 'in_memory'>;
@@ -94,6 +106,12 @@ export declare class DatabaseService implements OnModuleInit, OnModuleDestroy {
     private bindAuditToTail;
     private asEventMutationAudit;
     private inMemoryRecordKey;
+    private validatePageOptions;
+    private matchesPayloadFilters;
+    private encodeRecordCursor;
+    private decodeRecordCursor;
+    private beforeCursor;
+    private recordCreatedAt;
     private inMemoryIdempotencyKey;
     private jsonClone;
     private withTenant;

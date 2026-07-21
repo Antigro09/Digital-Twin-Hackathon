@@ -4,7 +4,7 @@ import { ProblemException } from './problem';
 
 export const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const SECRET_KEY_PATTERN = /(?:^|[_\-])(password|passwd|secret|token|credential|api[_\-]?key|private[_\-]?key|authorization|cookie|session)(?:$|[_\-])/i;
-const SENSITIVE_LOCATOR_PATTERN = /(?:[?&#](?:access[_-]?token|auth(?:orization)?|token|api[_-]?key|key|signature|sig|credential|password)=|\bbearer\s)/i;
+const SENSITIVE_LOCATOR_PATTERN = /(?:\/\/[^/\s@]+@|[?&#](?:access[_-]?token|auth(?:orization)?|token|api[_-]?key|key|signature|sig|credential|password)=|\bbearer\s)/i;
 
 export function invalid(code: string, detail: string): ProblemException {
   return new ProblemException(HttpStatus.BAD_REQUEST, code, detail);
@@ -40,7 +40,7 @@ export function safeRecord(value: unknown, field: string, maximumBytes: number):
   assertSafeJson(value, field, new Set<object>());
   const serialized = JSON.stringify(value);
   if (!serialized || serialized.length > maximumBytes) throw invalid('payload_too_large', `${field} exceeds its ${maximumBytes}-byte limit.`);
-  return structuredClone(value) as Record<string, unknown>;
+  return JSON.parse(serialized) as Record<string, unknown>;
 }
 
 export function safeJsonValue(value: unknown, field: string, maximumBytes: number): unknown {
@@ -52,9 +52,12 @@ export function safeJsonValue(value: unknown, field: string, maximumBytes: numbe
 
 export function plainRecord(value: unknown, field: string): Record<string, unknown> {
   if (!value || typeof value !== 'object' || Array.isArray(value)) throw invalid('invalid_object', `${field} must be an object.`);
-  const prototype = Object.getPrototypeOf(value);
-  if (prototype !== Object.prototype && prototype !== null) throw invalid('invalid_object', `${field} must be a plain JSON object.`);
-  return value as Record<string, unknown>;
+  if (Object.getOwnPropertySymbols(value).length) throw invalid('invalid_object', `${field} must be a JSON object.`);
+  const record = value as Record<string, unknown>;
+  if (Object.keys(record).some((key) => key === '__proto__' || key === 'constructor' || key === 'prototype')) {
+    throw invalid('unsafe_property_key', `${field} contains a forbidden property key.`);
+  }
+  return record;
 }
 
 export function score(value: unknown, field: string, fallback?: number): number {

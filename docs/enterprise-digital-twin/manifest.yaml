@@ -55,6 +55,8 @@ normative_contracts:
   - contracts/schemas/event-intelligence.schema.json
   - contracts/schemas/event-intelligence-event-changed.v1.schema.json
   - contracts/schemas/ai-intelligence.schema.json
+  - contracts/schemas/data-foundation.schema.json
+  - contracts/schemas/decision-intelligence.schema.json
   - contracts/schemas/connector-manifest.schema.json
   - contracts/schemas/ontology-package.schema.json
   - contracts/schemas/plugin-manifest.schema.json

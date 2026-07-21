@@ -1628,7 +1628,7 @@
 <h4 id="10-related-decisions">10. Related decisions<a class="headerlink" href="#10-related-decisions" title="Permanent link">&para;</a></h4>
 <p>Foundational choices are recorded by the ADR catalog. This chapter is the normative integrated view: modular service decomposition, PostgreSQL authority, rebuildable projections, transactional outbox, pooled relational tenancy, server-derived authorization, bounded AI capabilities, seeded PERT/Monte Carlo simulation, cloud-neutral packaging, and benchmark-gated extraction. Any later ADR that changes an invariant here must update this chapter, its acceptance criteria, and the traceability ledger in the same change.</p>
 <h2 id="ch-04-technology-stack">CH-04 - Technology Stack<a class="headerlink" href="#ch-04-technology-stack" title="Permanent link">&para;</a></h2>
-<p>Status: <strong>Committed</strong> | Owners: Architecture, Developer Platform | Last reviewed: 2026-07-13</p>
+<p>Status: <strong>Committed</strong> | Owners: Architecture, Developer Platform | Last reviewed: 2026-07-15</p>
 <h3 id="technology-stack">Technology Stack<a class="headerlink" href="#technology-stack" title="Permanent link">&para;</a></h3>
 <h4 id="1-decision-policy">1. Decision policy<a class="headerlink" href="#1-decision-policy" title="Permanent link">&para;</a></h4>
 <p>This chapter is the authoritative technology portfolio. It prevents an exhaustive wishlist from becoming an obligation to operate overlapping systems.</p>
@@ -1775,9 +1775,9 @@
 </tr>
 <tr>
 <td>AI</td>
-<td>OpenAI Responses API and Python Agents SDK behind a model gateway</td>
-<td>Capability-oriented model calls, structured tools, traceable runs</td>
-<td>Pinned evaluated snapshots; no provider call bypasses gateway</td>
+<td>Provider-neutral Python AI Gateway; Meta Llama API primary; OpenAI Responses optional</td>
+<td>Capability-oriented model calls, strict schemas, permission-aware retrieval, traceable runs</td>
+<td>Exact evaluated model configuration; no provider call bypasses gateway; no simulated production response</td>
 </tr>
 </tbody>
 </table>
@@ -1796,29 +1796,29 @@
 <thead>
 <tr>
 <th>Capability</th>
-<th>H1 family default</th>
+<th>H1 route</th>
 <th>Required gate</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>difficult orchestration and evaluation</td>
-<td>gpt-5.6-sol</td>
-<td>Tool and argument accuracy, groundedness, safety, latency, and cost evaluation</td>
+<td>difficult grounded reasoning</td>
+<td>Configured <code>AI_REASONING_PROVIDER</code>; Llama by default</td>
+<td>Argument accuracy, groundedness, safety, latency, and cost evaluation</td>
 </tr>
 <tr>
 <td>balanced grounded analysis</td>
-<td>gpt-5.6-terra</td>
-<td>Citation support, abstention, ACL and injection evaluation</td>
+<td>Configured Llama model</td>
+<td>Citation support, abstention, ACL, injection, and schema evaluation</td>
 </tr>
 <tr>
 <td>high-volume extraction</td>
-<td>gpt-5.6-luna</td>
-<td>Structured extraction precision/recall and cost evaluation</td>
+<td>Configured Llama model</td>
+<td>Structured extraction precision/recall, provenance, latency, and cost evaluation</td>
 </tr>
 </tbody>
 </table>
-<p>These names are configuration defaults from the approved architecture, not permission to use a floating provider alias. Before deployment, the platform owner must confirm account availability and record the exact snapshot in the model registry. If no available snapshot passes the capability evaluation, that capability is disabled. Fallbacks are independently evaluated and cannot silently reduce safety. The Responses API is the interface for new agentic integrations, as documented by <a href="https://developers.openai.com/api/docs/guides/migrate-to-responses">OpenAI</a>.</p>
+<p>The model identifier is never guessed or embedded in application features. Before deployment, the platform owner records the exact account-available model/configuration and evaluation evidence in the model registry. If no route passes the capability evaluation, that capability is disabled. Fallbacks are independently evaluated and cannot silently reduce safety. Meta documents its hosted Llama API and official SDKs in the <a href="https://ai.meta.com/blog/llamacon-llama-news/">Llama API announcement</a> and <a href="https://github.com/meta-llama/llama-api-python">official Python SDK</a>. OpenAI Responses remains an optional adapter and follows its <a href="https://developers.openai.com/api/docs/guides/structured-outputs">structured-output contract</a>.</p>
 <h4 id="3-technology-portfolio-matrix">3. Technology portfolio matrix<a class="headerlink" href="#3-technology-portfolio-matrix" title="Permanent link">&para;</a></h4>
 <h5 id="31-languages-and-client-platforms">3.1 Languages and client platforms<a class="headerlink" href="#31-languages-and-client-platforms" title="Permanent link">&para;</a></h5>
 <table>
@@ -3462,7 +3462,7 @@
 </table>
 <p>Additional connectors use this contract only after a connector-specific threat model, exact permission list, source precedence, deletion semantics, provider rate model, fixtures, and mutation review are committed. H2 connector reads are Committed by domain need; every new external mutation remains separately gated and disabled by default.</p>
 <h2 id="ch-07-ai-agents-reasoning-and-evaluations">CH-07 - AI Agents, Reasoning, and Evaluations<a class="headerlink" href="#ch-07-ai-agents-reasoning-and-evaluations" title="Permanent link">&para;</a></h2>
-<p>Status: <strong>Committed</strong> | Owners: AI Platform, Applied AI, Security | Last reviewed: 2026-07-13</p>
+<p>Status: <strong>Committed</strong> | Owners: AI Platform, Applied AI, Security | Last reviewed: 2026-07-15</p>
 <h3 id="ai-agents-reasoning-and-evaluations">AI Agents, Reasoning, and Evaluations<a class="headerlink" href="#ai-agents-reasoning-and-evaluations" title="Permanent link">&para;</a></h3>
 <h4 id="1-purpose-and-safety-boundary">1. Purpose and safety boundary<a class="headerlink" href="#1-purpose-and-safety-boundary" title="Permanent link">&para;</a></h4>
 <p>The AI subsystem converts an authorized question into evidence retrieval, structured analysis, simulation requests, and reviewable drafts. It is not an authority system. A model cannot authenticate a user, choose a tenant, expand a delegation, grant access, establish a canonical fact, approve its own action, or call an external mutation without deterministic policy and approval services.</p>
@@ -3477,7 +3477,7 @@
 <tbody>
 <tr>
 <td>REQ-AI-001</td>
-<td>AI workloads MUST use the Responses API and Agents SDK behind capability, policy, budget, and evaluation interfaces.</td>
+<td>AI workloads MUST use the centralized provider-neutral gateway; Llama is the primary H1 provider and every route is capability-, policy-, budget-, schema-, and evaluation-gated.</td>
 </tr>
 <tr>
 <td>REQ-AI-002</td>
@@ -3538,8 +3538,8 @@
 </tbody>
 </table>
 <h4 id="2-runtime-architecture">2. Runtime architecture<a class="headerlink" href="#2-runtime-architecture" title="Permanent link">&para;</a></h4>
-<p>The Python AI worker uses the OpenAI Responses API through an internal <code>ModelGateway</code>. The OpenAI Agents SDK supplies the server-owned agent loop, tool dispatch, handoffs, guardrails, and traces; PostgreSQL and Temporal remain authoritative for durable run state and approvals. The public API never exposes provider response IDs, API keys, raw prompts, or provider-specific tool objects.</p>
-<p>OpenAI describes the Responses API as the agentic interface for multi-turn and tool-using applications, and its current model guidance recommends Responses for reasoning and tool calling. See <a href="https://developers.openai.com/api/docs/guides/migrate-to-responses">Responses API migration guidance</a> and <a href="https://developers.openai.com/api/docs/guides/latest-model">current model guidance</a>. The <a href="https://developers.openai.com/api/docs/guides/agents">Agents SDK guide</a> explicitly supports server ownership of deployment, tools, storage, and approval decisions, which is the boundary used here.</p>
+<p>The Python AI worker implements the only <code>ModelGateway</code>/<code>AIProvider</code> boundary. Its default <code>LlamaProvider</code> uses the hosted Meta Llama API; an <code>OpenAIProvider</code> uses the Responses API only when independently configured and evaluated. PostgreSQL and Temporal remain authoritative for durable run/workflow state and approvals. The public API never exposes provider response IDs, API keys, internal service credentials, raw prompts, or provider-specific tool objects.</p>
+<p>Meta documents API-key creation, official Python/TypeScript SDKs, and OpenAI-SDK compatibility in its <a href="https://ai.meta.com/blog/llamacon-llama-news/">Llama API announcement</a>. The <a href="https://github.com/meta-llama/llama-api-python">official Python SDK</a> supplies the chat-completions transport, configurable base URL, timeouts, bounded retries, API error types, and structured response format used inside the adapter. OpenAI&rsquo;s <a href="https://developers.openai.com/api/docs/guides/structured-outputs">structured-output guidance</a> governs the optional Responses adapter. All agent loops, retrieval, memory, validation, review, and audit remain application-owned.</p>
 <h5 id="21-model-gateway-contract">2.1 Model gateway contract<a class="headerlink" href="#21-model-gateway-contract" title="Permanent link">&para;</a></h5>
 <p><code>ModelGateway.run(request)</code> accepts:</p>
 <ul>
@@ -3554,51 +3554,51 @@
 <li>a privacy-preserving <code>safety_identifier</code> derived as an HMAC of tenant and actor IDs.</li>
 </ul>
 <p>It returns <code>AgentRunResult</code> with structured output, model and revision actually used, usage, finish reason, tool-invocation references, validation results, citations, safety flags, and terminal state. Provider exceptions are normalized. Raw provider request/response payloads are not retained by default; an explicitly opted-in diagnostic sample may be encrypted under a restricted key, assigned a short TTL, and accessed only through time-limited break glass.</p>
-<p>The OpenAI request defaults to <code>store: false</code>; the application owns conversation state and supplies only the context required for that turn. Any use of provider-side storage requires an approved data-processing profile and tenant configuration. API credentials are server-side secret references, isolated per environment, never placed in a tool schema or prompt.</p>
+<p>The application owns conversation state and supplies only the context required for the turn. The optional OpenAI request defaults to <code>store: false</code>; no provider-side storage is assumed for Llama. Any provider retention/storage feature requires an approved data-processing profile and tenant configuration. API credentials are server-side secret references, isolated per environment, never placed in a tool schema or prompt.</p>
 <h5 id="22-model-policy">2.2 Model policy<a class="headerlink" href="#22-model-policy" title="Permanent link">&para;</a></h5>
 <table>
 <thead>
 <tr>
 <th>Workload</th>
-<th>H1 family default</th>
-<th>Starting reasoning</th>
+<th>H1 route</th>
+<th>Sampling policy</th>
 <th>Promotion objective</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>High-volume extraction and classification</td>
-<td><code>gpt-5.6-luna</code></td>
-<td><code>none</code> or <code>low</code></td>
-<td>Schema validity, field accuracy, cost, and latency</td>
+<td>Knowledge/technical extraction and event understanding</td>
+<td>Configured Llama model</td>
+<td>Low temperature</td>
+<td>Schema validity, field accuracy, provenance, cost, and latency</td>
 </tr>
 <tr>
-<td>Entity-resolution explanation and graph verification</td>
-<td><code>gpt-5.6-terra</code></td>
-<td><code>low</code></td>
-<td>Pairwise decision accuracy and evidence use</td>
+<td>Entity resolution</td>
+<td>Configured Llama model</td>
+<td>Near-deterministic</td>
+<td>Pairwise decision accuracy, conflict disclosure, and evidence use</td>
 </tr>
 <tr>
-<td>Grounded query/research and mitigation drafting</td>
-<td><code>gpt-5.6-terra</code></td>
-<td><code>medium</code></td>
-<td>Citation, abstention, usefulness, and latency</td>
+<td>Causal and prediction explanation</td>
+<td>Configured Llama reasoning model</td>
+<td>Low temperature</td>
+<td>Citation, abstention, numeric preservation, usefulness, and latency</td>
 </tr>
 <tr>
-<td>Scenario compilation and explanation</td>
-<td><code>gpt-5.6-terra</code></td>
-<td><code>medium</code></td>
-<td>Operation accuracy and unsupported-change rejection</td>
+<td>Scenario planning</td>
+<td>Configured Llama reasoning model</td>
+<td>Low temperature</td>
+<td>Registered-operation accuracy and unsupported-change rejection</td>
 </tr>
 <tr>
-<td>Difficult orchestration, adjudication, and eval grading</td>
-<td><code>gpt-5.6-sol</code></td>
-<td><code>high</code>; <code>max</code> only after measurement</td>
-<td>Quality-first benchmark with explicit cost ceiling</td>
+<td>Explicitly promoted difficult reasoning</td>
+<td>Evaluated <code>AI_REASONING_PROVIDER</code> route</td>
+<td>Task-specific</td>
+<td>Quality-first benchmark with an explicit cost ceiling</td>
 </tr>
 </tbody>
 </table>
-<p>OpenAI currently identifies <code>gpt-5.6-sol</code> for frontier capability, <code>gpt-5.6-terra</code> for balanced capability and cost, and <code>gpt-5.6-luna</code> for efficient high-volume work in <a href="https://developers.openai.com/api/docs/guides/latest-model">model guidance</a>. These are workload defaults, not unconditional production aliases. Production configuration records an explicitly evaluated model revision where available, the prompt and tool-schema hashes, reasoning setting, and fallback set.</p>
+<p><code>LLAMA_MODEL</code>, optional <code>LLAMA_REASONING_MODEL</code>, endpoint, prompt/schema hashes, sampling settings, and evaluated fallback set are versioned deployment configuration. Application features never name a floating model. The status surface reports the actual configured route without exposing credentials.</p>
 <p>A fallback is eligible only if it has passed the same capability eval gate and data-control requirements. The gateway may fall back for transient availability or rate-limit failure, never to bypass a safety refusal, tool denial, data residency rule, or output validation error. If no approved candidate remains, the run fails closed with a retryable or terminal status.</p>
 <h4 id="3-durable-run-model">3. Durable run model<a class="headerlink" href="#3-durable-run-model" title="Permanent link">&para;</a></h4>
 <table>
@@ -3714,7 +3714,7 @@
 <p>The citation verifier checks accessibility again, locator integrity, evidence existence, textual entailment, temporal fit, and conflict disclosure. A claim without valid support is removed, rewritten as an assumption, or causes abstention. Confidence labels derive from calibrated verifier bands and data completeness; the model cannot assign its own final confidence score.</p>
 <h4 id="6-tool-contract-and-authority">6. Tool contract and authority<a class="headerlink" href="#6-tool-contract-and-authority" title="Permanent link">&para;</a></h4>
 <h5 id="61-tool-schemas">6.1 Tool schemas<a class="headerlink" href="#61-tool-schemas" title="Permanent link">&para;</a></h5>
-<p>Tools use JSON Schema with <code>additionalProperties: false</code>, explicit enums, lengths, numeric bounds, and required fields. Structured Outputs enforce schema adherence for model responses, while function calling is used to bridge the model to application tools; this distinction follows <a href="https://developers.openai.com/api/docs/guides/structured-outputs">OpenAI structured output guidance</a>.</p>
+<p>Tools and agent results use JSON Schema with <code>additionalProperties: false</code>, explicit enums, lengths, numeric bounds, and required fields. Provider-native strict structured output is requested when supported and the same schema is enforced again locally. The Meta Llama adapter uses its chat-completions JSON-schema response format; the optional OpenAI adapter uses Responses <code>text.format</code>, following <a href="https://developers.openai.com/api/docs/guides/structured-outputs">OpenAI structured output guidance</a>.</p>
 <p>H1 tools are:</p>
 <table>
 <thead>
@@ -4017,14 +4017,28 @@
 </tr>
 </tbody>
 </table>
-<p>Native OpenAI multi-agent features, remote MCP, additional model providers, fine-tuning, persistent provider state, voice agents, and autonomous background actions are Provisional. Each requires a separate data-flow review, threat model, eval suite, cost envelope, rollback, and explicit product horizon. Autonomous organizations, AI executives, and workforce prediction remain Research and have no production authority.</p>
+<p>Provider-native multi-agent features, remote MCP, further provider adapters, fine-tuning, persistent provider state, voice agents, and autonomous background actions are Provisional. Each requires a separate data-flow review, threat model, eval suite, cost envelope, rollback, and explicit product horizon. Autonomous organizations, AI executives, and workforce prediction remain Research and have no production authority.</p>
 <h2 id="ch-08-simulation-and-prediction">CH-08 - Simulation and Prediction<a class="headerlink" href="#ch-08-simulation-and-prediction" title="Permanent link">&para;</a></h2>
 <p>Status: <strong>Committed</strong> | Owners: Simulation Platform, Applied AI, Product Analytics | Last reviewed: 2026-07-13</p>
 <h3 id="simulation-and-prediction">Simulation and Prediction<a class="headerlink" href="#simulation-and-prediction" title="Permanent link">&para;</a></h3>
+<h4 id="phase-3-decision-intelligence-foundation">Phase 3 decision-intelligence foundation<a class="headerlink" href="#phase-3-decision-intelligence-foundation" title="Permanent link">&para;</a></h4>
+<p>ADR-019 adds a general, governed foundation beside the frozen H1 launch scheduler. It deliberately keeps two questions separate:</p>
+<pre><code class="language-text">Simulation: immutable snapshot -&gt; confirmed change -&gt; bounded relationship propagation
+            -&gt; versioned deterministic rules -&gt; impact -&gt; baseline comparison
+
+Prediction: historical observations -&gt; bounded feature processing -&gt; registered non-LLM model
+            -&gt; forecast -&gt; confidence evidence -&gt; real outcome -&gt; human validation -&gt; learning event
+</code></pre>
+<p>The API routes are separated under <code>/v1/twin/simulation/*</code> and <code>/v1/twin/prediction/*</code>; neither service imports or calls the other. PostgreSQL records are tenant-qualified, hash-bound, idempotent, audited, and emitted through the transactional outbox. The Python intelligence worker performs pure deterministic calculation and fails closed. It has no connector read, graph write, LLM call, oracle fallback, or external action capability.</p>
+<p>General simulation snapshots seal one to 100 authorized graph nodes, explicit aggregate numeric variables, up to 500 visible relationships, graph version, as-of time, assumptions, and canonical digest. A scenario is a typed <code>hiring</code>, <code>pricing_change</code>, <code>supplier_failure</code>, <code>expansion</code>, or <code>budget_change</code> branch. Every branch references an immutable snapshot and optional confirmed parent branch, contains allowlisted <code>set</code>, <code>add</code>, or <code>multiply</code> changes, declares a propagation depth of at most six, and requires digest confirmation. Execution applies changes, propagates the same variable through declared direction/strength/confidence/importance, recalculates only the registered <code>revenue</code>, <code>operating_margin</code>, <code>budget_variance</code>, and <code>capacity_gap</code> identities when their inputs exist, and returns per-node baseline/scenario deltas. Propagated weights express modeled exposure, not causality.</p>
+<p>The predictive registry stores forecasting, optimization, anomaly-detection, computer-vision, and classification definitions with inputs, outputs, semantic version, accuracy, owner, trigger, lifecycle state, calibration bias, learning revision, and state hash. This phase executes only active forecasting/classification definitions using <code>linear_trend</code> or <code>bounded_linear_trend</code>; other types are governance-ready registrations, not pretend implementations. Revenue, expense, customer-churn, aggregate-workforce, and risk forecasts accept three to 10,000 historical observations and a one-to-36-step horizon. The exact observations are retained in an immutable tenant-scoped feature batch with user-input source binding and data hash; the public run references that batch without duplicating it. Results include processed feature summaries, forecast intervals, fit/sample/error confidence evidence, limitations, input hash, model version, and pending-outcome state.</p>
+<p>Learning is explicit and reviewable. A real outcome is recorded with source evidence, then an authorized user confirms or corrects it. The worker calculates MAE, MAPE where defined, RMSE, bias, and normalized accuracy. One transaction updates the prediction, rolling model accuracy, bounded calibration bias, learning revision, append-only learning event, audit chain, idempotency record, and outbox event. Historical outcomes, technical specifications, company rules, corrections, and expert knowledge can be submitted, but remain <code>pending_review</code> and cannot silently alter a model.</p>
+<p>Workforce use remains aggregate-only: <code>headcount</code>, <code>workforce_capacity</code>, and <code>open_positions</code>. Person identifiers, individual attrition, performance, productivity, suitability, and hiring scores are rejected. Hiring scenarios model an explicit aggregate headcount change; they do not recommend, rank, select, or evaluate people and do not authorize an employment action.</p>
+<p>The current foundation is horizontally stateless at the API layer and all reads are recovered from PostgreSQL rather than replica-local maps. Bounded input sizes prevent unbounded graph or historical processing. Production promotion still requires Temporal orchestration for long runs, cancellation/heartbeats, object storage for large artifacts, representative backtesting, calibration/drift/fairness gates, model-artifact signing, domain-owner approval, and load evidence. Those gates are limitations, not silently claimed capabilities.</p>
 <h4 id="1-purpose-claim-boundary-and-non-goals">1. Purpose, claim boundary, and non-goals<a class="headerlink" href="#1-purpose-claim-boundary-and-non-goals" title="Permanent link">&para;</a></h4>
 <p>H1 implements one defensible simulation: a seeded PERT/Monte Carlo forecast of launch timing over a task dependency DAG. It compares an immutable baseline with a user-confirmed scenario and explains the conditional distribution of completion dates.</p>
 <p>The result is not a promise, causal conclusion, or validated prediction of human behavior. It is conditional on task estimates, dependencies, calendars, and stated assumptions. The product MUST call it a forecast or simulation, not an objective prediction of the organization.</p>
-<p>Individual burnout, attrition, performance, productivity, hiring, compensation, emotion, health, misconduct, or suitability scoring is prohibited through H3. H1 has no person-level rate, performance, availability, or productivity parameter. Mergers, layoffs, hiring, customer churn, pricing, security-loss magnitude, cash flow, and market simulations remain Research until separately governed models and validation exist.</p>
+<p>Individual burnout, attrition, performance, productivity, hiring, compensation, emotion, health, misconduct, or suitability scoring is prohibited through H3. H1 has no person-level rate, performance, availability, or productivity parameter. Production-calibrated mergers, layoffs, customer churn, pricing, security-loss magnitude, cash-flow, and market claims remain Research until separately governed models and validation exist; ADR-019 provides only the bounded conditional/statistical foundation described above.</p>
 <table>
 <thead>
 <tr>
@@ -5838,7 +5852,7 @@ Q(q) = (1 - g) * x[j] + g * x[min(j + 1, n - 1)]
 </tbody>
 </table>
 <h2 id="ch-11-user-experience-and-visualization-specification">CH-11 - User Experience and Visualization Specification<a class="headerlink" href="#ch-11-user-experience-and-visualization-specification" title="Permanent link">&para;</a></h2>
-<p>Status: <strong>committed</strong> | Owners: product-design, frontend-engineering, accessibility-engineering | Last reviewed: 2026-07-13</p>
+<p>Status: <strong>committed</strong> | Owners: product-design, frontend-engineering, accessibility-engineering | Last reviewed: 2026-07-15</p>
 <h3 id="user-experience-and-visualization-specification">User Experience and Visualization Specification<a class="headerlink" href="#user-experience-and-visualization-specification" title="Permanent link">&para;</a></h3>
 <h4 id="1-experience-goals">1. Experience goals<a class="headerlink" href="#1-experience-goals" title="Permanent link">&para;</a></h4>
 <p>The interface helps an authorized user move through six distinct cognitive tasks without collapsing them into a conversational black box:</p>
@@ -5882,8 +5896,8 @@ Q(q) = (1 - g) * x[j] + g * x[min(j + 1, n - 1)]
 <tbody>
 <tr>
 <td>Understand</td>
-<td>Home, Ask, Explore, Timeline</td>
-<td>Visible</td>
+<td>Home, Ask, Explore, Timeline, AI Control Center</td>
+<td>Visible; model-backed actions show provider readiness and are disabled when unconfigured</td>
 </tr>
 <tr>
 <td>Plan</td>
@@ -6024,6 +6038,12 @@ Q(q) = (1 - g) * x[j] + g * x[min(j + 1, n - 1)]
 <td>Committed H1</td>
 <td>Data stewards</td>
 <td>Candidate records, match and non-match evidence, rule/model version, confidence, resulting canonical identity, split action, impact preview, and rebuild status.</td>
+</tr>
+<tr>
+<td>AI Control Center <code>/:tenant/ai</code></td>
+<td>Committed H1</td>
+<td>Authorized analysts, stewards, and reviewers</td>
+<td>Real Llama/provider readiness, vector status, seven specialized-agent launchers, private document import, permission-trimmed retrieval, activity and token/cost metadata, Explain This, evidence and limitations, and PENDING_REVIEW suggestion decisions. It has no offline simulated AI response and every review receipt states <code>mutation_performed: false</code>.</td>
 </tr>
 </tbody>
 </table>
@@ -7374,7 +7394,7 @@ X-EDT-Signature: v1=&lt;hex HMAC-SHA256(secret, timestamp + &quot;.&quot; + raw_
 </table>
 <p>H1 commits REST, SSE, authenticated provider webhook ingress, logical AsyncAPI events, the constrained MCP facade, TypeScript/Python SDK and CLI conformance contracts, and package validation. Distributable public SDK/CLI packages, H2 outbound platform webhooks and read-only GraphQL, H3 gRPC extraction, marketplace distribution, and additional native SDKs are Provisional and require usage, security, performance, and support evidence before activation.</p>
 <h2 id="ch-13-deployment-and-operations">CH-13 - Deployment and Operations<a class="headerlink" href="#ch-13-deployment-and-operations" title="Permanent link">&para;</a></h2>
-<p>Status: <strong>Committed</strong> | Owners: Platform Engineering, Site Reliability Engineering, Release Engineering | Last reviewed: 2026-07-13</p>
+<p>Status: <strong>Committed</strong> | Owners: Platform Engineering, Site Reliability Engineering, Release Engineering | Last reviewed: 2026-07-15</p>
 <h3 id="deployment-and-operations">Deployment and Operations<a class="headerlink" href="#deployment-and-operations" title="Permanent link">&para;</a></h3>
 <h4 id="1-deployment-principles">1. Deployment principles<a class="headerlink" href="#1-deployment-principles" title="Permanent link">&para;</a></h4>
 <p>Cloud neutrality means the application is packaged as OCI images, production workloads run on Kubernetes through Helm, infrastructure is described with OpenTofu-compatible HCL, authoritative state uses PostgreSQL-compatible SQL and S3-compatible objects, identity uses OIDC/SAML/SCIM, and telemetry uses OpenTelemetry. It does not mean simultaneous active-active deployment to multiple clouds, maintaining duplicate infrastructure stacks, or guaranteeing identical behavior from every provider service.</p>
@@ -7471,7 +7491,7 @@ X-EDT-Signature: v1=&lt;hex HMAC-SHA256(secret, timestamp + &quot;.&quot; + raw_
 <li>Images run the same entrypoints, schema versions, non-root user, and read-only filesystem used in Kubernetes.</li>
 <li>Named volumes make restarts realistic. The reset command refuses non-synthetic environments and prints the resolved absolute volume/project scope before deletion.</li>
 <li>A seed value creates the same two tenants, identities, source payloads, oracle, graph, scenarios, and expected action target.</li>
-<li>Local deterministic tests can run without public provider/model credentials by using signed provider fixtures and recorded model-safe stubs. Stubs cannot satisfy the model-integration, AI-evaluation, or cited-answer release gate; the H1 presentation/release evidence includes an approved live OpenAI endpoint run. Live mode is explicit and is not used to establish deterministic fixture assertions.</li>
+<li>Local deterministic tests can run without public provider/model credentials by using test-only provider doubles. Doubles cannot satisfy the model-integration, AI-evaluation, or cited-answer release gate; the H1 presentation/release evidence includes an approved live Llama endpoint run with the exact provider/model configuration and redacted usage receipt. Live mode is explicit and is not used to establish deterministic fixture assertions.</li>
 <li>Compose is not a production HA profile and does not support real customer data.</li>
 </ol>
 <p>The required developer experience is a cross-platform Node launcher that implements bootstrap, start, stop, seed, test, verify, export-logs, and reset. It wraps Compose and workspace commands so developers do not memorize container sequencing.</p>
@@ -7672,7 +7692,7 @@ X-EDT-Signature: v1=&lt;hex HMAC-SHA256(secret, timestamp + &quot;.&quot; + raw_
 <p>Support bundles are customer-triggered, previewable, redacted, encrypted to support, expiring, and audited. They contain configuration/health summaries and pseudonymous diagnostics, never source content, secrets, raw prompts, model responses, or unrestricted database dumps.</p>
 <h5 id="103-air-gapped">10.3 Air-gapped<a class="headerlink" href="#103-air-gapped" title="Permanent link">&para;</a></h5>
 <p>An offline release bundle contains signed images, charts, OpenTofu/manifest options, SBOMs, provenance, licenses, vulnerability database snapshot/date, documentation, migration tool, preflight, and verification public keys. Import verifies every digest/signature without network access.</p>
-<p>GitHub, Jira and OpenAI capabilities are unavailable unless the customer provides approved reachable equivalents with the same connector/model contract and evaluation. The UI must state capability unavailable; it cannot silently simulate live synchronization or model reasoning. Security updates use a documented out-of-band bundle and emergency cadence.</p>
+<p>GitHub, Jira, Llama, OpenAI, and other online-provider capabilities are unavailable unless the customer provides approved reachable equivalents with the same connector/model contract and evaluation. The UI must state capability unavailable; it cannot silently simulate live synchronization, embeddings, or model reasoning. Security updates use a documented out-of-band bundle and emergency cadence.</p>
 <h5 id="104-regional-and-multi-cloud">10.4 Regional and multi-cloud<a class="headerlink" href="#104-regional-and-multi-cloud" title="Permanent link">&para;</a></h5>
 <p>H4 can place tenants in regional cells with a home-region catalog. Each tenant has one authoritative writer. Recovery uses controlled failover to an approved region; active-active writes are not supported. Multi-cloud portability is tested through a second provider deployment rehearsal, not simultaneous production.</p>
 <p>Before support, the profile must freeze conflict semantics, global identity dependency, key ownership, audit ordering, connector ownership, Temporal failover, data transfer, model residency, network partitions, failback, cost and customer-visible RPO/RTO.</p>
@@ -8889,8 +8909,12 @@ X-EDT-Signature: v1=&lt;hex HMAC-SHA256(secret, timestamp + &quot;.&quot; + raw_
 <li>Two consecutive cross-domain reviews with no new Critical/High finding are required before specification convergence; this limits review passes, not ongoing operational assurance.</li>
 </ul>
 <h2 id="ch-16-architecture-audit-and-convergence-record">CH-16 - Architecture Audit and Convergence Record<a class="headerlink" href="#ch-16-architecture-audit-and-convergence-record" title="Permanent link">&para;</a></h2>
-<p>Status: <strong>committed</strong> | Owners: architecture-review-board, security-architecture, product-governance | Last reviewed: 2026-07-13</p>
+<p>Status: <strong>committed</strong> | Owners: architecture-review-board, security-architecture, product-governance | Last reviewed: 2026-07-15</p>
 <h3 id="architecture-audit-and-convergence-record">Architecture Audit and Convergence Record<a class="headerlink" href="#architecture-audit-and-convergence-record" title="Permanent link">&para;</a></h3>
+<h4 id="phase-3-implementation-audit-2026-07-21">Phase 3 implementation audit (2026-07-21)<a class="headerlink" href="#phase-3-implementation-audit-2026-07-21" title="Permanent link">&para;</a></h4>
+<p>The pre-implementation audit found that the H1 simulation mathematics were reproducible and appropriately isolated in the Python worker, but its NestJS compatibility facade was demo-only: Aster-specific snapshot compilation, process-local lookup maps, fire-and-forget persistence, weakly bounded generic intervention input, no general branching, and an enabled-by-default oracle fallback. The worker supported only the frozen dependency-DAG workload. No numeric business prediction pipeline, prediction outcome lifecycle, calibration/accuracy learning loop, or non-LLM model registry existed. AI learning outcomes applied to reviewed suggestions rather than numeric predictions.</p>
+<p>The main security risks were missing explicit capability checks on legacy simulation creation, insufficient validation of caller-provided times and interventions, false-success risk from asynchronous writes and fabricated fallback output, and possible user confusion between conditional simulation and prediction. The main scalability risks were replica-local state, synchronous inline worker calls without durable orchestration, no general run pagination/cancellation, and no artifact offload for large output. Existing policy also correctly prohibited individual workforce prediction and treated pricing, churn, and hiring models as unvalidated research.</p>
+<p>ADR-019 addresses the implementable foundation without weakening those policy boundaries: new services use server-derived tenancy, explicit capabilities, exact-key and size validation, immutable hashes, confirmation, PostgreSQL reads, transactional compare-and-set writes, idempotency, audit, outbox, bounded worker functions, and fail-closed errors. Simulation and prediction are separate services and worker functions. Aggregate workforce enforcement is duplicated at both API and worker boundaries. Long-running workflow orchestration, artifact storage, operational model adapters, and production validation remain explicit promotion work rather than being represented as complete.</p>
 <h4 id="1-audit-opinion">1. Audit opinion<a class="headerlink" href="#1-audit-opinion" title="Permanent link">&para;</a></h4>
 <p>The <code>1.0.0-rc.1</code> architecture is suitable as the normative implementation blueprint for the bounded H1 reference workload and as a gated reference architecture for H2. It does not become final <code>1.0.0</code> until every convergence criterion in this chapter is evidenced. H3 and H4 remain Provisional where telemetry, benchmarks, customer constraints, or deployment evidence are required. H5 remains Research.</p>
 <p>No Critical or High architecture finding remains open in the design. Three Medium risks are explicitly accepted with owners, compensating controls, expiry dates, and revisit triggers. Other registered risks are mitigated but remain subject to implementation evidence. This opinion does not assert that the software has been built, that a control has operated effectively, that a compliance certification exists, or that synthetic simulation has external predictive validity.</p>
@@ -9055,7 +9079,7 @@ X-EDT-Signature: v1=&lt;hex HMAC-SHA256(secret, timestamp + &quot;.&quot; + raw_
 <tr>
 <td><code>FND-013</code></td>
 <td>High</td>
-<td>Cloud neutrality, active-active multi-cloud, air gap, edge, and online OpenAI dependency were treated as simultaneously available.</td>
+<td>Cloud neutrality, active-active multi-cloud, air gap, edge, and online model-provider dependencies were treated as simultaneously available.</td>
 <td>Define portable contracts and one reference profile; graduate dedicated, customer-managed, regional, air-gapped, and edge profiles independently with explicit capability differences.</td>
 <td><code>REQ-ARCH-004</code>, <code>REQ-ARCH-006</code>, <code>ADR-015</code>, <code>RSK-008</code></td>
 </tr>
@@ -9285,7 +9309,7 @@ X-EDT-Signature: v1=&lt;hex HMAC-SHA256(secret, timestamp + &quot;.&quot; + raw_
 <li>H1 physical-asset anomalies and forecasts are deterministic demonstrations over synthetic history. They are not trained or validated predictive-maintenance models and cannot support maintenance, safety, or equipment-operation decisions.</li>
 <li>PERT/Monte Carlo output is conditional on fixture distributions and dependency structure. It is not a causal estimate and cannot validate a real launch forecast.</li>
 <li>Shared tenancy is the reference deployment. Dedicated, customer-managed, regional, air-gapped, and edge profiles remain separately gated.</li>
-<li>The online OpenAI runtime is an explicit dependency for H1. Air-gapped inference is unavailable until a local model profile passes the same workload-specific quality and safety gates.</li>
+<li>The online Llama runtime is an explicit dependency for live H1 AI acceptance evidence; OpenAI is optional. Air-gapped inference is unavailable until a local model and embedding profile pass the same workload-specific quality and safety gates.</li>
 <li>PostgreSQL, Neo4j, pgvector, and Valkey are sufficient only inside measured boundaries. Scale transitions follow <code>CH-15</code>; they are not pre-approved technology migrations.</li>
 <li>Two-person approval reduces accidental or unilateral action but does not prevent collusion. Organizational role assignment, separation-of-duty review, and audit monitoring remain required.</li>
 <li>Source systems may not support transactional rollback. Compensation is a new conditional action with conflict handling, not erasure of history.</li>
@@ -9641,14 +9665,15 @@ X-EDT-Signature: v1=&lt;hex HMAC-SHA256(secret, timestamp + &quot;.&quot; + raw_
 <h4 id="decision_10">Decision<a class="headerlink" href="#decision_10" title="Permanent link">&para;</a></h4>
 <p>Each installation uses tenant-scoped credentials, least scopes, an egress allowlist, resource quotas, signed webhook verification, durable cursor checkpoints, periodic reconciliation, normalized immutable observations, tombstones, and error-classified retries. Parsers treat every byte as hostile and isolate expensive or risky formats.</p>
 <p>GitHub H1 is read-only metadata for allowlisted sandbox repositories. Jira H1 reads allowlisted sandbox projects and exposes one exact dual-approved remediation mutation. Source revisions win within their object lineage; canonical claims preserve conflicting evidence rather than silently overwrite it.</p>
-<h2 id="adr-012-openai-first-capability-gateway">ADR-012 - OpenAI-First Capability Gateway<a class="headerlink" href="#adr-012-openai-first-capability-gateway" title="Permanent link">&para;</a></h2>
+<h2 id="adr-012-historical-openai-first-capability-gateway">ADR-012 - Historical OpenAI-First Capability Gateway<a class="headerlink" href="#adr-012-historical-openai-first-capability-gateway" title="Permanent link">&para;</a></h2>
 <p>Status: <strong>accepted</strong> | Owners: ai-platform</p>
-<h3 id="adr-012-openai-first-capability-gateway_1">ADR-012: OpenAI-First Capability Gateway<a class="headerlink" href="#adr-012-openai-first-capability-gateway_1" title="Permanent link">&para;</a></h3>
+<h3 id="adr-012-historical-openai-first-capability-gateway_1">ADR-012: Historical OpenAI-First Capability Gateway<a class="headerlink" href="#adr-012-historical-openai-first-capability-gateway_1" title="Permanent link">&para;</a></h3>
+<p>This accepted decision is superseded in full by <code>ADR-018</code>. It remains in the ledger to preserve the decision history; wherever the two conflict, <code>ADR-018</code> has precedence.</p>
 <h4 id="decision_11">Decision<a class="headerlink" href="#decision_11" title="Permanent link">&para;</a></h4>
-<p>Use the OpenAI Responses API and Python Agents SDK behind an internal gateway that owns capability routing, tenant policy, budgets, redaction, model and prompt versions, retention configuration, and evaluation status. Use the GPT-5.6 family by evaluated workload: sol for highest-complexity orchestration and grading, terra for balanced grounded synthesis, and luna for high-volume extraction.</p>
-<p>Production pins evaluated snapshots. A fallback is eligible only after the same use-case safety and quality gates; otherwise the run fails closed or queues for review. OpenAI-native structured outputs and tools remain available rather than being flattened behind a lowest-common-denominator interface.</p>
+<p>The original decision selected the OpenAI Responses API and Python Agents SDK behind an internal gateway that owned capability routing, tenant policy, budgets, redaction, model and prompt versions, retention configuration, and evaluation status.</p>
+<p>The enduring controls—evaluated pinned configurations, strict structured output, no unapproved fallback, and fail-closed behavior—are retained by <code>ADR-018</code>. The provider-first constraint is not.</p>
 <h4 id="consequences_7">Consequences<a class="headerlink" href="#consequences_7" title="Permanent link">&para;</a></h4>
-<p>OpenAI is an explicit H1 external dependency. Air-gapped operation requires a separately evaluated local-model adapter in H4.</p>
+<p>OpenAI is no longer the mandatory H1 provider. It is an optional adapter that must pass the same workload-specific gates as the Llama route.</p>
 <h2 id="adr-013-bounded-agent-authority-and-exact-payload-approval">ADR-013 - Bounded Agent Authority and Exact-Payload Approval<a class="headerlink" href="#adr-013-bounded-agent-authority-and-exact-payload-approval" title="Permanent link">&para;</a></h2>
 <p>Status: <strong>accepted</strong> | Owners: ai-security, workflow-security</p>
 <h3 id="adr-013-bounded-agent-authority-and-exact-payload-approval_1">ADR-013: Bounded Agent Authority and Exact-Payload Approval<a class="headerlink" href="#adr-013-bounded-agent-authority-and-exact-payload-approval_1" title="Permanent link">&para;</a></h3>
@@ -9668,7 +9693,7 @@ X-EDT-Signature: v1=&lt;hex HMAC-SHA256(secret, timestamp + &quot;.&quot; + raw_
 <h3 id="adr-015-infrastructure-portability-cloud-neutrality_1">ADR-015: Infrastructure-Portability Cloud Neutrality<a class="headerlink" href="#adr-015-infrastructure-portability-cloud-neutrality_1" title="Permanent link">&para;</a></h3>
 <h4 id="decision_14">Decision<a class="headerlink" href="#decision_14" title="Permanent link">&para;</a></h4>
 <p>Cloud neutrality means portable contracts and migration paths, not active-active multi-cloud. H1 runs through Docker Compose. H2 promotes OCI workloads to a conformant Kubernetes distribution with Helm and OpenTofu modules. Domain code uses PostgreSQL, S3-compatible object, OIDC/SAML/SCIM, Temporal, and OpenTelemetry interfaces. Provider-specific code is confined to infrastructure adapters.</p>
-<p>Managed implementations are permitted when export, restore, identity, encryption, observability, and failure contracts remain testable. Dedicated, on-premises, air-gapped, edge, and multi-region profiles are H4 gates. Air-gapped mode excludes the OpenAI path until a local adapter passes evaluations.</p>
+<p>Managed implementations are permitted when export, restore, identity, encryption, observability, and failure contracts remain testable. Dedicated, on-premises, air-gapped, edge, and multi-region profiles are H4 gates. Air-gapped mode excludes online Llama, OpenAI, and embedding paths until a reachable local adapter passes the same evaluations.</p>
 <h2 id="adr-016-evaluation-driven-verification-and-finite-release-gates">ADR-016 - Evaluation-Driven Verification and Finite Release Gates<a class="headerlink" href="#adr-016-evaluation-driven-verification-and-finite-release-gates" title="Permanent link">&para;</a></h2>
 <p>Status: <strong>accepted</strong> | Owners: quality-engineering, architecture-review-board</p>
 <h3 id="adr-016-evaluation-driven-verification-and-finite-release-gates_1">ADR-016: Evaluation-Driven Verification and Finite Release Gates<a class="headerlink" href="#adr-016-evaluation-driven-verification-and-finite-release-gates_1" title="Permanent link">&para;</a></h3>
@@ -9683,6 +9708,37 @@ X-EDT-Signature: v1=&lt;hex HMAC-SHA256(secret, timestamp + &quot;.&quot; + raw_
 <h4 id="decision_16">Decision<a class="headerlink" href="#decision_16" title="Permanent link">&para;</a></h4>
 <p>Build the claim/evidence model, ontology governance, reversible entity resolution, permission-aware projections, organizational reasoning, agent policy gateway, simulation registry, and graph/scenario UX. Use standards-based or managed implementations for identity federation, transactional and graph databases, object storage, workflow runtime, observability transport, email, malware scanning, billing, and feature flags.</p>
 <p>Commercial dependencies MUST support tenant isolation, export, deletion, audit, regionality, incident evidence, contractual security, and a tested exit path. A managed service may not become an undocumented source of truth.</p>
+<h2 id="adr-018-provider-neutral-ai-gateway-with-llama-primary">ADR-018 - Provider-Neutral AI Gateway with Llama Primary<a class="headerlink" href="#adr-018-provider-neutral-ai-gateway-with-llama-primary" title="Permanent link">&para;</a></h2>
+<p>Status: <strong>accepted</strong> | Owners: ai-platform, security-architecture</p>
+<h3 id="adr-018-provider-neutral-ai-gateway-with-llama-primary_1">ADR-018: Provider-Neutral AI Gateway with Llama Primary<a class="headerlink" href="#adr-018-provider-neutral-ai-gateway-with-llama-primary_1" title="Permanent link">&para;</a></h3>
+<h4 id="decision_17">Decision<a class="headerlink" href="#decision_17" title="Permanent link">&para;</a></h4>
+<p>Supersede <code>ADR-012</code> and route every model-backed capability through one provider-neutral Python AI Gateway. Meta Llama API is the default H1 provider through an <code>AIProvider</code> adapter. OpenAI Responses is an optional independently configured and evaluated adapter. Application controllers, the browser, connectors, graph services, simulation services, and action services cannot call either provider directly or select an arbitrary provider/model.</p>
+<p>The gateway owns server-derived tenant/actor context, permission-trimmed retrieval, agent/profile and model routing, immutable prompt and schema versions, strict structured outputs, local validation, rate/time/token/cost budgets, controlled memory, suggestion review state, redacted audit, retry normalization, and provider readiness. Provider-native features remain available inside their adapter; the common contract does not weaken schema, refusal, safety, usage, or data-control behavior.</p>
+<p>Llama credentials, endpoint, and exact account-available model identifiers are runtime secrets/configuration. No model response, semantic embedding, or provider-success state may be simulated outside test-only doubles. When no approved route is configured or healthy, the affected AI capability reports unavailable and fails closed while deterministic twin capabilities remain operational.</p>
+<p>Seven H1 capability profiles are model-backed: knowledge ingestion, entity resolution, event understanding, causal analysis, simulation planning, prediction explanation, and technical knowledge. They produce evidence-bearing <code>PENDING_REVIEW</code> suggestions. They cannot authenticate, authorize, mutate the canonical graph, establish enterprise memory, calculate simulation/prediction values, approve themselves, or execute actions. Only reviewed artifacts may enter enterprise/learning memory, and graph mutations still require a separate deterministic domain command.</p>
+<h4 id="consequences_9">Consequences<a class="headerlink" href="#consequences_9" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Llama becomes an explicit H1 external dependency for live AI acceptance evidence; a real key, endpoint, and exact model are deployment inputs.</li>
+<li>Provider portability is a tested adapter boundary, not a promise that models are behaviorally interchangeable.</li>
+<li>OpenAI can be promoted per workload only with the same isolation, injection, schema, grounding, quality, latency, cost, and data-processing gates.</li>
+<li>PostgreSQL stores durable AI runs, provenance, vectors, memory, suggestions, reviews, and usage; reduced local stores cannot satisfy the enterprise-memory release gate.</li>
+<li>Air-gapped inference remains unavailable until a reachable local adapter and embedding route pass the same workload gates.</li>
+</ul>
+<h2 id="adr-019-separated-simulation-and-predictive-intelligence">ADR-019 - Separated Simulation and Predictive Intelligence<a class="headerlink" href="#adr-019-separated-simulation-and-predictive-intelligence" title="Permanent link">&para;</a></h2>
+<p>Status: <strong>accepted</strong> | Owners: simulation-science, applied-ai, data-platform</p>
+<h3 id="adr-019-separated-simulation-and-predictive-intelligence_1">ADR-019: Separated Simulation and Predictive Intelligence<a class="headerlink" href="#adr-019-separated-simulation-and-predictive-intelligence_1" title="Permanent link">&para;</a></h3>
+<h4 id="decision_18">Decision<a class="headerlink" href="#decision_18" title="Permanent link">&para;</a></h4>
+<p>The general decision-intelligence foundation has two non-interchangeable execution paths. Simulation answers a conditional question by applying confirmed typed changes to an immutable graph-backed snapshot, propagating declared relationship weights within a bound, running versioned deterministic derived-metric rules, and comparing the branch with its baseline. Prediction answers a likelihood question by processing historical observations through a registered non-LLM statistical model, emitting a forecast, confidence evidence, limitations, and a pending-validation state.</p>
+<p>The NestJS API owns server-derived tenancy, authorization, model/scenario lifecycle, confirmation, idempotency, PostgreSQL records, audit, and outbox publication. The Python intelligence worker owns bounded pure mathematics. The new simulation service cannot import or call the predictive service, and the predictive service cannot use simulation output as historical truth. Neither path invokes an LLM or substitutes an oracle when the worker fails.</p>
+<p>The model registry accepts forecasting, optimization, anomaly-detection, computer-vision, and classification definitions with explicit inputs, outputs, version, accuracy, owner, trigger, lifecycle, and state hash. Only allowlisted deterministic forecasting baselines are executable in this phase; other model kinds are registered for governed future adapters.</p>
+<p>Validated real outcomes update rolling accuracy and a bounded calibration bias through an append-only learning event. Submitted rules, specifications, corrections, historical outcomes, and expert knowledge remain pending review and cannot silently retrain or activate a model.</p>
+<p>Hiring scenarios and workforce forecasts are aggregate-only. Person identifiers, individual attrition, performance, productivity, suitability, and hiring scores are rejected. This decision does not authorize employment decisions or remove the prohibitions in CH-09.</p>
+<h4 id="consequences_10">Consequences<a class="headerlink" href="#consequences_10" title="Permanent link">&para;</a></h4>
+<ul>
+<li>The frozen H1 PERT/Monte Carlo scheduler and its compatibility routes remain unchanged.</li>
+<li>New work uses <code>/v1/twin/simulation/*</code> or <code>/v1/twin/prediction/*</code> and the <code>edt.decision-intelligence/1.0.0</code> contract.</li>
+<li>Production promotion still requires representative backtesting, drift and fairness review, calibration evidence, domain-owner approval, capacity testing, and durable workflow orchestration.</li>
+</ul>
 <h1 id="part-iv-normative-catalogs">Part IV - Normative Catalogs<a class="headerlink" href="#part-iv-normative-catalogs" title="Permanent link">&para;</a></h1>
 <h2 id="source-ledger">Source Ledger<a class="headerlink" href="#source-ledger" title="Permanent link">&para;</a></h2>
 <p>Source: <code>docs/enterprise-digital-twin/source-ledger.yaml</code></p>
@@ -9843,6 +9899,24 @@ X-EDT-Signature: v1=&lt;hex HMAC-SHA256(secret, timestamp + &quot;.&quot; + raw_
 <td>informative-provider-contract</td>
 <td>https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-rest-api-3-issue-issueidorkey-put</td>
 <td>2026-07-13</td>
+</tr>
+<tr>
+<td>SRC-017</td>
+<td>Meta Llama API announcement</td>
+<td>primary-technical-source</td>
+<td></td>
+<td>informative-current-product-fact</td>
+<td>https://ai.meta.com/blog/llamacon-llama-news/</td>
+<td>2026-07-15</td>
+</tr>
+<tr>
+<td>SRC-018</td>
+<td>Official Meta Llama API Python SDK</td>
+<td>primary-technical-source</td>
+<td></td>
+<td>informative-provider-contract</td>
+<td>https://github.com/meta-llama/llama-api-python</td>
+<td>2026-07-15</td>
 </tr>
 </tbody>
 </table>
@@ -10176,8 +10250,8 @@ X-EDT-Signature: v1=&lt;hex HMAC-SHA256(secret, timestamp + &quot;.&quot; + raw_
 </tr>
 <tr>
 <td>REQ-AI-001</td>
-<td>OpenAI-first gateway</td>
-<td>AI workloads MUST use the Responses API and Agents SDK behind capability policy budget and evaluation interfaces.</td>
+<td>Central provider-neutral AI gateway</td>
+<td>AI workloads MUST use the centralized provider-neutral gateway with Llama primary and capability policy budget schema and evaluation controls.</td>
 <td>H1</td>
 <td>committed</td>
 </tr>
@@ -10683,7 +10757,7 @@ X-EDT-Signature: v1=&lt;hex HMAC-SHA256(secret, timestamp + &quot;.&quot; + raw_
 <tr>
 <td>REQ-EVT-</td>
 <td>chapters/18-event-intelligence-causal-impact.md<br>chapters/05-data-knowledge-graph.md<br>chapters/07-ai-agents-reasoning.md<br>chapters/08-simulation-prediction.md<br>chapters/09-security-privacy-compliance.md<br>chapters/11-ux-visualizations.md<br>chapters/12-apis-developer-platform.md</td>
-<td>ADR-004<br>ADR-006<br>ADR-009<br>ADR-010<br>ADR-011<br>ADR-012</td>
+<td>ADR-004<br>ADR-006<br>ADR-009<br>ADR-010<br>ADR-011<br>ADR-012<br>ADR-018</td>
 <td>CMP-WEB<br>CMP-API<br>CMP-EVENT-INTELLIGENCE<br>CMP-AI<br>CMP-POLICY<br>CMP-WORKFLOW<br>CMP-POSTGRES<br>CMP-GRAPH<br>CMP-OBS</td>
 <td>contracts/openapi/enterprise-digital-twin.openapi.yaml<br>contracts/asyncapi/events.asyncapi.yaml<br>contracts/schemas/event-intelligence.schema.json</td>
 <td>CTRL-AI-001<br>CTRL-AI-002<br>CTRL-AI-004<br>CTRL-IAM-003<br>CTRL-TEN-001<br>CTRL-AUD-001<br>CTRL-PRV-002<br>CTRL-EVT-001</td>
@@ -10712,25 +10786,25 @@ X-EDT-Signature: v1=&lt;hex HMAC-SHA256(secret, timestamp + &quot;.&quot; + raw_
 <td>chapters/05-data-knowledge-graph.md<br>catalogs/ontology.yaml</td>
 <td>ADR-008<br>ADR-009<br>ADR-010</td>
 <td>CMP-POSTGRES<br>CMP-OBJECT<br>CMP-GRAPH<br>CMP-PROJECTION</td>
-<td>contracts/schemas/canonical.schema.json<br>contracts/schemas/ontology-package.schema.json</td>
+<td>contracts/schemas/canonical.schema.json<br>contracts/schemas/ontology-package.schema.json<br>contracts/schemas/data-foundation.schema.json<br>contracts/openapi/enterprise-digital-twin.openapi.yaml<br>contracts/asyncapi/events.asyncapi.yaml</td>
 <td>CTRL-DAT-001<br>CTRL-DAT-002<br>CTRL-DAT-003</td>
-<td>AC-DATA-001<br>AC-DATA-002<br>AC-DATA-003<br>AC-PRV-001</td>
+<td>AC-DATA-001<br>AC-DATA-002<br>AC-DATA-003<br>AC-DATA-004<br>AC-PRV-001</td>
 </tr>
 <tr>
 <td>REQ-CON-</td>
 <td>chapters/06-ingestion-connectors-sync.md<br>catalogs/connectors.yaml</td>
 <td>ADR-011</td>
 <td>CMP-CONNECTOR<br>CMP-WORKFLOW<br>CMP-PROJECTION</td>
-<td>contracts/schemas/connector-manifest.schema.json<br>contracts/connectors/github/manifest.json<br>contracts/connectors/github/schemas/raw-envelope.schema.json<br>contracts/connectors/github/schemas/raw-payload.schema.json<br>contracts/connectors/github/schemas/normalized-observation.schema.json<br>contracts/connectors/github/schemas/cursor.schema.json<br>contracts/connectors/github/schemas/ontology-mapping.schema.json<br>contracts/connectors/jira-cloud/manifest.json<br>contracts/connectors/jira-cloud/schemas/raw-envelope.schema.json<br>contracts/connectors/jira-cloud/schemas/raw-payload.schema.json<br>contracts/connectors/jira-cloud/schemas/normalized-observation.schema.json<br>contracts/connectors/jira-cloud/schemas/cursor.schema.json<br>contracts/connectors/jira-cloud/schemas/ontology-mapping.schema.json<br>contracts/asyncapi/events.asyncapi.yaml</td>
+<td>contracts/schemas/connector-manifest.schema.json<br>contracts/schemas/data-foundation.schema.json<br>contracts/openapi/enterprise-digital-twin.openapi.yaml<br>contracts/connectors/github/manifest.json<br>contracts/connectors/github/schemas/raw-envelope.schema.json<br>contracts/connectors/github/schemas/raw-payload.schema.json<br>contracts/connectors/github/schemas/normalized-observation.schema.json<br>contracts/connectors/github/schemas/cursor.schema.json<br>contracts/connectors/github/schemas/ontology-mapping.schema.json<br>contracts/connectors/jira-cloud/manifest.json<br>contracts/connectors/jira-cloud/schemas/raw-envelope.schema.json<br>contracts/connectors/jira-cloud/schemas/raw-payload.schema.json<br>contracts/connectors/jira-cloud/schemas/normalized-observation.schema.json<br>contracts/connectors/jira-cloud/schemas/cursor.schema.json<br>contracts/connectors/jira-cloud/schemas/ontology-mapping.schema.json<br>contracts/asyncapi/events.asyncapi.yaml</td>
 <td>CTRL-CON-001<br>CTRL-CON-002<br>CTRL-CON-003<br>CTRL-CRY-002</td>
-<td>AC-CON-001<br>AC-CON-002</td>
+<td>AC-CON-001<br>AC-CON-002<br>AC-CON-003</td>
 </tr>
 <tr>
 <td>REQ-AI-</td>
 <td>chapters/07-ai-agents-reasoning.md<br>catalogs/agents.yaml</td>
-<td>ADR-012<br>ADR-013</td>
+<td>ADR-012<br>ADR-018<br>ADR-013</td>
 <td>CMP-AI<br>CMP-MODEL-GATEWAY<br>CMP-POLICY<br>CMP-WORKFLOW</td>
-<td>contracts/schemas/canonical.schema.json<br>contracts/mcp-manifest.json<br>contracts/openapi/enterprise-digital-twin.openapi.yaml</td>
+<td>contracts/schemas/canonical.schema.json<br>contracts/schemas/ai-intelligence.schema.json<br>contracts/mcp-manifest.json<br>contracts/openapi/enterprise-digital-twin.openapi.yaml</td>
 <td>CTRL-AI-001<br>CTRL-AI-002<br>CTRL-AI-003<br>CTRL-AI-004<br>CTRL-AI-005</td>
 <td>AC-AI-001<br>AC-AI-002<br>AC-AI-003<br>AC-AI-004</td>
 </tr>
@@ -10888,7 +10962,7 @@ X-EDT-Signature: v1=&lt;hex HMAC-SHA256(secret, timestamp + &quot;.&quot; + raw_
 <tr>
 <td>QAR-AI-</td>
 <td>chapters/07-ai-agents-reasoning.md<br>chapters/14-testing-evaluation-dx.md</td>
-<td>ADR-012<br>ADR-013</td>
+<td>ADR-012<br>ADR-018<br>ADR-013</td>
 <td>CMP-AI<br>CMP-MODEL-GATEWAY<br>CMP-POLICY</td>
 <td>contracts/mcp-manifest.json<br>contracts/schemas/canonical.schema.json</td>
 <td>CTRL-AI-001<br>CTRL-AI-002<br>CTRL-AI-003<br>CTRL-AI-004</td>
@@ -10933,7 +11007,7 @@ X-EDT-Signature: v1=&lt;hex HMAC-SHA256(secret, timestamp + &quot;.&quot; + raw_
 <tr>
 <td>QAR-COST-</td>
 <td>chapters/07-ai-agents-reasoning.md<br>chapters/10-scalability-reliability-observability.md</td>
-<td>ADR-012<br>ADR-013</td>
+<td>ADR-012<br>ADR-018<br>ADR-013</td>
 <td>CMP-AI<br>CMP-MODEL-GATEWAY<br>CMP-WORKFLOW</td>
 <td>contracts/schemas/canonical.schema.json<br>contracts/mcp-manifest.json</td>
 <td>CTRL-AI-003<br>CTRL-AI-004</td>
@@ -11065,7 +11139,7 @@ X-EDT-Signature: v1=&lt;hex HMAC-SHA256(secret, timestamp + &quot;.&quot; + raw_
 <td>ai-simulation-worker</td>
 <td>ai-platform</td>
 <td>Approved model snapshots, budgets, structured schemas, fallbacks, and evaluation gates.</td>
-<td>OpenAI-Responses-API<br>OpenAI-Agents-SDK</td>
+<td>AIProvider<br>Llama-Chat-Completions-API<br>OpenAI-Responses-API</td>
 </tr>
 <tr>
 <td>CMP-OBS</td>
@@ -13004,6 +13078,69 @@ merge: Duplicate edges combine evidence but never broaden ACLs; conflicting sema
 <td>OptimizationProposal</td>
 <td>Proposal and evaluation record; never direct high-impact execution.</td>
 </tr>
+<tr>
+<td>AGENT-AI-KNOWLEDGE-INGESTION</td>
+<td>AI knowledge ingestion specialist</td>
+<td>H1</td>
+<td>Convert supported authorized document extracts into evidence-bearing entity relationship and constraint suggestions.</td>
+<td>retrieve_authorized_evidence<br>validate_knowledge_schema<br>create_review_suggestion</td>
+<td>KnowledgeIngestionOutput</td>
+<td>Strict PENDING_REVIEW suggestion or fail-closed validation/provider error.</td>
+</tr>
+<tr>
+<td>AGENT-AI-ENTITY-RESOLUTION</td>
+<td>AI entity resolution specialist</td>
+<td>H1</td>
+<td>Compare tenant-local authorized entity candidates and explain a duplicate or conflict proposal without merging.</td>
+<td>retrieve_authorized_entities<br>validate_resolution_schema<br>create_review_suggestion</td>
+<td>EntityResolutionOutput</td>
+<td>PENDING_REVIEW match/conflict proposal or abstention; automatic_merge_allowed is always false.</td>
+</tr>
+<tr>
+<td>AGENT-AI-EVENT-UNDERSTANDING</td>
+<td>AI event understanding specialist</td>
+<td>H1</td>
+<td>Convert natural-language reports into typed event candidates and possible impacts for deterministic event-engine review.</td>
+<td>retrieve_authorized_context<br>validate_event_candidate<br>create_review_suggestion</td>
+<td>EventUnderstandingOutput</td>
+<td>PENDING_REVIEW event candidate; actual_effects_calculated is always false.</td>
+</tr>
+<tr>
+<td>AGENT-AI-CAUSAL-ANALYSIS</td>
+<td>AI causal explanation specialist</td>
+<td>H1</td>
+<td>Explain supplied graph paths events and deterministic results while distinguishing evidence assumptions and unknowns.</td>
+<td>retrieve_authorized_graph_context<br>validate_causal_chain<br>create_review_suggestion</td>
+<td>CausalAnalysisOutput</td>
+<td>Evidence-linked PENDING_REVIEW explanation; probabilities_calculated is always false.</td>
+</tr>
+<tr>
+<td>AGENT-AI-SIMULATION-PLANNING</td>
+<td>AI simulation planning specialist</td>
+<td>H1</td>
+<td>Propose bounded typed scenario inputs for confirmation and deterministic simulation.</td>
+<td>retrieve_authorized_snapshot<br>validate_registered_scenario_operations<br>create_review_suggestion</td>
+<td>SimulationPlanningOutput</td>
+<td>PENDING_REVIEW scenario plan; simulation_executed is always false.</td>
+</tr>
+<tr>
+<td>AGENT-AI-PREDICTION-EXPLANATION</td>
+<td>AI prediction explanation specialist</td>
+<td>H1</td>
+<td>Explain supplied validated prediction values drivers uncertainty and mitigations without recalculation.</td>
+<td>retrieve_authorized_prediction_evidence<br>validate_numeric_preservation<br>create_review_suggestion</td>
+<td>PredictionExplanationOutput</td>
+<td>PENDING_REVIEW explanation; prediction_recalculated is always false.</td>
+</tr>
+<tr>
+<td>AGENT-AI-TECHNICAL-KNOWLEDGE</td>
+<td>AI technical knowledge specialist</td>
+<td>H1</td>
+<td>Extract cited capabilities limitations dependencies constraints and failure modes from technical sources.</td>
+<td>retrieve_authorized_technical_evidence<br>validate_technical_schema<br>create_review_suggestion</td>
+<td>TechnicalKnowledgeOutput</td>
+<td>Strict PENDING_REVIEW technical-fact suggestion or fail-closed validation/provider error.</td>
+</tr>
 </tbody>
 </table>
 <h3 id="authority-invariant">Authority Invariant<a class="headerlink" href="#authority-invariant" title="Permanent link">&para;</a></h3>
@@ -13518,6 +13655,15 @@ certification: Contract tests synthetic fixture permission tests replay tests fa
 <td>Event intelligence workspace</td>
 <td>H1</td>
 <td>Interpret untrusted event reports resolve entities inspect bounded causal impacts compare before and after route scenarios review synthetic mutations and roll them back.</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>UX-AI-CONTROL</td>
+<td>AI Control Center</td>
+<td>H1</td>
+<td>Inspect provider and vector readiness run seven bounded agents import private evidence search permission-trimmed knowledge explain results review suggestions and inspect token cost provenance and failures without exposing credentials or permitting model mutations.</td>
 <td></td>
 <td></td>
 <td></td>
@@ -14311,6 +14457,11 @@ governance: State intended use prohibited use calibration evidence human confirm
 <td>A false entity merge is undone without losing identities evidence history or unrelated relationships.</td>
 </tr>
 <tr>
+<td>AC-DATA-004</td>
+<td>Operational data quality</td>
+<td>All six operational event categories and direct data points retain source owner update reliability confidence duplicate conflict stale and bounded propagation evidence through replay and tenant isolation.</td>
+</tr>
+<tr>
 <td>AC-CON-001</td>
 <td>Signed webhook defense</td>
 <td>Invalid stale replayed and wrong-tenant GitHub and Jira webhooks are denied and audited.</td>
@@ -14319,6 +14470,11 @@ governance: State intended use prohibited use calibration evidence human confirm
 <td>AC-CON-002</td>
 <td>Reconciliation recovery</td>
 <td>Missed webhook and partial backfill recover through cursor reconciliation without duplicate state.</td>
+</tr>
+<tr>
+<td>AC-CON-003</td>
+<td>Integration and MCP registry</td>
+<td>ERP CRM HRIS accounting API database document and MCP definitions validate authentication schema mapping permission cadence error tool and connected-data policy without storing credentials or executing tools in the API.</td>
 </tr>
 <tr>
 <td>AC-AI-001</td>
@@ -14337,8 +14493,8 @@ governance: State intended use prohibited use calibration evidence human confirm
 </tr>
 <tr>
 <td>AC-AI-004</td>
-<td>Tool accuracy</td>
-<td>Tool choice and exact argument accuracy meet the approved task rubric on golden and adversarial cases.</td>
+<td>Provider and agent integrity</td>
+<td>The real Llama route plus every specialized agent meets schema evidence authority numeric-preservation routing retry timeout token-cost and exact-argument rubrics; no model or review directly mutates state.</td>
 </tr>
 <tr>
 <td>AC-ACT-001</td>
@@ -14558,8 +14714,8 @@ governance: State intended use prohibited use calibration evidence human confirm
 <td>evaluation</td>
 <td>H1</td>
 <td>ai-platform<br>security-engineering</td>
-<td>Run golden and adversarial cases for citations, abstention, ACL-filtered context, tool selection and arguments, trace grading, prompt injection, workload routing, approved fallback, cost budgets, and model failure.</td>
-<td>Thresholds in the acceptance catalog pass on pinned snapshots; inaccessible evidence never enters context; no unapproved fallback or tool authority is exercised.</td>
+<td>Run provider transport failure retry timeout refusal and malformed-schema tests plus golden and adversarial cases for all seven agents citations abstention ACL-filtered lexical/vector retrieval tenant isolation prompt injection workload routing approved fallback controlled memory review-only suggestions token/cost accounting and model failure; include a separately enabled real Llama integration run.</td>
+<td>Thresholds in the acceptance catalog pass on the exact evaluated configuration; inaccessible evidence never enters context; every knowledge-changing output remains PENDING_REVIEW with mutation_performed false; no unapproved fallback test double or tool authority satisfies live release evidence.</td>
 <td>output/test-evidence/TST-AI-001.json</td>
 <td>REQ-AI-001<br>REQ-AI-002<br>REQ-AI-003<br>REQ-AI-004<br>REQ-AI-005<br>REQ-AI-006<br>REQ-AI-007<br>REQ-AI-008<br>QAR-AI-001<br>QAR-AI-002<br>QAR-COST-001</td>
 <td></td>
@@ -14735,15 +14891,15 @@ governance: State intended use prohibited use calibration evidence human confirm
 <td>contracts/openapi/enterprise-digital-twin.openapi.yaml</td>
 <td>OpenAPI</td>
 <td>3.1.0</td>
-<td>90302</td>
-<td>2a705f5527c39e93</td>
+<td>119904</td>
+<td>1f4ec5f457465e30</td>
 </tr>
 <tr>
 <td>contracts/asyncapi/events.asyncapi.yaml</td>
 <td>AsyncAPI</td>
 <td>3.0.0</td>
-<td>11584</td>
-<td>e2890a41a2ffc414</td>
+<td>21448</td>
+<td>dadb9cd19c75d693</td>
 </tr>
 <tr>
 <td>contracts/graphql/schema.graphql</td>
@@ -14793,6 +14949,27 @@ governance: State intended use prohibited use calibration evidence human confirm
 <td>schema</td>
 <td>4840</td>
 <td>cb994d57740ebd12</td>
+</tr>
+<tr>
+<td>contracts/schemas/ai-intelligence.schema.json</td>
+<td>JSON Schema</td>
+<td>schema</td>
+<td>15924</td>
+<td>9bf85834d51664ab</td>
+</tr>
+<tr>
+<td>contracts/schemas/data-foundation.schema.json</td>
+<td>JSON Schema</td>
+<td>schema</td>
+<td>9917</td>
+<td>b307a026af71ac28</td>
+</tr>
+<tr>
+<td>contracts/schemas/decision-intelligence.schema.json</td>
+<td>JSON Schema</td>
+<td>schema</td>
+<td>6895</td>
+<td>516641a98777f946</td>
 </tr>
 <tr>
 <td>contracts/schemas/connector-manifest.schema.json</td>
@@ -16255,7 +16432,7 @@ tenant_isolation:
 <h4 id="residual-risk">Residual risk<a class="headerlink" href="#residual-risk" title="Permanent link">&para;</a></h4>
 <p>Pooled graph isolation remains weaker than PostgreSQL RLS. H1 accepts this only with bounded server-owned query templates, tenant-qualified projection assertions, two-tenant tests, and no arbitrary Cypher. Failure of any control blocks release and triggers isolated graph deployment analysis.</p>
 <h1 id="build-provenance">Build Provenance<a class="headerlink" href="#build-provenance" title="Permanent link">&para;</a></h1>
-<p>Manifest SHA-256: <code>e1f17b58c501cb97f8aca9201379fa56cf1930406b353b980e72891b9609eaa9</code></p>
+<p>Manifest SHA-256: <code>1bff7b94a20f8237ac9f5e80752d250b5142d2518d17595fb334740711464ebb</code></p>
 <p>Generated by <code>scripts/build_blueprint.py</code>; generated editions are not edited directly.</p>
 </body>
 </html>

@@ -1,0 +1,158 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://enterprise-digital-twin.example/schemas/data-foundation/1.0.0",
+  "title": "Enterprise Digital Twin data and integration foundation",
+  "type": "object",
+  "$defs": {
+    "classification": {"enum": ["public", "internal", "confidential", "restricted"]},
+    "score": {"type": "number", "minimum": 0, "maximum": 1},
+    "source": {
+      "type": "object",
+      "required": ["source_system", "source_record_id"],
+      "properties": {
+        "source_system": {"type": "string", "minLength": 1, "maxLength": 120},
+        "source_record_id": {"type": "string", "minLength": 1, "maxLength": 500},
+        "source_revision": {"type": "string", "minLength": 1, "maxLength": 200},
+        "connector_id": {"type": "string", "format": "uuid"},
+        "observed_at": {"type": "string", "format": "date-time"},
+        "locator": {"type": "string", "minLength": 1, "maxLength": 1000}
+      },
+      "additionalProperties": false
+    },
+    "quality": {
+      "type": "object",
+      "required": ["assessed_at", "method", "source_fingerprint", "value_hash", "duplicate_of", "conflicts_with", "stale", "stale_after", "confidence_score", "rationale"],
+      "properties": {
+        "assessed_at": {"type": "string", "format": "date-time"},
+        "method": {"const": "deterministic_provenance_quality/1.0.0"},
+        "source_fingerprint": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+        "value_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+        "duplicate_of": {"type": ["string", "null"], "format": "uuid"},
+        "conflicts_with": {"type": "array", "maxItems": 20, "items": {"type": "string", "format": "uuid"}, "uniqueItems": true},
+        "stale": {"type": "boolean"},
+        "stale_now": {"type": "boolean"},
+        "stale_after": {"type": "string", "format": "date-time"},
+        "confidence_score": {"$ref": "#/$defs/score"},
+        "rationale": {"type": "array", "items": {"type": "string"}}
+      },
+      "additionalProperties": false
+    },
+    "eventCreate": {
+      "type": "object",
+      "required": ["type_id", "occurred_at", "source", "affected_node_ids"],
+      "properties": {
+        "type_id": {"type": "string", "minLength": 1, "maxLength": 128},
+        "category": {"enum": ["employee_change", "system_failure", "customer_change", "financial_change", "market_change", "operational_change"]},
+        "occurred_at": {"type": "string", "format": "date-time"},
+        "source": {"$ref": "#/$defs/source"},
+        "affected_node_ids": {"type": "array", "minItems": 1, "maxItems": 25, "items": {"type": "string", "format": "uuid"}, "uniqueItems": true},
+        "severity": {"enum": ["info", "low", "medium", "high", "critical"]},
+        "outcome": {"enum": ["observed", "mitigated", "resolved", "failed", "unknown"]},
+        "owner_id": {"type": ["string", "null"], "format": "uuid"},
+        "classification": {"$ref": "#/$defs/classification"},
+        "details": {"type": "object"},
+        "confidence_score": {"$ref": "#/$defs/score"},
+        "reliability_score": {"$ref": "#/$defs/score"},
+        "freshness_ttl_seconds": {"type": "integer", "minimum": 60, "maximum": 31536000},
+        "propagation": {
+          "type": "object",
+          "properties": {"max_depth": {"type": "integer", "minimum": 1, "maximum": 6}, "max_impacts": {"type": "integer", "minimum": 1, "maximum": 250}},
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "dataPointCreate": {
+      "type": "object",
+      "required": ["metric", "value", "source"],
+      "properties": {
+        "subject_node_id": {"type": ["string", "null"], "format": "uuid"},
+        "metric": {"type": "string", "minLength": 1, "maxLength": 160},
+        "value": true,
+        "source": {"$ref": "#/$defs/source"},
+        "owner_id": {"type": ["string", "null"], "format": "uuid"},
+        "classification": {"$ref": "#/$defs/classification"},
+        "confidence_score": {"$ref": "#/$defs/score"},
+        "reliability_score": {"$ref": "#/$defs/score"},
+        "freshness_ttl_seconds": {"type": "integer", "minimum": 60, "maximum": 31536000}
+      },
+      "additionalProperties": false
+    },
+    "authentication": {
+      "type": "object",
+      "required": ["kind", "secret_reference", "scopes"],
+      "properties": {
+        "kind": {"enum": ["oauth2", "api_key", "service_account", "database_credentials", "mutual_tls", "none", "oauth2_client_credentials", "oauth2_delegated", "service_token"]},
+        "secret_reference": {"type": ["string", "null"], "maxLength": 1024},
+        "scopes": {"type": "array", "maxItems": 100, "items": {"type": "string", "maxLength": 160}, "uniqueItems": true}
+      },
+      "additionalProperties": false
+    },
+    "connectorAuthentication": {
+      "allOf": [
+        {"$ref": "#/$defs/authentication"},
+        {"type": "object", "properties": {"kind": {"enum": ["oauth2", "api_key", "service_account", "database_credentials", "mutual_tls", "none"]}}}
+      ]
+    },
+    "mcpAuthentication": {
+      "allOf": [
+        {"$ref": "#/$defs/authentication"},
+        {"type": "object", "properties": {"kind": {"enum": ["oauth2_client_credentials", "oauth2_delegated", "service_token", "none"]}}}
+      ]
+    },
+    "connectorDefinition": {
+      "type": "object",
+      "required": ["name", "kind", "purpose", "authentication", "schema", "mapping", "permissions", "sync", "error_handling"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1, "maxLength": 160},
+        "kind": {"enum": ["erp", "crm", "hris", "accounting", "api", "database", "document"]},
+        "purpose": {"type": "string", "minLength": 1, "maxLength": 2000},
+        "authentication": {"$ref": "#/$defs/connectorAuthentication"},
+        "schema": {
+          "type": "object",
+          "required": ["source_schema_ref", "normalized_schema_ref", "version"],
+          "properties": {"source_schema_ref": {"type": "string"}, "normalized_schema_ref": {"type": "string"}, "version": {"type": "string", "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$"}},
+          "additionalProperties": false
+        },
+        "mapping": {
+          "type": "object",
+          "required": ["version", "rules"],
+          "properties": {
+            "version": {"type": "string"},
+            "rules": {"type": "array", "maxItems": 200, "items": {"type": "object", "required": ["source_path", "target_path"], "properties": {"source_path": {"type": "string"}, "target_path": {"type": "string"}, "transform": {"enum": ["identity", "string.trim", "string.lowercase", "string.uppercase", "number.parse", "boolean.parse", "timestamp.iso8601", "uuid.normalize", "json.copy"]}}, "additionalProperties": false}}
+          },
+          "additionalProperties": false
+        },
+        "permissions": {
+          "type": "object",
+          "required": ["read", "write", "allowed_classifications"],
+          "properties": {"read": {"type": "array", "minItems": 1, "items": {"type": "string"}}, "write": {"type": "array", "items": {"type": "string"}}, "allowed_classifications": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/classification"}}},
+          "additionalProperties": false
+        },
+        "sync": {"type": "object", "required": ["mode", "frequency_seconds"], "properties": {"mode": {"enum": ["manual", "interval", "webhook", "hybrid"]}, "frequency_seconds": {"type": ["integer", "null"], "minimum": 60, "maximum": 604800}}, "additionalProperties": false},
+        "error_handling": {"type": "object", "required": ["mode", "max_attempts", "initial_backoff_seconds", "max_backoff_seconds"], "properties": {"mode": {"enum": ["fail_closed", "retry_with_backoff", "dead_letter"]}, "max_attempts": {"type": "integer", "minimum": 1, "maximum": 12}, "initial_backoff_seconds": {"type": "integer", "minimum": 1, "maximum": 900}, "max_backoff_seconds": {"type": "integer", "minimum": 1, "maximum": 3600}}, "additionalProperties": false},
+        "owner_id": {"type": ["string", "null"], "format": "uuid"},
+        "reliability_score": {"$ref": "#/$defs/score"},
+        "classification": {"$ref": "#/$defs/classification"},
+        "status": {"enum": ["draft", "active", "suspended", "archived"]}
+      },
+      "additionalProperties": false
+    },
+    "mcpServerDefinition": {
+      "type": "object",
+      "required": ["name", "purpose", "authentication", "tools", "permissions", "connected_data"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1, "maxLength": 160},
+        "purpose": {"type": "string", "minLength": 1, "maxLength": 2000},
+        "authentication": {"$ref": "#/$defs/mcpAuthentication"},
+        "tools": {"type": "array", "minItems": 1, "maxItems": 100, "items": {"type": "object", "required": ["tool_id", "purpose", "permissions", "side_effects"], "properties": {"tool_id": {"type": "string", "minLength": 1, "maxLength": 80}, "purpose": {"type": "string", "minLength": 1, "maxLength": 1000}, "permissions": {"type": "array", "items": {"type": "string"}}, "side_effects": {"type": "boolean"}}, "additionalProperties": false}},
+        "permissions": {"type": "array", "maxItems": 100, "items": {"type": "string"}, "uniqueItems": true},
+        "connected_data": {"type": "array", "minItems": 1, "maxItems": 100, "items": {"type": "object", "required": ["data_plane", "resource_kind"], "properties": {"data_plane": {"enum": ["application_data", "graph_data", "ai_knowledge", "historical_metrics"]}, "resource_kind": {"type": "string"}, "connector_id": {"type": "string", "format": "uuid"}}, "additionalProperties": false}},
+        "owner_id": {"type": ["string", "null"], "format": "uuid"},
+        "classification": {"$ref": "#/$defs/classification"},
+        "status": {"enum": ["draft", "active", "suspended", "archived"]}
+      },
+      "additionalProperties": false
+    }
+  }
+}

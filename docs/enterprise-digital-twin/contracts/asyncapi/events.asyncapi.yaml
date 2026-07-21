@@ -29,6 +29,36 @@ channels:
   intelligenceEventChanged:
     address: edt.v1.event-intelligence.event-changed
     messages: {intelligenceEventChanged: {$ref: '#/components/messages/IntelligenceEventChanged'}}
+  twinOperationalEventRecorded:
+    address: edt.v1.twin.operational-event-recorded
+    messages: {twinOperationalEventRecorded: {$ref: '#/components/messages/TwinOperationalEventRecorded'}}
+  twinDataPointRecorded:
+    address: edt.v1.twin.data-point-recorded
+    messages: {twinDataPointRecorded: {$ref: '#/components/messages/TwinDataPointRecorded'}}
+  twinConnectorRegistered:
+    address: edt.v1.twin.connector-registered
+    messages: {twinConnectorRegistered: {$ref: '#/components/messages/TwinConnectorRegistered'}}
+  twinConnectorUpdated:
+    address: edt.v1.twin.connector-updated
+    messages: {twinConnectorUpdated: {$ref: '#/components/messages/TwinConnectorUpdated'}}
+  twinMcpServerRegistered:
+    address: edt.v1.twin.mcp-server-registered
+    messages: {twinMcpServerRegistered: {$ref: '#/components/messages/TwinMcpServerRegistered'}}
+  twinMcpServerUpdated:
+    address: edt.v1.twin.mcp-server-updated
+    messages: {twinMcpServerUpdated: {$ref: '#/components/messages/TwinMcpServerUpdated'}}
+  decisionSimulationCompleted:
+    address: edt.v1.decision.simulation-completed
+    messages: {decisionSimulationCompleted: {$ref: '#/components/messages/DecisionSimulationCompleted'}}
+  predictionLifecycleChanged:
+    address: edt.v1.decision.prediction-changed
+    messages:
+      predictionCreated: {$ref: '#/components/messages/PredictionCreated'}
+      predictionOutcomeRecorded: {$ref: '#/components/messages/PredictionOutcomeRecorded'}
+      predictionValidated: {$ref: '#/components/messages/PredictionValidated'}
+  predictiveModelChanged:
+    address: edt.v1.decision.model-changed
+    messages: {predictiveModelChanged: {$ref: '#/components/messages/PredictiveModelChanged'}}
 operations:
   consumeObservationAccepted: {action: receive, channel: {$ref: '#/channels/observationAccepted'}}
   consumeClaimsChanged: {action: receive, channel: {$ref: '#/channels/claimsChanged'}}
@@ -38,6 +68,15 @@ operations:
   consumeApprovalChanged: {action: receive, channel: {$ref: '#/channels/approvalChanged'}}
   consumeActionReceiptRecorded: {action: receive, channel: {$ref: '#/channels/actionReceiptRecorded'}}
   consumeIntelligenceEventChanged: {action: receive, channel: {$ref: '#/channels/intelligenceEventChanged'}}
+  consumeTwinOperationalEventRecorded: {action: receive, channel: {$ref: '#/channels/twinOperationalEventRecorded'}}
+  consumeTwinDataPointRecorded: {action: receive, channel: {$ref: '#/channels/twinDataPointRecorded'}}
+  consumeTwinConnectorRegistered: {action: receive, channel: {$ref: '#/channels/twinConnectorRegistered'}}
+  consumeTwinConnectorUpdated: {action: receive, channel: {$ref: '#/channels/twinConnectorUpdated'}}
+  consumeTwinMcpServerRegistered: {action: receive, channel: {$ref: '#/channels/twinMcpServerRegistered'}}
+  consumeTwinMcpServerUpdated: {action: receive, channel: {$ref: '#/channels/twinMcpServerUpdated'}}
+  consumeDecisionSimulationCompleted: {action: receive, channel: {$ref: '#/channels/decisionSimulationCompleted'}}
+  consumePredictionLifecycleChanged: {action: receive, channel: {$ref: '#/channels/predictionLifecycleChanged'}}
+  consumePredictiveModelChanged: {action: receive, channel: {$ref: '#/channels/predictiveModelChanged'}}
 components:
   messages:
     ObservationAccepted: {name: ObservationAccepted, payload: {$ref: '#/components/schemas/ObservationAcceptedEvent'}}
@@ -48,7 +87,72 @@ components:
     ApprovalChanged: {name: ApprovalChanged, payload: {$ref: '#/components/schemas/ApprovalChangedEvent'}}
     ActionReceiptRecorded: {name: ActionReceiptRecorded, payload: {$ref: '#/components/schemas/ActionReceiptRecordedEvent'}}
     IntelligenceEventChanged: {name: IntelligenceEventChanged, payload: {$ref: '#/components/schemas/IntelligenceEventChangedEvent'}}
+    TwinOperationalEventRecorded: {name: TwinOperationalEventRecorded, payload: {$ref: '#/components/schemas/TwinOperationalEventRecordedEvent'}}
+    TwinDataPointRecorded: {name: TwinDataPointRecorded, payload: {$ref: '#/components/schemas/TwinDataPointRecordedEvent'}}
+    TwinConnectorRegistered: {name: TwinConnectorRegistered, payload: {$ref: '#/components/schemas/TwinConnectorRegisteredEvent'}}
+    TwinConnectorUpdated: {name: TwinConnectorUpdated, payload: {$ref: '#/components/schemas/TwinConnectorUpdatedEvent'}}
+    TwinMcpServerRegistered: {name: TwinMcpServerRegistered, payload: {$ref: '#/components/schemas/TwinMcpServerRegisteredEvent'}}
+    TwinMcpServerUpdated: {name: TwinMcpServerUpdated, payload: {$ref: '#/components/schemas/TwinMcpServerUpdatedEvent'}}
+    DecisionSimulationCompleted: {name: DecisionSimulationCompleted, payload: {$ref: '#/components/schemas/DecisionSimulationCompletedEvent'}}
+    PredictionCreated: {name: PredictionCreated, payload: {$ref: '#/components/schemas/PredictionCreatedEvent'}}
+    PredictionOutcomeRecorded: {name: PredictionOutcomeRecorded, payload: {$ref: '#/components/schemas/PredictionOutcomeRecordedEvent'}}
+    PredictionValidated: {name: PredictionValidated, payload: {$ref: '#/components/schemas/PredictionValidatedEvent'}}
+    PredictiveModelChanged: {name: PredictiveModelChanged, payload: {$ref: '#/components/schemas/PredictiveModelChangedEvent'}}
   schemas:
+    DecisionSimulationCompletedEvent:
+      allOf:
+        - {$ref: '#/components/schemas/EventEnvelope'}
+        - type: object
+          required: [data]
+          properties:
+            type: {const: com.enterprisedigitaltwin.decision.simulation-completed.v1}
+            data: {$ref: '#/components/schemas/DecisionResourceChangedData'}
+      unevaluatedProperties: false
+    PredictionCreatedEvent:
+      allOf:
+        - {$ref: '#/components/schemas/EventEnvelope'}
+        - type: object
+          required: [data]
+          properties:
+            type: {const: com.enterprisedigitaltwin.decision.prediction-created.v1}
+            data: {$ref: '#/components/schemas/DecisionResourceChangedData'}
+      unevaluatedProperties: false
+    PredictionOutcomeRecordedEvent:
+      allOf:
+        - {$ref: '#/components/schemas/EventEnvelope'}
+        - type: object
+          required: [data]
+          properties:
+            type: {const: com.enterprisedigitaltwin.decision.prediction-outcome-recorded.v1}
+            data: {$ref: '#/components/schemas/DecisionResourceChangedData'}
+      unevaluatedProperties: false
+    PredictionValidatedEvent:
+      allOf:
+        - {$ref: '#/components/schemas/EventEnvelope'}
+        - type: object
+          required: [data]
+          properties:
+            type: {const: com.enterprisedigitaltwin.decision.prediction-validated.v1}
+            data: {$ref: '#/components/schemas/DecisionResourceChangedData'}
+      unevaluatedProperties: false
+    PredictiveModelChangedEvent:
+      allOf:
+        - {$ref: '#/components/schemas/EventEnvelope'}
+        - type: object
+          required: [data]
+          properties:
+            type: {const: com.enterprisedigitaltwin.decision.model-registered.v1}
+            data: {$ref: '#/components/schemas/DecisionResourceChangedData'}
+      unevaluatedProperties: false
+    DecisionResourceChangedData:
+      type: object
+      additionalProperties: false
+      required: [tenant_id, resource_id, history_event_id, outbox_position]
+      properties:
+        tenant_id: {type: string, format: uuid}
+        resource_id: {type: string, format: uuid}
+        history_event_id: {type: string, format: uuid}
+        outbox_position: {type: integer, minimum: 1}
     EventEnvelope:
       type: object
       required: [specversion, id, source, type, subject, time, datacontenttype, dataschema, tenant_id, partition_key, aggregate_type, aggregate_id, aggregate_version, causation_id, correlation_id, traceparent, schema_version, schema_hash, data_classification]
@@ -218,3 +322,87 @@ components:
         after_hash: {type: string, pattern: '^[a-f0-9]{64}$'}
     IntelligenceEventChangedEvent:
       $ref: '../schemas/event-intelligence-event-changed.v1.schema.json'
+    TwinOperationalEventRecordedEvent:
+      allOf:
+        - {$ref: '#/components/schemas/EventEnvelope'}
+        - type: object
+          required: [data]
+          properties:
+            type: {const: com.enterprisedigitaltwin.twin.operational-event-recorded.v1}
+            data:
+              type: object
+              required: [event_id, data_point_id, graph_version, outbox_position]
+              properties:
+                event_id: {type: string, format: uuid}
+                data_point_id: {type: string, format: uuid}
+                graph_version: {type: integer, minimum: 0}
+                outbox_position: {type: integer, minimum: 1}
+              additionalProperties: false
+      unevaluatedProperties: false
+    TwinDataPointRecordedEvent:
+      allOf:
+        - {$ref: '#/components/schemas/EventEnvelope'}
+        - type: object
+          required: [data]
+          properties:
+            type: {const: com.enterprisedigitaltwin.twin.data-point-recorded.v1}
+            data:
+              type: object
+              required: [data_point_id, outbox_position]
+              properties:
+                data_point_id: {type: string, format: uuid}
+                outbox_position: {type: integer, minimum: 1}
+              additionalProperties: false
+      unevaluatedProperties: false
+    TwinConnectorRegisteredEvent:
+      allOf:
+        - {$ref: '#/components/schemas/EventEnvelope'}
+        - type: object
+          required: [data]
+          properties:
+            type: {const: com.enterprisedigitaltwin.integration.connector-registered.v1}
+            data:
+              type: object
+              required: [connector_id, outbox_position]
+              properties: {connector_id: {type: string, format: uuid}, outbox_position: {type: integer, minimum: 1}}
+              additionalProperties: false
+      unevaluatedProperties: false
+    TwinConnectorUpdatedEvent:
+      allOf:
+        - {$ref: '#/components/schemas/EventEnvelope'}
+        - type: object
+          required: [data]
+          properties:
+            type: {const: com.enterprisedigitaltwin.integration.connector-updated.v1}
+            data:
+              type: object
+              required: [connector_id, outbox_position]
+              properties: {connector_id: {type: string, format: uuid}, outbox_position: {type: integer, minimum: 1}}
+              additionalProperties: false
+      unevaluatedProperties: false
+    TwinMcpServerRegisteredEvent:
+      allOf:
+        - {$ref: '#/components/schemas/EventEnvelope'}
+        - type: object
+          required: [data]
+          properties:
+            type: {const: com.enterprisedigitaltwin.integration.mcp-server-registered.v1}
+            data:
+              type: object
+              required: [mcp_server_id, outbox_position]
+              properties: {mcp_server_id: {type: string, format: uuid}, outbox_position: {type: integer, minimum: 1}}
+              additionalProperties: false
+      unevaluatedProperties: false
+    TwinMcpServerUpdatedEvent:
+      allOf:
+        - {$ref: '#/components/schemas/EventEnvelope'}
+        - type: object
+          required: [data]
+          properties:
+            type: {const: com.enterprisedigitaltwin.integration.mcp-server-updated.v1}
+            data:
+              type: object
+              required: [mcp_server_id, outbox_position]
+              properties: {mcp_server_id: {type: string, format: uuid}, outbox_position: {type: integer, minimum: 1}}
+              additionalProperties: false
+      unevaluatedProperties: false

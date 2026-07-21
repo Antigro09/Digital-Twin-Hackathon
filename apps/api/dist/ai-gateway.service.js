@@ -380,7 +380,7 @@ let AiGatewayService = class AiGatewayService {
             if (activity.agent_type !== null && activity.agent_type !== undefined)
                 this.enumValue(activity.agent_type, 'agent_type', AGENT_TYPES);
             this.enumValue(activity.kind, 'kind', ['agent_run', 'document_import', 'retrieval', 'suggestion_review', 'learning_outcome']);
-            this.enumValue(activity.state, 'state', ['succeeded', 'failed']);
+            this.enumValue(activity.state, 'state', ['running', 'succeeded', 'failed']);
             if (activity.provider !== null && activity.provider !== undefined)
                 this.enumValue(activity.provider, 'provider', ['llama', 'openai']);
             if (activity.model !== null && activity.model !== undefined)
@@ -461,6 +461,10 @@ let AiGatewayService = class AiGatewayService {
             throw new Error('reviewer binding');
         if (record.suggestion_status !== 'PENDING_REVIEW' || record.mutation_performed !== false)
             throw new Error('mutation invariant');
+        if (workerDecision === 'APPROVE')
+            this.uuid(record.validated_memory_id, 'validated_memory_id');
+        if (workerDecision === 'REJECT' && record.validated_memory_id !== null && record.validated_memory_id !== undefined)
+            throw new Error('rejected memory invariant');
         this.requiredString(record.reviewed_at, 'reviewed_at');
         this.assertTenant(record, context);
         const result = { ...record, decision: publicDecision };

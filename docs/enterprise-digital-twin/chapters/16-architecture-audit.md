@@ -12,6 +12,14 @@ last_reviewed: 2026-07-15
 
 # Architecture Audit and Convergence Record
 
+## Phase 3 implementation audit (2026-07-21)
+
+The pre-implementation audit found that the H1 simulation mathematics were reproducible and appropriately isolated in the Python worker, but its NestJS compatibility facade was demo-only: Aster-specific snapshot compilation, process-local lookup maps, fire-and-forget persistence, weakly bounded generic intervention input, no general branching, and an enabled-by-default oracle fallback. The worker supported only the frozen dependency-DAG workload. No numeric business prediction pipeline, prediction outcome lifecycle, calibration/accuracy learning loop, or non-LLM model registry existed. AI learning outcomes applied to reviewed suggestions rather than numeric predictions.
+
+The main security risks were missing explicit capability checks on legacy simulation creation, insufficient validation of caller-provided times and interventions, false-success risk from asynchronous writes and fabricated fallback output, and possible user confusion between conditional simulation and prediction. The main scalability risks were replica-local state, synchronous inline worker calls without durable orchestration, no general run pagination/cancellation, and no artifact offload for large output. Existing policy also correctly prohibited individual workforce prediction and treated pricing, churn, and hiring models as unvalidated research.
+
+ADR-019 addresses the implementable foundation without weakening those policy boundaries: new services use server-derived tenancy, explicit capabilities, exact-key and size validation, immutable hashes, confirmation, PostgreSQL reads, transactional compare-and-set writes, idempotency, audit, outbox, bounded worker functions, and fail-closed errors. Simulation and prediction are separate services and worker functions. Aggregate workforce enforcement is duplicated at both API and worker boundaries. Long-running workflow orchestration, artifact storage, operational model adapters, and production validation remain explicit promotion work rather than being represented as complete.
+
 ## 1. Audit opinion
 
 The `1.0.0-rc.1` architecture is suitable as the normative implementation blueprint for the bounded H1 reference workload and as a gated reference architecture for H2. It does not become final `1.0.0` until every convergence criterion in this chapter is evidenced. H3 and H4 remain Provisional where telemetry, benchmarks, customer constraints, or deployment evidence are required. H5 remains Research.

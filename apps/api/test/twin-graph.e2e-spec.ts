@@ -133,7 +133,7 @@ describe('Extensible enterprise twin graph (e2e)', () => {
       confidence_score: 0.95,
     });
     applicationId = application.body.node.node_id;
-    applicationEtag = application.headers.etag as string;
+    applicationEtag = application.body.etag as string;
 
     const process = await createNode('process', {
       type_id: 'Process',
@@ -261,7 +261,7 @@ describe('Extensible enterprise twin graph (e2e)', () => {
     const archived = await request(app.getHttpServer())
       .delete(`/v1/twin/nodes/${employeeId}`)
       .set(admin)
-      .set('if-match', (await request(app.getHttpServer()).get(`/v1/twin/nodes/${employeeId}`).set(admin).expect(200)).headers.etag as string)
+      .set('if-match', (await request(app.getHttpServer()).get(`/v1/twin/nodes/${employeeId}`).set(admin).expect(200)).body.etag as string)
       .set('idempotency-key', key('archive-owner'))
       .expect(200);
     expect(archived.body.node.state).toBe('archived');

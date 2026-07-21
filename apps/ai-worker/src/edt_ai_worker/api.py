@@ -12,6 +12,15 @@ from pydantic import BaseModel, ConfigDict
 from . import __version__
 from .errors import DomainError
 from .evidence import extract_facts, grounded_answer
+from .decision_engines import run_decision_simulation, run_prediction, validate_prediction
+from .decision_models import (
+    DecisionSimulationRequest,
+    DecisionSimulationResult,
+    PredictionValidationRequest,
+    PredictionValidationResult,
+    PredictiveRequest,
+    PredictiveResult,
+)
 from .factory import create_gateway
 from .gateway import AIGateway
 from .intelligence_models import (
@@ -158,6 +167,25 @@ def get_result(result_sha256: str, context: TenantDependency) -> SimulationResul
         raise DomainError("simulation_result_not_found", "No result exists in this tenant scope.", status_code=404)
     context.assert_response_isolated(result)
     return result
+
+
+@app.post("/v1/decision-simulations", response_model=DecisionSimulationResult)
+def decision_simulation(body: DecisionSimulationRequest, context: TenantDependency) -> DecisionSimulationResult:
+    result = run_decision_simulation(body, context)
+    context.assert_response_isolated(result)
+    return result
+
+
+@app.post("/v1/predictions", response_model=PredictiveResult)
+def prediction(body: PredictiveRequest, context: TenantDependency) -> PredictiveResult:
+    result = run_prediction(body, context)
+    context.assert_response_isolated(result)
+    return result
+
+
+@app.post("/v1/predictions/validate", response_model=PredictionValidationResult)
+def prediction_validation(body: PredictionValidationRequest, _: TenantDependency) -> PredictionValidationResult:
+    return validate_prediction(body)
 
 
 @app.post(

@@ -29,6 +29,8 @@ async function bootstrap() {
         reply.header('x-frame-options', 'DENY');
         reply.header('referrer-policy', 'no-referrer');
         reply.header('permissions-policy', 'camera=(), microphone=(), geolocation=()');
+        if (_request.url.startsWith('/v1/twin'))
+            reply.header('cache-control', 'private, no-store');
         done(null, payload);
     });
     app.enableShutdownHooks();

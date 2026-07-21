@@ -24,7 +24,7 @@ export class DataArchitectureService {
         authority: 'authoritative',
         purpose: 'Tenant-scoped transactional application data, canonical events, data quality, connector registry, audit evidence, and outbox records.',
         access_boundary: 'PostgreSQL row-level security with server-derived tenant context.',
-        record_classes: ['twin_event', 'twin_data_point', 'twin_connector_definition', 'twin_mcp_server_definition', 'event_audit_evidence', 'outbox'],
+        record_classes: ['twin_event', 'twin_data_point', 'twin_connector_definition', 'twin_mcp_server_definition', 'decision_simulation_snapshot', 'decision_scenario_branch', 'decision_simulation_run', 'predictive_model_definition', 'prediction_feature_batch', 'prediction_run', 'prediction_knowledge', 'prediction_learning_event', 'event_audit_evidence', 'outbox'],
         implementation_status: relationalHealth === 'connected' ? 'available' : 'registered_for_projection',
       },
       {
@@ -51,7 +51,7 @@ export class DataArchitectureService {
         authority: 'specialized',
         purpose: 'Immutable event/data-point history, raw-source retention references, time-series metrics, backtesting, and future cold-storage exports.',
         access_boundary: 'Retention policy, tenant scope, classification, and source provenance apply before export or analytical projection.',
-        record_classes: ['twin_event', 'twin_data_point', 'normalized_observation', 'historical_metric'],
+        record_classes: ['twin_event', 'twin_data_point', 'normalized_observation', 'historical_metric', 'prediction_feature_batch', 'prediction_learning_event'],
         implementation_status: 'registered_for_projection',
       },
     ];

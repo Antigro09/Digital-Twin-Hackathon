@@ -58,6 +58,17 @@ const DAY_SECONDS = 24 * 60 * 60;
 const PROHIBITED_MCP_TOOL_SEGMENTS = new Set([
   'sql', 'cypher', 'shell', 'filesystem', 'generic_url_fetch', 'unrestricted_provider_operation',
 ]);
+const ALLOWED_MAPPING_TRANSFORMS = new Set([
+  'identity',
+  'string.trim',
+  'string.lowercase',
+  'string.uppercase',
+  'number.parse',
+  'boolean.parse',
+  'timestamp.iso8601',
+  'uuid.normalize',
+  'json.copy',
+]);
 
 interface RegistryState {
   metadata: IntegrationRegistryMetadata;
@@ -365,7 +376,7 @@ export class IntegrationRegistryService {
       purpose: requiredString(input.purpose, 'purpose', 2_000),
       authentication: this.mcpAuthentication(input.authentication),
       tools: this.mcpTools(input.tools),
-      permissions: stringArray(input.permissions, 'permissions', 100, 160),
+      permissions: this.permissionList(input.permissions, 'permissions'),
       connected_data: connectedData.map(({ classification: _classification, ...reference }) => reference),
       owner_id: optionalUuid(input.owner_id, 'owner_id'),
       classification: this.classificationAtLeast(input.classification, minimumClassification),
@@ -429,6 +440,9 @@ export class IntegrationRegistryService {
     const rule = plainRecord(raw, `mapping.rules[${index}]`);
     assertExactKeys(rule, ['source_path', 'target_path', 'transform'], `mapping.rules[${index}]`);
     const transform = optionalString(rule.transform, `mapping.rules[${index}].transform`, 500);
+    if (transform && !ALLOWED_MAPPING_TRANSFORMS.has(transform)) {
+      throw invalid('unsupported_mapping_transform', `mapping.rules[${index}].transform must name a supported deterministic transform.`);
+    }
     return {
       source_path: requiredString(rule.source_path, `mapping.rules[${index}].source_path`, 500),
       target_path: requiredString(rule.target_path, `mapping.rules[${index}].target_path`, 500),
@@ -762,7 +776,8 @@ export class IntegrationRegistryService {
   }
 
   private prohibitedTool(toolId: string): boolean {
-    return toolId.split('_').some((segment) => PROHIBITED_MCP_TOOL_SEGMENTS.has(segment)) || PROHIBITED_MCP_TOOL_SEGMENTS.has(toolId);
+    const segments = toolId.split(/[._:/-]+/).filter(Boolean);
+    return segments.some((segment) => PROHIBITED_MCP_TOOL_SEGMENTS.has(segment)) || PROHIBITED_MCP_TOOL_SEGMENTS.has(toolId);
   }
 
   private assertEtag(value: string | undefined, currentHash: string, resource: string): void {

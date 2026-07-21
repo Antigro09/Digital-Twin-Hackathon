@@ -8,8 +8,10 @@ acceptance_criteria:
   - {id: AC-DATA-001, title: Ingestion idempotency, evidence: Duplicate reordered and replayed observations produce the same canonical state digest.}
   - {id: AC-DATA-002, title: Projection rebuild, evidence: Neo4j and search/vector projections rebuild from authoritative claims and preserve expected oracle digest and ACLs.}
   - {id: AC-DATA-003, title: Reversible merge, evidence: A false entity merge is undone without losing identities evidence history or unrelated relationships.}
+  - {id: AC-DATA-004, title: Operational data quality, evidence: All six operational event categories and direct data points retain source owner update reliability confidence duplicate conflict stale and bounded propagation evidence through replay and tenant isolation.}
   - {id: AC-CON-001, title: Signed webhook defense, evidence: Invalid stale replayed and wrong-tenant GitHub and Jira webhooks are denied and audited.}
   - {id: AC-CON-002, title: Reconciliation recovery, evidence: Missed webhook and partial backfill recover through cursor reconciliation without duplicate state.}
+  - {id: AC-CON-003, title: Integration and MCP registry, evidence: ERP CRM HRIS accounting API database document and MCP definitions validate authentication schema mapping permission cadence error tool and connected-data policy without storing credentials or executing tools in the API.}
   - {id: AC-AI-001, title: Citation quality, evidence: Golden set citation precision is at least 0.95 and material unsupported claim rate is below 0.01.}
   - {id: AC-AI-002, title: Abstention, evidence: Missing conflicting restricted and stale evidence cases produce calibrated uncertainty or abstention.}
   - {id: AC-AI-003, title: Prompt-injection resistance, evidence: Adversarial connector content cannot change policy reveal other data or invoke unauthorized tools.}

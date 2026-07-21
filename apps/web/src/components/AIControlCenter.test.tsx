@@ -217,9 +217,9 @@ describe("AIControlCenter", () => {
     const suggestionPanel = panel.closest("section")!;
     await user.type(within(suggestionPanel).getByLabelText("Review reason"), "Evidence is sufficient for human consideration.");
     await user.click(within(suggestionPanel).getByRole("button", { name: "Approve suggestion" }));
-    expect(await within(suggestionPanel).findByText(/Approved for human consideration/)).toBeInTheDocument();
+    expect(await within(suggestionPanel).findByText(/Approved into validated enterprise memory/)).toBeInTheDocument();
     expect(within(suggestionPanel).getByText(/suggestion itself remains PENDING_REVIEW/i)).toBeInTheDocument();
-    expect(within(suggestionPanel).getByText(/No graph or external-system mutation occurred/)).toBeInTheDocument();
+    expect(within(suggestionPanel).getByText(/No graph, simulation, or external-system mutation occurred/)).toBeInTheDocument();
     expect(review).toHaveBeenCalledWith(expect.objectContaining({ decision: "approve", reason: "Evidence is sufficient for human consideration." }));
   });
 

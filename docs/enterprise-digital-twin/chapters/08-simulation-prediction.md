@@ -12,13 +12,37 @@ last_reviewed: 2026-07-13
 
 # Simulation and Prediction
 
+## Phase 3 decision-intelligence foundation
+
+ADR-019 adds a general, governed foundation beside the frozen H1 launch scheduler. It deliberately keeps two questions separate:
+
+```text
+Simulation: immutable snapshot -> confirmed change -> bounded relationship propagation
+            -> versioned deterministic rules -> impact -> baseline comparison
+
+Prediction: historical observations -> bounded feature processing -> registered non-LLM model
+            -> forecast -> confidence evidence -> real outcome -> human validation -> learning event
+```
+
+The API routes are separated under `/v1/twin/simulation/*` and `/v1/twin/prediction/*`; neither service imports or calls the other. PostgreSQL records are tenant-qualified, hash-bound, idempotent, audited, and emitted through the transactional outbox. The Python intelligence worker performs pure deterministic calculation and fails closed. It has no connector read, graph write, LLM call, oracle fallback, or external action capability.
+
+General simulation snapshots seal one to 100 authorized graph nodes, explicit aggregate numeric variables, up to 500 visible relationships, graph version, as-of time, assumptions, and canonical digest. A scenario is a typed `hiring`, `pricing_change`, `supplier_failure`, `expansion`, or `budget_change` branch. Every branch references an immutable snapshot and optional confirmed parent branch, contains allowlisted `set`, `add`, or `multiply` changes, declares a propagation depth of at most six, and requires digest confirmation. Execution applies changes, propagates the same variable through declared direction/strength/confidence/importance, recalculates only the registered `revenue`, `operating_margin`, `budget_variance`, and `capacity_gap` identities when their inputs exist, and returns per-node baseline/scenario deltas. Propagated weights express modeled exposure, not causality.
+
+The predictive registry stores forecasting, optimization, anomaly-detection, computer-vision, and classification definitions with inputs, outputs, semantic version, accuracy, owner, trigger, lifecycle state, calibration bias, learning revision, and state hash. This phase executes only active forecasting/classification definitions using `linear_trend` or `bounded_linear_trend`; other types are governance-ready registrations, not pretend implementations. Revenue, expense, customer-churn, aggregate-workforce, and risk forecasts accept three to 10,000 historical observations and a one-to-36-step horizon. The exact observations are retained in an immutable tenant-scoped feature batch with user-input source binding and data hash; the public run references that batch without duplicating it. Results include processed feature summaries, forecast intervals, fit/sample/error confidence evidence, limitations, input hash, model version, and pending-outcome state.
+
+Learning is explicit and reviewable. A real outcome is recorded with source evidence, then an authorized user confirms or corrects it. The worker calculates MAE, MAPE where defined, RMSE, bias, and normalized accuracy. One transaction updates the prediction, rolling model accuracy, bounded calibration bias, learning revision, append-only learning event, audit chain, idempotency record, and outbox event. Historical outcomes, technical specifications, company rules, corrections, and expert knowledge can be submitted, but remain `pending_review` and cannot silently alter a model.
+
+Workforce use remains aggregate-only: `headcount`, `workforce_capacity`, and `open_positions`. Person identifiers, individual attrition, performance, productivity, suitability, and hiring scores are rejected. Hiring scenarios model an explicit aggregate headcount change; they do not recommend, rank, select, or evaluate people and do not authorize an employment action.
+
+The current foundation is horizontally stateless at the API layer and all reads are recovered from PostgreSQL rather than replica-local maps. Bounded input sizes prevent unbounded graph or historical processing. Production promotion still requires Temporal orchestration for long runs, cancellation/heartbeats, object storage for large artifacts, representative backtesting, calibration/drift/fairness gates, model-artifact signing, domain-owner approval, and load evidence. Those gates are limitations, not silently claimed capabilities.
+
 ## 1. Purpose, claim boundary, and non-goals
 
 H1 implements one defensible simulation: a seeded PERT/Monte Carlo forecast of launch timing over a task dependency DAG. It compares an immutable baseline with a user-confirmed scenario and explains the conditional distribution of completion dates.
 
 The result is not a promise, causal conclusion, or validated prediction of human behavior. It is conditional on task estimates, dependencies, calendars, and stated assumptions. The product MUST call it a forecast or simulation, not an objective prediction of the organization.
 
-Individual burnout, attrition, performance, productivity, hiring, compensation, emotion, health, misconduct, or suitability scoring is prohibited through H3. H1 has no person-level rate, performance, availability, or productivity parameter. Mergers, layoffs, hiring, customer churn, pricing, security-loss magnitude, cash flow, and market simulations remain Research until separately governed models and validation exist.
+Individual burnout, attrition, performance, productivity, hiring, compensation, emotion, health, misconduct, or suitability scoring is prohibited through H3. H1 has no person-level rate, performance, availability, or productivity parameter. Production-calibrated mergers, layoffs, customer churn, pricing, security-loss magnitude, cash-flow, and market claims remain Research until separately governed models and validation exist; ADR-019 provides only the bounded conditional/statistical foundation described above.
 
 | ID | Requirement |
 |---|---|

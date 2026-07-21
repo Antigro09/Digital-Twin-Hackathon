@@ -899,7 +899,7 @@ Foundational choices are recorded by the ADR catalog. This chapter is the normat
 
 ## CH-04 - Technology Stack
 
-Status: **Committed** | Owners: Architecture, Developer Platform | Last reviewed: 2026-07-13
+Status: **Committed** | Owners: Architecture, Developer Platform | Last reviewed: 2026-07-15
 
 ### Technology Stack
 
@@ -939,7 +939,7 @@ Exact package and image versions are pinned by lockfiles and image digests in th
 | Orchestration | Docker Compose for local/H1; Kubernetes and Helm adopted at H2 | Standard scheduling, policy, rollout, and availability for the committed design-partner topology | Production stateful services should be managed outside the cluster |
 | Infrastructure as code | OpenTofu with provider-neutral modules | Declarative cloud and Kubernetes resources without dual IaC sources | Remote encrypted state, locking, plan review |
 | Identity | External OIDC; SAML and SCIM at H2 boundary | Enterprise IdP remains authentication authority | Local development can use a disposable OIDC provider |
-| AI | OpenAI Responses API and Python Agents SDK behind a model gateway | Capability-oriented model calls, structured tools, traceable runs | Pinned evaluated snapshots; no provider call bypasses gateway |
+| AI | Provider-neutral Python AI Gateway; Meta Llama API primary; OpenAI Responses optional | Capability-oriented model calls, strict schemas, permission-aware retrieval, traceable runs | Exact evaluated model configuration; no provider call bypasses gateway; no simulated production response |
 
 ##### 2.1 Language and data-access rules
 
@@ -954,13 +954,13 @@ Exact package and image versions are pinned by lockfiles and image digests in th
 
 The gateway exposes capabilities, not raw model names, to application code:
 
-| Capability | H1 family default | Required gate |
+| Capability | H1 route | Required gate |
 |---|---|---|
-| difficult orchestration and evaluation | gpt-5.6-sol | Tool and argument accuracy, groundedness, safety, latency, and cost evaluation |
-| balanced grounded analysis | gpt-5.6-terra | Citation support, abstention, ACL and injection evaluation |
-| high-volume extraction | gpt-5.6-luna | Structured extraction precision/recall and cost evaluation |
+| difficult grounded reasoning | Configured `AI_REASONING_PROVIDER`; Llama by default | Argument accuracy, groundedness, safety, latency, and cost evaluation |
+| balanced grounded analysis | Configured Llama model | Citation support, abstention, ACL, injection, and schema evaluation |
+| high-volume extraction | Configured Llama model | Structured extraction precision/recall, provenance, latency, and cost evaluation |
 
-These names are configuration defaults from the approved architecture, not permission to use a floating provider alias. Before deployment, the platform owner must confirm account availability and record the exact snapshot in the model registry. If no available snapshot passes the capability evaluation, that capability is disabled. Fallbacks are independently evaluated and cannot silently reduce safety. The Responses API is the interface for new agentic integrations, as documented by [OpenAI](https://developers.openai.com/api/docs/guides/migrate-to-responses).
+The model identifier is never guessed or embedded in application features. Before deployment, the platform owner records the exact account-available model/configuration and evaluation evidence in the model registry. If no route passes the capability evaluation, that capability is disabled. Fallbacks are independently evaluated and cannot silently reduce safety. Meta documents its hosted Llama API and official SDKs in the [Llama API announcement](https://ai.meta.com/blog/llamacon-llama-news/) and [official Python SDK](https://github.com/meta-llama/llama-api-python). OpenAI Responses remains an optional adapter and follows its [structured-output contract](https://developers.openai.com/api/docs/guides/structured-outputs).
 
 #### 3. Technology portfolio matrix
 
@@ -1667,7 +1667,7 @@ Additional connectors use this contract only after a connector-specific threat m
 
 ## CH-07 - AI Agents, Reasoning, and Evaluations
 
-Status: **Committed** | Owners: AI Platform, Applied AI, Security | Last reviewed: 2026-07-13
+Status: **Committed** | Owners: AI Platform, Applied AI, Security | Last reviewed: 2026-07-15
 
 ### AI Agents, Reasoning, and Evaluations
 
@@ -1679,7 +1679,7 @@ Agents are bounded capability profiles, not artificial executives. Labels such a
 
 | ID | Requirement |
 |---|---|
-| REQ-AI-001 | AI workloads MUST use the Responses API and Agents SDK behind capability, policy, budget, and evaluation interfaces. |
+| REQ-AI-001 | AI workloads MUST use the centralized provider-neutral gateway; Llama is the primary H1 provider and every route is capability-, policy-, budget-, schema-, and evaluation-gated. |
 | REQ-AI-002 | Agents MUST be versioned capability profiles with explicit tools, memory, context limits, handoffs, retries, evaluation, and termination. |
 | REQ-AI-003 | Deterministic authorization, retrieval, validation, execution, verification, citation, approval, and audit MUST surround model behavior. |
 | REQ-AI-004 | Connector/user content MUST NOT become privileged instructions or grant tools, and model output MUST be schema-validated. |
@@ -1697,9 +1697,9 @@ Agents are bounded capability profiles, not artificial executives. Labels such a
 
 #### 2. Runtime architecture
 
-The Python AI worker uses the OpenAI Responses API through an internal `ModelGateway`. The OpenAI Agents SDK supplies the server-owned agent loop, tool dispatch, handoffs, guardrails, and traces; PostgreSQL and Temporal remain authoritative for durable run state and approvals. The public API never exposes provider response IDs, API keys, raw prompts, or provider-specific tool objects.
+The Python AI worker implements the only `ModelGateway`/`AIProvider` boundary. Its default `LlamaProvider` uses the hosted Meta Llama API; an `OpenAIProvider` uses the Responses API only when independently configured and evaluated. PostgreSQL and Temporal remain authoritative for durable run/workflow state and approvals. The public API never exposes provider response IDs, API keys, internal service credentials, raw prompts, or provider-specific tool objects.
 
-OpenAI describes the Responses API as the agentic interface for multi-turn and tool-using applications, and its current model guidance recommends Responses for reasoning and tool calling. See [Responses API migration guidance](https://developers.openai.com/api/docs/guides/migrate-to-responses) and [current model guidance](https://developers.openai.com/api/docs/guides/latest-model). The [Agents SDK guide](https://developers.openai.com/api/docs/guides/agents) explicitly supports server ownership of deployment, tools, storage, and approval decisions, which is the boundary used here.
+Meta documents API-key creation, official Python/TypeScript SDKs, and OpenAI-SDK compatibility in its [Llama API announcement](https://ai.meta.com/blog/llamacon-llama-news/). The [official Python SDK](https://github.com/meta-llama/llama-api-python) supplies the chat-completions transport, configurable base URL, timeouts, bounded retries, API error types, and structured response format used inside the adapter. OpenAI's [structured-output guidance](https://developers.openai.com/api/docs/guides/structured-outputs) governs the optional Responses adapter. All agent loops, retrieval, memory, validation, review, and audit remain application-owned.
 
 ##### 2.1 Model gateway contract
 
@@ -1717,19 +1717,19 @@ OpenAI describes the Responses API as the agentic interface for multi-turn and t
 
 It returns `AgentRunResult` with structured output, model and revision actually used, usage, finish reason, tool-invocation references, validation results, citations, safety flags, and terminal state. Provider exceptions are normalized. Raw provider request/response payloads are not retained by default; an explicitly opted-in diagnostic sample may be encrypted under a restricted key, assigned a short TTL, and accessed only through time-limited break glass.
 
-The OpenAI request defaults to `store: false`; the application owns conversation state and supplies only the context required for that turn. Any use of provider-side storage requires an approved data-processing profile and tenant configuration. API credentials are server-side secret references, isolated per environment, never placed in a tool schema or prompt.
+The application owns conversation state and supplies only the context required for the turn. The optional OpenAI request defaults to `store: false`; no provider-side storage is assumed for Llama. Any provider retention/storage feature requires an approved data-processing profile and tenant configuration. API credentials are server-side secret references, isolated per environment, never placed in a tool schema or prompt.
 
 ##### 2.2 Model policy
 
-| Workload | H1 family default | Starting reasoning | Promotion objective |
+| Workload | H1 route | Sampling policy | Promotion objective |
 |---|---|---|---|
-| High-volume extraction and classification | `gpt-5.6-luna` | `none` or `low` | Schema validity, field accuracy, cost, and latency |
-| Entity-resolution explanation and graph verification | `gpt-5.6-terra` | `low` | Pairwise decision accuracy and evidence use |
-| Grounded query/research and mitigation drafting | `gpt-5.6-terra` | `medium` | Citation, abstention, usefulness, and latency |
-| Scenario compilation and explanation | `gpt-5.6-terra` | `medium` | Operation accuracy and unsupported-change rejection |
-| Difficult orchestration, adjudication, and eval grading | `gpt-5.6-sol` | `high`; `max` only after measurement | Quality-first benchmark with explicit cost ceiling |
+| Knowledge/technical extraction and event understanding | Configured Llama model | Low temperature | Schema validity, field accuracy, provenance, cost, and latency |
+| Entity resolution | Configured Llama model | Near-deterministic | Pairwise decision accuracy, conflict disclosure, and evidence use |
+| Causal and prediction explanation | Configured Llama reasoning model | Low temperature | Citation, abstention, numeric preservation, usefulness, and latency |
+| Scenario planning | Configured Llama reasoning model | Low temperature | Registered-operation accuracy and unsupported-change rejection |
+| Explicitly promoted difficult reasoning | Evaluated `AI_REASONING_PROVIDER` route | Task-specific | Quality-first benchmark with an explicit cost ceiling |
 
-OpenAI currently identifies `gpt-5.6-sol` for frontier capability, `gpt-5.6-terra` for balanced capability and cost, and `gpt-5.6-luna` for efficient high-volume work in [model guidance](https://developers.openai.com/api/docs/guides/latest-model). These are workload defaults, not unconditional production aliases. Production configuration records an explicitly evaluated model revision where available, the prompt and tool-schema hashes, reasoning setting, and fallback set.
+`LLAMA_MODEL`, optional `LLAMA_REASONING_MODEL`, endpoint, prompt/schema hashes, sampling settings, and evaluated fallback set are versioned deployment configuration. Application features never name a floating model. The status surface reports the actual configured route without exposing credentials.
 
 A fallback is eligible only if it has passed the same capability eval gate and data-control requirements. The gateway may fall back for transient availability or rate-limit failure, never to bypass a safety refusal, tool denial, data residency rule, or output validation error. If no approved candidate remains, the run fails closed with a retryable or terminal status.
 
@@ -1795,7 +1795,7 @@ The citation verifier checks accessibility again, locator integrity, evidence ex
 
 ##### 6.1 Tool schemas
 
-Tools use JSON Schema with `additionalProperties: false`, explicit enums, lengths, numeric bounds, and required fields. Structured Outputs enforce schema adherence for model responses, while function calling is used to bridge the model to application tools; this distinction follows [OpenAI structured output guidance](https://developers.openai.com/api/docs/guides/structured-outputs).
+Tools and agent results use JSON Schema with `additionalProperties: false`, explicit enums, lengths, numeric bounds, and required fields. Provider-native strict structured output is requested when supported and the same schema is enforced again locally. The Meta Llama adapter uses its chat-completions JSON-schema response format; the optional OpenAI adapter uses Responses `text.format`, following [OpenAI structured output guidance](https://developers.openai.com/api/docs/guides/structured-outputs).
 
 H1 tools are:
 
@@ -1942,7 +1942,7 @@ Promotion evidence also reports quality, safety, latency, and cost against the c
 | RSK-006 | Model output substitutes an approved payload or becomes a confused deputy. | Exact canonical digest, role-distinct humans, deterministic executor, one-time grant, and execution-time policy check. |
 | RSK-007 | Sensitive employment inference emerges from ordinary organizational data. | Prohibited-use schemas, aggregate-only simulation, tool/prompt controls, output classifiers, policy review, and security evals. |
 
-Native OpenAI multi-agent features, remote MCP, additional model providers, fine-tuning, persistent provider state, voice agents, and autonomous background actions are Provisional. Each requires a separate data-flow review, threat model, eval suite, cost envelope, rollback, and explicit product horizon. Autonomous organizations, AI executives, and workforce prediction remain Research and have no production authority.
+Provider-native multi-agent features, remote MCP, further provider adapters, fine-tuning, persistent provider state, voice agents, and autonomous background actions are Provisional. Each requires a separate data-flow review, threat model, eval suite, cost envelope, rollback, and explicit product horizon. Autonomous organizations, AI executives, and workforce prediction remain Research and have no production authority.
 
 ## CH-08 - Simulation and Prediction
 
@@ -1950,13 +1950,37 @@ Status: **Committed** | Owners: Simulation Platform, Applied AI, Product Analyti
 
 ### Simulation and Prediction
 
+#### Phase 3 decision-intelligence foundation
+
+ADR-019 adds a general, governed foundation beside the frozen H1 launch scheduler. It deliberately keeps two questions separate:
+
+```text
+Simulation: immutable snapshot -> confirmed change -> bounded relationship propagation
+            -> versioned deterministic rules -> impact -> baseline comparison
+
+Prediction: historical observations -> bounded feature processing -> registered non-LLM model
+            -> forecast -> confidence evidence -> real outcome -> human validation -> learning event
+```
+
+The API routes are separated under `/v1/twin/simulation/*` and `/v1/twin/prediction/*`; neither service imports or calls the other. PostgreSQL records are tenant-qualified, hash-bound, idempotent, audited, and emitted through the transactional outbox. The Python intelligence worker performs pure deterministic calculation and fails closed. It has no connector read, graph write, LLM call, oracle fallback, or external action capability.
+
+General simulation snapshots seal one to 100 authorized graph nodes, explicit aggregate numeric variables, up to 500 visible relationships, graph version, as-of time, assumptions, and canonical digest. A scenario is a typed `hiring`, `pricing_change`, `supplier_failure`, `expansion`, or `budget_change` branch. Every branch references an immutable snapshot and optional confirmed parent branch, contains allowlisted `set`, `add`, or `multiply` changes, declares a propagation depth of at most six, and requires digest confirmation. Execution applies changes, propagates the same variable through declared direction/strength/confidence/importance, recalculates only the registered `revenue`, `operating_margin`, `budget_variance`, and `capacity_gap` identities when their inputs exist, and returns per-node baseline/scenario deltas. Propagated weights express modeled exposure, not causality.
+
+The predictive registry stores forecasting, optimization, anomaly-detection, computer-vision, and classification definitions with inputs, outputs, semantic version, accuracy, owner, trigger, lifecycle state, calibration bias, learning revision, and state hash. This phase executes only active forecasting/classification definitions using `linear_trend` or `bounded_linear_trend`; other types are governance-ready registrations, not pretend implementations. Revenue, expense, customer-churn, aggregate-workforce, and risk forecasts accept three to 10,000 historical observations and a one-to-36-step horizon. The exact observations are retained in an immutable tenant-scoped feature batch with user-input source binding and data hash; the public run references that batch without duplicating it. Results include processed feature summaries, forecast intervals, fit/sample/error confidence evidence, limitations, input hash, model version, and pending-outcome state.
+
+Learning is explicit and reviewable. A real outcome is recorded with source evidence, then an authorized user confirms or corrects it. The worker calculates MAE, MAPE where defined, RMSE, bias, and normalized accuracy. One transaction updates the prediction, rolling model accuracy, bounded calibration bias, learning revision, append-only learning event, audit chain, idempotency record, and outbox event. Historical outcomes, technical specifications, company rules, corrections, and expert knowledge can be submitted, but remain `pending_review` and cannot silently alter a model.
+
+Workforce use remains aggregate-only: `headcount`, `workforce_capacity`, and `open_positions`. Person identifiers, individual attrition, performance, productivity, suitability, and hiring scores are rejected. Hiring scenarios model an explicit aggregate headcount change; they do not recommend, rank, select, or evaluate people and do not authorize an employment action.
+
+The current foundation is horizontally stateless at the API layer and all reads are recovered from PostgreSQL rather than replica-local maps. Bounded input sizes prevent unbounded graph or historical processing. Production promotion still requires Temporal orchestration for long runs, cancellation/heartbeats, object storage for large artifacts, representative backtesting, calibration/drift/fairness gates, model-artifact signing, domain-owner approval, and load evidence. Those gates are limitations, not silently claimed capabilities.
+
 #### 1. Purpose, claim boundary, and non-goals
 
 H1 implements one defensible simulation: a seeded PERT/Monte Carlo forecast of launch timing over a task dependency DAG. It compares an immutable baseline with a user-confirmed scenario and explains the conditional distribution of completion dates.
 
 The result is not a promise, causal conclusion, or validated prediction of human behavior. It is conditional on task estimates, dependencies, calendars, and stated assumptions. The product MUST call it a forecast or simulation, not an objective prediction of the organization.
 
-Individual burnout, attrition, performance, productivity, hiring, compensation, emotion, health, misconduct, or suitability scoring is prohibited through H3. H1 has no person-level rate, performance, availability, or productivity parameter. Mergers, layoffs, hiring, customer churn, pricing, security-loss magnitude, cash flow, and market simulations remain Research until separately governed models and validation exist.
+Individual burnout, attrition, performance, productivity, hiring, compensation, emotion, health, misconduct, or suitability scoring is prohibited through H3. H1 has no person-level rate, performance, availability, or productivity parameter. Production-calibrated mergers, layoffs, customer churn, pricing, security-loss magnitude, cash-flow, and market claims remain Research until separately governed models and validation exist; ADR-019 provides only the bounded conditional/statistical foundation described above.
 
 | ID | Requirement |
 |---|---|
@@ -2956,7 +2980,7 @@ Capacity warnings are tickets, not pages, unless exhaustion is imminent. Runbook
 
 ## CH-11 - User Experience and Visualization Specification
 
-Status: **committed** | Owners: product-design, frontend-engineering, accessibility-engineering | Last reviewed: 2026-07-13
+Status: **committed** | Owners: product-design, frontend-engineering, accessibility-engineering | Last reviewed: 2026-07-15
 
 ### User Experience and Visualization Specification
 
@@ -3003,7 +3027,7 @@ Desktop uses a visible left navigation rail and top context bar. Tablet uses a c
 
 | Group | Destinations | H1 visibility |
 |---|---|---|
-| Understand | Home, Ask, Explore, Timeline | Visible |
+| Understand | Home, Ask, Explore, Timeline, AI Control Center | Visible; model-backed actions show provider readiness and are disabled when unconfigured |
 | Plan | Scenarios, Simulation Runs | Visible |
 | Act | Proposed Actions, Approvals, Action Receipts | Visible to authorized roles; counts never reveal unauthorized items |
 | Operate | Connectors, Sync Runs, Audit | Visible by role |
@@ -3046,6 +3070,7 @@ Status values follow the architecture-wide `Committed`, `Provisional`, `Research
 | Entity detail `/:tenant/entities/:entityId` | Committed H1 | Authorized users | Canonical attributes, aliases, provenance, relationships, timeline, ACL summary, data-quality warnings, merge history, and report-correction entry. Hidden relations do not influence visible counts. |
 | Evidence detail `/:tenant/evidence/:evidenceId` | Committed H1 | Authorized users | Immutable source digest, normalized observation, transformation lineage, claims supported or contradicted, retention status, and source link. Raw payload requires separate scope and is redacted by default. |
 | Resolution review `/:tenant/resolution/:decisionId` | Committed H1 | Data stewards | Candidate records, match and non-match evidence, rule/model version, confidence, resulting canonical identity, split action, impact preview, and rebuild status. |
+| AI Control Center `/:tenant/ai` | Committed H1 | Authorized analysts, stewards, and reviewers | Real Llama/provider readiness, vector status, seven specialized-agent launchers, private document import, permission-trimmed retrieval, activity and token/cost metadata, Explain This, evidence and limitations, and PENDING_REVIEW suggestion decisions. It has no offline simulated AI response and every review receipt states `mutation_performed: false`. |
 
 ##### 3.3 Explore and time
 
@@ -3662,7 +3687,7 @@ H1 commits REST, SSE, authenticated provider webhook ingress, logical AsyncAPI e
 
 ## CH-13 - Deployment and Operations
 
-Status: **Committed** | Owners: Platform Engineering, Site Reliability Engineering, Release Engineering | Last reviewed: 2026-07-13
+Status: **Committed** | Owners: Platform Engineering, Site Reliability Engineering, Release Engineering | Last reviewed: 2026-07-15
 
 ### Deployment and Operations
 
@@ -3713,7 +3738,7 @@ Rules:
 4. Images run the same entrypoints, schema versions, non-root user, and read-only filesystem used in Kubernetes.
 5. Named volumes make restarts realistic. The reset command refuses non-synthetic environments and prints the resolved absolute volume/project scope before deletion.
 6. A seed value creates the same two tenants, identities, source payloads, oracle, graph, scenarios, and expected action target.
-7. Local deterministic tests can run without public provider/model credentials by using signed provider fixtures and recorded model-safe stubs. Stubs cannot satisfy the model-integration, AI-evaluation, or cited-answer release gate; the H1 presentation/release evidence includes an approved live OpenAI endpoint run. Live mode is explicit and is not used to establish deterministic fixture assertions.
+7. Local deterministic tests can run without public provider/model credentials by using test-only provider doubles. Doubles cannot satisfy the model-integration, AI-evaluation, or cited-answer release gate; the H1 presentation/release evidence includes an approved live Llama endpoint run with the exact provider/model configuration and redacted usage receipt. Live mode is explicit and is not used to establish deterministic fixture assertions.
 8. Compose is not a production HA profile and does not support real customer data.
 
 The required developer experience is a cross-platform Node launcher that implements bootstrap, start, stop, seed, test, verify, export-logs, and reset. It wraps Compose and workspace commands so developers do not memorize container sequencing.
@@ -3936,7 +3961,7 @@ Support bundles are customer-triggered, previewable, redacted, encrypted to supp
 
 An offline release bundle contains signed images, charts, OpenTofu/manifest options, SBOMs, provenance, licenses, vulnerability database snapshot/date, documentation, migration tool, preflight, and verification public keys. Import verifies every digest/signature without network access.
 
-GitHub, Jira and OpenAI capabilities are unavailable unless the customer provides approved reachable equivalents with the same connector/model contract and evaluation. The UI must state capability unavailable; it cannot silently simulate live synchronization or model reasoning. Security updates use a documented out-of-band bundle and emergency cadence.
+GitHub, Jira, Llama, OpenAI, and other online-provider capabilities are unavailable unless the customer provides approved reachable equivalents with the same connector/model contract and evaluation. The UI must state capability unavailable; it cannot silently simulate live synchronization, embeddings, or model reasoning. Security updates use a documented out-of-band bundle and emergency cadence.
 
 ##### 10.4 Regional and multi-cloud
 
@@ -4659,9 +4684,17 @@ It can become Committed only after shadow or controlled-pilot evidence meets tho
 
 ## CH-16 - Architecture Audit and Convergence Record
 
-Status: **committed** | Owners: architecture-review-board, security-architecture, product-governance | Last reviewed: 2026-07-13
+Status: **committed** | Owners: architecture-review-board, security-architecture, product-governance | Last reviewed: 2026-07-15
 
 ### Architecture Audit and Convergence Record
+
+#### Phase 3 implementation audit (2026-07-21)
+
+The pre-implementation audit found that the H1 simulation mathematics were reproducible and appropriately isolated in the Python worker, but its NestJS compatibility facade was demo-only: Aster-specific snapshot compilation, process-local lookup maps, fire-and-forget persistence, weakly bounded generic intervention input, no general branching, and an enabled-by-default oracle fallback. The worker supported only the frozen dependency-DAG workload. No numeric business prediction pipeline, prediction outcome lifecycle, calibration/accuracy learning loop, or non-LLM model registry existed. AI learning outcomes applied to reviewed suggestions rather than numeric predictions.
+
+The main security risks were missing explicit capability checks on legacy simulation creation, insufficient validation of caller-provided times and interventions, false-success risk from asynchronous writes and fabricated fallback output, and possible user confusion between conditional simulation and prediction. The main scalability risks were replica-local state, synchronous inline worker calls without durable orchestration, no general run pagination/cancellation, and no artifact offload for large output. Existing policy also correctly prohibited individual workforce prediction and treated pricing, churn, and hiring models as unvalidated research.
+
+ADR-019 addresses the implementable foundation without weakening those policy boundaries: new services use server-derived tenancy, explicit capabilities, exact-key and size validation, immutable hashes, confirmation, PostgreSQL reads, transactional compare-and-set writes, idempotency, audit, outbox, bounded worker functions, and fail-closed errors. Simulation and prediction are separate services and worker functions. Aggregate workforce enforcement is duplicated at both API and worker boundaries. Long-running workflow orchestration, artifact storage, operational model adapters, and production validation remain explicit promotion work rather than being represented as complete.
 
 #### 1. Audit opinion
 
@@ -4736,7 +4769,7 @@ The formal ledger reviews close with no remaining Critical or High issue, and pa
 | `FND-010` | High | External retry and rollback behavior could duplicate a Jira write or overwrite a concurrent edit. | Use durable workflow state, stable idempotency, provider correlation, before/after receipts, optimistic source-version precondition, and compensation conflict instead of blind overwrite. | `REQ-ACT-003`, `CTRL-ACT-003`, `AC-ACT-002`, `AC-ACT-003`, `RSK-013` |
 | `FND-011` | High | Simulation and prediction scope mixed conditional scheduling with causal and workforce claims. | H1 uses a seeded dependency-DAG PERT/Monte Carlo scheduler with distributions and limitations. Workforce-sensitive inference is prohibited through H3 and separately governed as Research. | `REQ-SIM-001` through `REQ-SIM-005`, `CTRL-PRV-002`, `ADR-014`, `RSK-007`, `RSK-011` |
 | `FND-012` | High | Unlimited scale and trillion-edge language had no workload, cost, or validation boundary. | Commit explicit H1 and H2 envelopes; freeze H3 tiers from pilot telemetry; retain hyperscale as H5 Research with representative workload gates. | `REQ-REL-001`, `REQ-REL-002`, `REQ-REL-006`, `CH-15` |
-| `FND-013` | High | Cloud neutrality, active-active multi-cloud, air gap, edge, and online OpenAI dependency were treated as simultaneously available. | Define portable contracts and one reference profile; graduate dedicated, customer-managed, regional, air-gapped, and edge profiles independently with explicit capability differences. | `REQ-ARCH-004`, `REQ-ARCH-006`, `ADR-015`, `RSK-008` |
+| `FND-013` | High | Cloud neutrality, active-active multi-cloud, air gap, edge, and online model-provider dependencies were treated as simultaneously available. | Define portable contracts and one reference profile; graduate dedicated, customer-managed, regional, air-gapped, and edge profiles independently with explicit capability differences. | `REQ-ARCH-004`, `REQ-ARCH-006`, `ADR-015`, `RSK-008` |
 | `FND-014` | Medium | Language, protocol, and datastore lists risked adoption by enumeration and duplicated responsibilities. | Assign TypeScript, Python, SQL, PostgreSQL, Neo4j, Temporal, S3-compatible storage, pgvector, Valkey, OpenTelemetry, Docker, and Kubernetes explicit ownership; defer alternatives behind triggers. | `ADR-004`, `ADR-010`, `ADR-017`, `RSK-009` |
 | `FND-015` | High | Graph-first UX could hide evidence, staleness, permissions, uncertainty, and inaccessible states. | Make search/list the default, bound graph traversal/rendering, expose evidence and checkpoints, and require table/text equivalence plus WCAG 2.2 AA acceptance. | `REQ-UX-001` through `REQ-UX-004`, `CH-11`, `AC-UX-001` |
 | `FND-016` | High | Compliance language could be read as a certification or legal conclusion. | Limit claims to control alignment and evidence readiness; require separate organizational controls, legal ownership, audit, and certification. | `REQ-SEC-005`, `REQ-SEC-006`, `CH-09` |
@@ -4798,7 +4831,7 @@ These limitations are intentional and do not represent hidden implementation cho
 - H1 physical-asset anomalies and forecasts are deterministic demonstrations over synthetic history. They are not trained or validated predictive-maintenance models and cannot support maintenance, safety, or equipment-operation decisions.
 - PERT/Monte Carlo output is conditional on fixture distributions and dependency structure. It is not a causal estimate and cannot validate a real launch forecast.
 - Shared tenancy is the reference deployment. Dedicated, customer-managed, regional, air-gapped, and edge profiles remain separately gated.
-- The online OpenAI runtime is an explicit dependency for H1. Air-gapped inference is unavailable until a local model profile passes the same workload-specific quality and safety gates.
+- The online Llama runtime is an explicit dependency for live H1 AI acceptance evidence; OpenAI is optional. Air-gapped inference is unavailable until a local model and embedding profile pass the same workload-specific quality and safety gates.
 - PostgreSQL, Neo4j, pgvector, and Valkey are sufficient only inside measured boundaries. Scale transitions follow `CH-15`; they are not pre-approved technology migrations.
 - Two-person approval reduces accidental or unilateral action but does not prevent collusion. Organizational role assignment, separation-of-duty review, and audit monitoring remain required.
 - Source systems may not support transactional rollback. Compensation is a new conditional action with conflict handling, not erasure of history.
@@ -5231,21 +5264,23 @@ Each installation uses tenant-scoped credentials, least scopes, an egress allowl
 
 GitHub H1 is read-only metadata for allowlisted sandbox repositories. Jira H1 reads allowlisted sandbox projects and exposes one exact dual-approved remediation mutation. Source revisions win within their object lineage; canonical claims preserve conflicting evidence rather than silently overwrite it.
 
-## ADR-012 - OpenAI-First Capability Gateway
+## ADR-012 - Historical OpenAI-First Capability Gateway
 
 Status: **accepted** | Owners: ai-platform
 
-### ADR-012: OpenAI-First Capability Gateway
+### ADR-012: Historical OpenAI-First Capability Gateway
+
+This accepted decision is superseded in full by `ADR-018`. It remains in the ledger to preserve the decision history; wherever the two conflict, `ADR-018` has precedence.
 
 #### Decision
 
-Use the OpenAI Responses API and Python Agents SDK behind an internal gateway that owns capability routing, tenant policy, budgets, redaction, model and prompt versions, retention configuration, and evaluation status. Use the GPT-5.6 family by evaluated workload: sol for highest-complexity orchestration and grading, terra for balanced grounded synthesis, and luna for high-volume extraction.
+The original decision selected the OpenAI Responses API and Python Agents SDK behind an internal gateway that owned capability routing, tenant policy, budgets, redaction, model and prompt versions, retention configuration, and evaluation status.
 
-Production pins evaluated snapshots. A fallback is eligible only after the same use-case safety and quality gates; otherwise the run fails closed or queues for review. OpenAI-native structured outputs and tools remain available rather than being flattened behind a lowest-common-denominator interface.
+The enduring controls—evaluated pinned configurations, strict structured output, no unapproved fallback, and fail-closed behavior—are retained by `ADR-018`. The provider-first constraint is not.
 
 #### Consequences
 
-OpenAI is an explicit H1 external dependency. Air-gapped operation requires a separately evaluated local-model adapter in H4.
+OpenAI is no longer the mandatory H1 provider. It is an optional adapter that must pass the same workload-specific gates as the Llama route.
 
 ## ADR-013 - Bounded Agent Authority and Exact-Payload Approval
 
@@ -5285,7 +5320,7 @@ Status: **accepted** | Owners: platform-engineering
 
 Cloud neutrality means portable contracts and migration paths, not active-active multi-cloud. H1 runs through Docker Compose. H2 promotes OCI workloads to a conformant Kubernetes distribution with Helm and OpenTofu modules. Domain code uses PostgreSQL, S3-compatible object, OIDC/SAML/SCIM, Temporal, and OpenTelemetry interfaces. Provider-specific code is confined to infrastructure adapters.
 
-Managed implementations are permitted when export, restore, identity, encryption, observability, and failure contracts remain testable. Dedicated, on-premises, air-gapped, edge, and multi-region profiles are H4 gates. Air-gapped mode excludes the OpenAI path until a local adapter passes evaluations.
+Managed implementations are permitted when export, restore, identity, encryption, observability, and failure contracts remain testable. Dedicated, on-premises, air-gapped, edge, and multi-region profiles are H4 gates. Air-gapped mode excludes online Llama, OpenAI, and embedding paths until a reachable local adapter passes the same evaluations.
 
 ## ADR-016 - Evaluation-Driven Verification and Finite Release Gates
 
@@ -5315,6 +5350,54 @@ Build the claim/evidence model, ontology governance, reversible entity resolutio
 
 Commercial dependencies MUST support tenant isolation, export, deletion, audit, regionality, incident evidence, contractual security, and a tested exit path. A managed service may not become an undocumented source of truth.
 
+## ADR-018 - Provider-Neutral AI Gateway with Llama Primary
+
+Status: **accepted** | Owners: ai-platform, security-architecture
+
+### ADR-018: Provider-Neutral AI Gateway with Llama Primary
+
+#### Decision
+
+Supersede `ADR-012` and route every model-backed capability through one provider-neutral Python AI Gateway. Meta Llama API is the default H1 provider through an `AIProvider` adapter. OpenAI Responses is an optional independently configured and evaluated adapter. Application controllers, the browser, connectors, graph services, simulation services, and action services cannot call either provider directly or select an arbitrary provider/model.
+
+The gateway owns server-derived tenant/actor context, permission-trimmed retrieval, agent/profile and model routing, immutable prompt and schema versions, strict structured outputs, local validation, rate/time/token/cost budgets, controlled memory, suggestion review state, redacted audit, retry normalization, and provider readiness. Provider-native features remain available inside their adapter; the common contract does not weaken schema, refusal, safety, usage, or data-control behavior.
+
+Llama credentials, endpoint, and exact account-available model identifiers are runtime secrets/configuration. No model response, semantic embedding, or provider-success state may be simulated outside test-only doubles. When no approved route is configured or healthy, the affected AI capability reports unavailable and fails closed while deterministic twin capabilities remain operational.
+
+Seven H1 capability profiles are model-backed: knowledge ingestion, entity resolution, event understanding, causal analysis, simulation planning, prediction explanation, and technical knowledge. They produce evidence-bearing `PENDING_REVIEW` suggestions. They cannot authenticate, authorize, mutate the canonical graph, establish enterprise memory, calculate simulation/prediction values, approve themselves, or execute actions. Only reviewed artifacts may enter enterprise/learning memory, and graph mutations still require a separate deterministic domain command.
+
+#### Consequences
+
+- Llama becomes an explicit H1 external dependency for live AI acceptance evidence; a real key, endpoint, and exact model are deployment inputs.
+- Provider portability is a tested adapter boundary, not a promise that models are behaviorally interchangeable.
+- OpenAI can be promoted per workload only with the same isolation, injection, schema, grounding, quality, latency, cost, and data-processing gates.
+- PostgreSQL stores durable AI runs, provenance, vectors, memory, suggestions, reviews, and usage; reduced local stores cannot satisfy the enterprise-memory release gate.
+- Air-gapped inference remains unavailable until a reachable local adapter and embedding route pass the same workload gates.
+
+## ADR-019 - Separated Simulation and Predictive Intelligence
+
+Status: **accepted** | Owners: simulation-science, applied-ai, data-platform
+
+### ADR-019: Separated Simulation and Predictive Intelligence
+
+#### Decision
+
+The general decision-intelligence foundation has two non-interchangeable execution paths. Simulation answers a conditional question by applying confirmed typed changes to an immutable graph-backed snapshot, propagating declared relationship weights within a bound, running versioned deterministic derived-metric rules, and comparing the branch with its baseline. Prediction answers a likelihood question by processing historical observations through a registered non-LLM statistical model, emitting a forecast, confidence evidence, limitations, and a pending-validation state.
+
+The NestJS API owns server-derived tenancy, authorization, model/scenario lifecycle, confirmation, idempotency, PostgreSQL records, audit, and outbox publication. The Python intelligence worker owns bounded pure mathematics. The new simulation service cannot import or call the predictive service, and the predictive service cannot use simulation output as historical truth. Neither path invokes an LLM or substitutes an oracle when the worker fails.
+
+The model registry accepts forecasting, optimization, anomaly-detection, computer-vision, and classification definitions with explicit inputs, outputs, version, accuracy, owner, trigger, lifecycle, and state hash. Only allowlisted deterministic forecasting baselines are executable in this phase; other model kinds are registered for governed future adapters.
+
+Validated real outcomes update rolling accuracy and a bounded calibration bias through an append-only learning event. Submitted rules, specifications, corrections, historical outcomes, and expert knowledge remain pending review and cannot silently retrain or activate a model.
+
+Hiring scenarios and workforce forecasts are aggregate-only. Person identifiers, individual attrition, performance, productivity, suitability, and hiring scores are rejected. This decision does not authorize employment decisions or remove the prohibitions in CH-09.
+
+#### Consequences
+
+- The frozen H1 PERT/Monte Carlo scheduler and its compatibility routes remain unchanged.
+- New work uses `/v1/twin/simulation/*` or `/v1/twin/prediction/*` and the `edt.decision-intelligence/1.0.0` contract.
+- Production promotion still requires representative backtesting, drift and fairness review, calibration evidence, domain-owner approval, capacity testing, and durable workflow orchestration.
+
 # Part IV - Normative Catalogs
 
 ## Source Ledger
@@ -5341,6 +5424,8 @@ Source: `docs/enterprise-digital-twin/source-ledger.yaml`
 | SRC-014 | Atlassian OAuth 2.0 authorization code flow | primary-technical-source |  | informative-provider-contract | https://developer.atlassian.com/cloud/oauth/getting-started/implementing-oauth-3lo/ | 2026-07-13 |
 | SRC-015 | RFC 9457 Problem Details for HTTP APIs | primary-standard |  | normative-external-standard | https://www.rfc-editor.org/rfc/rfc9457 | 2026-07-13 |
 | SRC-016 | Jira Cloud REST API edit issue operation | primary-technical-source |  | informative-provider-contract | https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-rest-api-3-issue-issueidorkey-put | 2026-07-13 |
+| SRC-017 | Meta Llama API announcement | primary-technical-source |  | informative-current-product-fact | https://ai.meta.com/blog/llamacon-llama-news/ | 2026-07-15 |
+| SRC-018 | Official Meta Llama API Python SDK | primary-technical-source |  | informative-provider-contract | https://github.com/meta-llama/llama-api-python | 2026-07-15 |
 
 ## Requirements
 
@@ -5393,7 +5478,7 @@ Source: `docs/enterprise-digital-twin/catalogs/requirements.yaml`
 | REQ-CON-003 | Verifiable synchronization | Connectors MUST verify webhooks reconcile periodically checkpoint cursors deduplicate events and preserve tombstones. | H1 | committed |
 | REQ-CON-004 | Compromised connector containment | Connector execution MUST isolate credentials egress parsing quotas and tenant effects and support immediate revocation. | H1 | committed |
 | REQ-CON-005 | Connector SDK | H2 MUST define manifests authentication discovery backfill incremental sync writes errors observability testing and certification contracts. | H2 | committed |
-| REQ-AI-001 | OpenAI-first gateway | AI workloads MUST use the Responses API and Agents SDK behind capability policy budget and evaluation interfaces. | H1 | committed |
+| REQ-AI-001 | Central provider-neutral AI gateway | AI workloads MUST use the centralized provider-neutral gateway with Llama primary and capability policy budget schema and evaluation controls. | H1 | committed |
 | REQ-AI-002 | Bounded capability agents | Agents MUST be versioned capability profiles with explicit tools memory context limits handoff rules retries evaluation and termination. | H1 | committed |
 | REQ-AI-003 | Deterministic policy envelope | Authorization retrieval validation execution verification citation approval and audit MUST surround all model behavior. | H1 | committed |
 | REQ-AI-004 | Untrusted content separation | Connector and user content MUST NOT become privileged instructions or grant tools and all model outputs MUST be schema validated. | H1 | committed |
@@ -5473,12 +5558,12 @@ Source: `docs/enterprise-digital-twin/catalogs/traceability.yaml`
 | REQ-GOV- | README.md<br>decision-precedence.md<br>manifest.yaml<br>chapters/16-architecture-audit.md | ADR-001<br>ADR-016 | CMP-DOCS | manifest.yaml<br>catalogs/requirements.yaml<br>catalogs/traceability.yaml | CTRL-AUD-001 | AC-DOC-001<br>AC-DOC-002<br>AC-DOC-003<br>AC-REV-002 |
 | REQ-PROD- | chapters/01-product-vision.md<br>chapters/02-reference-workload.md<br>chapters/11-ux-visualizations.md | ADR-002 | CMP-WEB<br>CMP-API | contracts/openapi/enterprise-digital-twin.openapi.yaml<br>contracts/schemas/scenario.schema.json | CTRL-DAT-001<br>CTRL-IAM-003 | AC-PROD-001<br>AC-AI-001 |
 | REQ-PHY- | chapters/17-synthetic-physical-asset-twin.md<br>chapters/11-ux-visualizations.md<br>chapters/12-apis-developer-platform.md | ADR-002<br>ADR-004<br>ADR-013 | CMP-WEB<br>CMP-API<br>CMP-POLICY<br>CMP-POSTGRES | contracts/openapi/enterprise-digital-twin.openapi.yaml | CTRL-IAM-003<br>CTRL-TEN-001<br>CTRL-AUD-001<br>CTRL-PHY-001 | AC-PHY-001 |
-| REQ-EVT- | chapters/18-event-intelligence-causal-impact.md<br>chapters/05-data-knowledge-graph.md<br>chapters/07-ai-agents-reasoning.md<br>chapters/08-simulation-prediction.md<br>chapters/09-security-privacy-compliance.md<br>chapters/11-ux-visualizations.md<br>chapters/12-apis-developer-platform.md | ADR-004<br>ADR-006<br>ADR-009<br>ADR-010<br>ADR-011<br>ADR-012 | CMP-WEB<br>CMP-API<br>CMP-EVENT-INTELLIGENCE<br>CMP-AI<br>CMP-POLICY<br>CMP-WORKFLOW<br>CMP-POSTGRES<br>CMP-GRAPH<br>CMP-OBS | contracts/openapi/enterprise-digital-twin.openapi.yaml<br>contracts/asyncapi/events.asyncapi.yaml<br>contracts/schemas/event-intelligence.schema.json | CTRL-AI-001<br>CTRL-AI-002<br>CTRL-AI-004<br>CTRL-IAM-003<br>CTRL-TEN-001<br>CTRL-AUD-001<br>CTRL-PRV-002<br>CTRL-EVT-001 | AC-EVT-001 |
+| REQ-EVT- | chapters/18-event-intelligence-causal-impact.md<br>chapters/05-data-knowledge-graph.md<br>chapters/07-ai-agents-reasoning.md<br>chapters/08-simulation-prediction.md<br>chapters/09-security-privacy-compliance.md<br>chapters/11-ux-visualizations.md<br>chapters/12-apis-developer-platform.md | ADR-004<br>ADR-006<br>ADR-009<br>ADR-010<br>ADR-011<br>ADR-012<br>ADR-018 | CMP-WEB<br>CMP-API<br>CMP-EVENT-INTELLIGENCE<br>CMP-AI<br>CMP-POLICY<br>CMP-WORKFLOW<br>CMP-POSTGRES<br>CMP-GRAPH<br>CMP-OBS | contracts/openapi/enterprise-digital-twin.openapi.yaml<br>contracts/asyncapi/events.asyncapi.yaml<br>contracts/schemas/event-intelligence.schema.json | CTRL-AI-001<br>CTRL-AI-002<br>CTRL-AI-004<br>CTRL-IAM-003<br>CTRL-TEN-001<br>CTRL-AUD-001<br>CTRL-PRV-002<br>CTRL-EVT-001 | AC-EVT-001 |
 | REQ-ARCH- | chapters/03-system-architecture.md<br>chapters/04-technology-stack.md<br>chapters/13-deployment-operations.md | ADR-003<br>ADR-004<br>ADR-005<br>ADR-015 | CMP-WEB<br>CMP-API<br>CMP-CONNECTOR<br>CMP-AI<br>CMP-WORKFLOW<br>CMP-PLATFORM | contracts/openapi/enterprise-digital-twin.openapi.yaml<br>contracts/asyncapi/events.asyncapi.yaml<br>contracts/proto/digital_twin.proto | CTRL-OPS-002<br>CTRL-SUP-001 | AC-DOC-003<br>AC-REL-003 |
 | REQ-TEN- | chapters/03-system-architecture.md<br>chapters/05-data-knowledge-graph.md<br>chapters/09-security-privacy-compliance.md | ADR-006<br>ADR-007 | CMP-API<br>CMP-POLICY<br>CMP-POSTGRES<br>CMP-PROJECTION | contracts/schemas/canonical.schema.json<br>contracts/openapi/enterprise-digital-twin.openapi.yaml | CTRL-IAM-002<br>CTRL-TEN-001<br>CTRL-TEN-002<br>CTRL-TEN-003 | AC-TEN-001 |
-| REQ-DATA- | chapters/05-data-knowledge-graph.md<br>catalogs/ontology.yaml | ADR-008<br>ADR-009<br>ADR-010 | CMP-POSTGRES<br>CMP-OBJECT<br>CMP-GRAPH<br>CMP-PROJECTION | contracts/schemas/canonical.schema.json<br>contracts/schemas/ontology-package.schema.json | CTRL-DAT-001<br>CTRL-DAT-002<br>CTRL-DAT-003 | AC-DATA-001<br>AC-DATA-002<br>AC-DATA-003<br>AC-PRV-001 |
-| REQ-CON- | chapters/06-ingestion-connectors-sync.md<br>catalogs/connectors.yaml | ADR-011 | CMP-CONNECTOR<br>CMP-WORKFLOW<br>CMP-PROJECTION | contracts/schemas/connector-manifest.schema.json<br>contracts/connectors/github/manifest.json<br>contracts/connectors/github/schemas/raw-envelope.schema.json<br>contracts/connectors/github/schemas/raw-payload.schema.json<br>contracts/connectors/github/schemas/normalized-observation.schema.json<br>contracts/connectors/github/schemas/cursor.schema.json<br>contracts/connectors/github/schemas/ontology-mapping.schema.json<br>contracts/connectors/jira-cloud/manifest.json<br>contracts/connectors/jira-cloud/schemas/raw-envelope.schema.json<br>contracts/connectors/jira-cloud/schemas/raw-payload.schema.json<br>contracts/connectors/jira-cloud/schemas/normalized-observation.schema.json<br>contracts/connectors/jira-cloud/schemas/cursor.schema.json<br>contracts/connectors/jira-cloud/schemas/ontology-mapping.schema.json<br>contracts/asyncapi/events.asyncapi.yaml | CTRL-CON-001<br>CTRL-CON-002<br>CTRL-CON-003<br>CTRL-CRY-002 | AC-CON-001<br>AC-CON-002 |
-| REQ-AI- | chapters/07-ai-agents-reasoning.md<br>catalogs/agents.yaml | ADR-012<br>ADR-013 | CMP-AI<br>CMP-MODEL-GATEWAY<br>CMP-POLICY<br>CMP-WORKFLOW | contracts/schemas/canonical.schema.json<br>contracts/mcp-manifest.json<br>contracts/openapi/enterprise-digital-twin.openapi.yaml | CTRL-AI-001<br>CTRL-AI-002<br>CTRL-AI-003<br>CTRL-AI-004<br>CTRL-AI-005 | AC-AI-001<br>AC-AI-002<br>AC-AI-003<br>AC-AI-004 |
+| REQ-DATA- | chapters/05-data-knowledge-graph.md<br>catalogs/ontology.yaml | ADR-008<br>ADR-009<br>ADR-010 | CMP-POSTGRES<br>CMP-OBJECT<br>CMP-GRAPH<br>CMP-PROJECTION | contracts/schemas/canonical.schema.json<br>contracts/schemas/ontology-package.schema.json<br>contracts/schemas/data-foundation.schema.json<br>contracts/openapi/enterprise-digital-twin.openapi.yaml<br>contracts/asyncapi/events.asyncapi.yaml | CTRL-DAT-001<br>CTRL-DAT-002<br>CTRL-DAT-003 | AC-DATA-001<br>AC-DATA-002<br>AC-DATA-003<br>AC-DATA-004<br>AC-PRV-001 |
+| REQ-CON- | chapters/06-ingestion-connectors-sync.md<br>catalogs/connectors.yaml | ADR-011 | CMP-CONNECTOR<br>CMP-WORKFLOW<br>CMP-PROJECTION | contracts/schemas/connector-manifest.schema.json<br>contracts/schemas/data-foundation.schema.json<br>contracts/openapi/enterprise-digital-twin.openapi.yaml<br>contracts/connectors/github/manifest.json<br>contracts/connectors/github/schemas/raw-envelope.schema.json<br>contracts/connectors/github/schemas/raw-payload.schema.json<br>contracts/connectors/github/schemas/normalized-observation.schema.json<br>contracts/connectors/github/schemas/cursor.schema.json<br>contracts/connectors/github/schemas/ontology-mapping.schema.json<br>contracts/connectors/jira-cloud/manifest.json<br>contracts/connectors/jira-cloud/schemas/raw-envelope.schema.json<br>contracts/connectors/jira-cloud/schemas/raw-payload.schema.json<br>contracts/connectors/jira-cloud/schemas/normalized-observation.schema.json<br>contracts/connectors/jira-cloud/schemas/cursor.schema.json<br>contracts/connectors/jira-cloud/schemas/ontology-mapping.schema.json<br>contracts/asyncapi/events.asyncapi.yaml | CTRL-CON-001<br>CTRL-CON-002<br>CTRL-CON-003<br>CTRL-CRY-002 | AC-CON-001<br>AC-CON-002<br>AC-CON-003 |
+| REQ-AI- | chapters/07-ai-agents-reasoning.md<br>catalogs/agents.yaml | ADR-012<br>ADR-018<br>ADR-013 | CMP-AI<br>CMP-MODEL-GATEWAY<br>CMP-POLICY<br>CMP-WORKFLOW | contracts/schemas/canonical.schema.json<br>contracts/schemas/ai-intelligence.schema.json<br>contracts/mcp-manifest.json<br>contracts/openapi/enterprise-digital-twin.openapi.yaml | CTRL-AI-001<br>CTRL-AI-002<br>CTRL-AI-003<br>CTRL-AI-004<br>CTRL-AI-005 | AC-AI-001<br>AC-AI-002<br>AC-AI-003<br>AC-AI-004 |
 | REQ-ACT- | chapters/07-ai-agents-reasoning.md<br>chapters/09-security-privacy-compliance.md | ADR-013 | CMP-API<br>CMP-WORKFLOW<br>CMP-POLICY<br>CMP-CONNECTOR | contracts/schemas/canonical.schema.json<br>contracts/openapi/enterprise-digital-twin.openapi.yaml | CTRL-ACT-001<br>CTRL-ACT-002<br>CTRL-ACT-003 | AC-ACT-001<br>AC-ACT-002<br>AC-ACT-003 |
 | REQ-SIM- | chapters/08-simulation-prediction.md<br>catalogs/simulations.yaml | ADR-014 | CMP-AI<br>CMP-WORKFLOW<br>CMP-POSTGRES | contracts/schemas/scenario.schema.json<br>contracts/schemas/simulation-snapshot.schema.json<br>contracts/openapi/enterprise-digital-twin.openapi.yaml | CTRL-DAT-001<br>CTRL-PRV-002 | AC-SIM-001<br>AC-SIM-002 |
 | REQ-UX- | chapters/11-ux-visualizations.md<br>catalogs/screens.yaml | ADR-002 | CMP-WEB<br>CMP-API | contracts/openapi/enterprise-digital-twin.openapi.yaml<br>contracts/graphql/schema.graphql | CTRL-DAT-002<br>CTRL-PRV-001 | AC-UX-001 |
@@ -5499,12 +5584,12 @@ Source: `docs/enterprise-digital-twin/catalogs/traceability.yaml`
 | QAR-PERF- | chapters/02-reference-workload.md<br>chapters/10-scalability-reliability-observability.md | ADR-003<br>ADR-009<br>ADR-014 | CMP-API<br>CMP-AI<br>CMP-GRAPH<br>CMP-MODEL-GATEWAY | contracts/openapi/enterprise-digital-twin.openapi.yaml<br>contracts/schemas/scenario.schema.json | CTRL-AI-004<br>CTRL-OPS-002 | AC-REL-001 |
 | QAR-SYNC- | chapters/06-ingestion-connectors-sync.md<br>chapters/10-scalability-reliability-observability.md | ADR-005<br>ADR-011 | CMP-CONNECTOR<br>CMP-WORKFLOW<br>CMP-PROJECTION | contracts/asyncapi/events.asyncapi.yaml<br>contracts/schemas/connector-manifest.schema.json<br>contracts/connectors/github/manifest.json<br>contracts/connectors/jira-cloud/manifest.json | CTRL-CON-001<br>CTRL-CON-002<br>CTRL-OPS-002 | AC-CON-001<br>AC-CON-002 |
 | QAR-COR- | chapters/06-ingestion-connectors-sync.md<br>chapters/10-scalability-reliability-observability.md | ADR-005<br>ADR-011 | CMP-CONNECTOR<br>CMP-WORKFLOW<br>CMP-POSTGRES<br>CMP-PROJECTION | contracts/asyncapi/events.asyncapi.yaml<br>contracts/connectors/github/schemas/raw-envelope.schema.json<br>contracts/connectors/github/schemas/normalized-observation.schema.json<br>contracts/connectors/jira-cloud/schemas/raw-envelope.schema.json<br>contracts/connectors/jira-cloud/schemas/normalized-observation.schema.json | CTRL-CON-002<br>CTRL-OPS-002 | AC-DATA-001<br>AC-CON-002<br>AC-ACT-002 |
-| QAR-AI- | chapters/07-ai-agents-reasoning.md<br>chapters/14-testing-evaluation-dx.md | ADR-012<br>ADR-013 | CMP-AI<br>CMP-MODEL-GATEWAY<br>CMP-POLICY | contracts/mcp-manifest.json<br>contracts/schemas/canonical.schema.json | CTRL-AI-001<br>CTRL-AI-002<br>CTRL-AI-003<br>CTRL-AI-004 | AC-AI-001<br>AC-AI-002<br>AC-AI-003<br>AC-AI-004 |
+| QAR-AI- | chapters/07-ai-agents-reasoning.md<br>chapters/14-testing-evaluation-dx.md | ADR-012<br>ADR-018<br>ADR-013 | CMP-AI<br>CMP-MODEL-GATEWAY<br>CMP-POLICY | contracts/mcp-manifest.json<br>contracts/schemas/canonical.schema.json | CTRL-AI-001<br>CTRL-AI-002<br>CTRL-AI-003<br>CTRL-AI-004 | AC-AI-001<br>AC-AI-002<br>AC-AI-003<br>AC-AI-004 |
 | QAR-SIM- | chapters/08-simulation-prediction.md<br>chapters/14-testing-evaluation-dx.md | ADR-014 | CMP-AI<br>CMP-WORKFLOW<br>CMP-POSTGRES | contracts/schemas/scenario.schema.json<br>contracts/schemas/simulation-snapshot.schema.json | CTRL-DAT-001<br>CTRL-OPS-002 | AC-SIM-001<br>AC-SIM-002 |
 | QAR-OBS- | chapters/10-scalability-reliability-observability.md<br>chapters/13-deployment-operations.md | ADR-005<br>ADR-015 | CMP-OBS<br>CMP-API<br>CMP-WORKFLOW<br>CMP-CONNECTOR<br>CMP-AI | contracts/asyncapi/events.asyncapi.yaml<br>contracts/schemas/canonical.schema.json | CTRL-AUD-001<br>CTRL-OPS-002 | AC-OBS-001 |
 | QAR-ACC- | chapters/11-ux-visualizations.md<br>catalogs/screens.yaml | ADR-002 | CMP-WEB<br>CMP-API | contracts/openapi/enterprise-digital-twin.openapi.yaml | CTRL-DAT-002<br>CTRL-PRV-001 | AC-UX-001 |
 | QAR-PORT- | chapters/04-technology-stack.md<br>chapters/13-deployment-operations.md | ADR-004<br>ADR-015<br>ADR-017 | CMP-PLATFORM<br>CMP-DEVELOPER | contracts/openapi/enterprise-digital-twin.openapi.yaml<br>contracts/asyncapi/events.asyncapi.yaml<br>contracts/proto/digital_twin.proto | CTRL-SUP-001<br>CTRL-OPS-002 | AC-DOC-003<br>AC-SUP-001 |
-| QAR-COST- | chapters/07-ai-agents-reasoning.md<br>chapters/10-scalability-reliability-observability.md | ADR-012<br>ADR-013 | CMP-AI<br>CMP-MODEL-GATEWAY<br>CMP-WORKFLOW | contracts/schemas/canonical.schema.json<br>contracts/mcp-manifest.json | CTRL-AI-003<br>CTRL-AI-004 | AC-AI-004<br>AC-REL-003 |
+| QAR-COST- | chapters/07-ai-agents-reasoning.md<br>chapters/10-scalability-reliability-observability.md | ADR-012<br>ADR-018<br>ADR-013 | CMP-AI<br>CMP-MODEL-GATEWAY<br>CMP-WORKFLOW | contracts/schemas/canonical.schema.json<br>contracts/mcp-manifest.json | CTRL-AI-003<br>CTRL-AI-004 | AC-AI-004<br>AC-REL-003 |
 
 ## Components
 
@@ -5525,7 +5610,7 @@ Source: `docs/enterprise-digital-twin/catalogs/components.yaml`
 | CMP-CACHE | Cache and rate-limit store | Valkey | platform-api | Non-authoritative tenant-namespaced cache, rate-limit, and short-lived coordination state. | Redis-compatible-protocol |
 | CMP-PROJECTION | Projection and outbox relay | connector-worker | data-platform | Ordered checkpoints and rebuildable graph, vector, search, cache, and event projections. | transactional-outbox<br>AsyncAPI<br>CloudEvents |
 | CMP-POLICY | Identity and policy enforcement | api-and-worker-middleware | security-architecture | Server-derived tenant context and execution-time authorization decisions. | OIDC<br>SAML<br>SCIM<br>policy-decision-contract |
-| CMP-MODEL-GATEWAY | Capability-oriented model gateway | ai-simulation-worker | ai-platform | Approved model snapshots, budgets, structured schemas, fallbacks, and evaluation gates. | OpenAI-Responses-API<br>OpenAI-Agents-SDK |
+| CMP-MODEL-GATEWAY | Capability-oriented model gateway | ai-simulation-worker | ai-platform | Approved model snapshots, budgets, structured schemas, fallbacks, and evaluation gates. | AIProvider<br>Llama-Chat-Completions-API<br>OpenAI-Responses-API |
 | CMP-OBS | Observability and audit pipeline | platform-services | reliability-engineering | Redacted telemetry, SLOs, trace correlation, and tamper-evident audit envelopes. | OpenTelemetry<br>audit-event-schema |
 | CMP-PLATFORM | Deployment platform | infrastructure | platform-engineering | OCI packaging, configuration, keys, networking, deployment profiles, backup, and recovery. | Docker-Compose<br>Kubernetes<br>Helm<br>OpenTofu<br>OCI |
 | CMP-DEVELOPER | Developer and extension platform | repository-tooling-and-api | developer-platform | Versioned SDK, CLI, connector, plugin, MCP, ontology, and compatibility contracts. | OpenAPI<br>AsyncAPI<br>JSON-Schema<br>GraphQL<br>Protobuf<br>MCP |
@@ -5853,6 +5938,13 @@ Source: `docs/enterprise-digital-twin/catalogs/agents.yaml`
 | AGENT-EVENT-VERIFY | Event verification specialist | H1 | Check evidence authorization ontology constraints conflicts confidence routing and exact mutation eligibility. | read_event_draft<br>validate_evidence<br>validate_ontology<br>open_review_case | EventVerificationReport | Verified scenario-only rejected or human-review-required. |
 | AGENT-GRAPH-MUTATE | Event graph mutation executor | H1 | Deterministically apply or compensate only an exact approved synthetic mutation plan. | verify_event_review<br>apply_synthetic_mutation<br>compensate_synthetic_mutation | EventMutationReceipt | Applied once replayed denied expired conflicted or compensated. |
 | AGENT-WORKFLOW-OPT | Workflow optimization specialist | H3 | Recommend process changes and simulate effects before any approved execution. | read_workflow<br>simulate_scenario<br>draft_change | OptimizationProposal | Proposal and evaluation record; never direct high-impact execution. |
+| AGENT-AI-KNOWLEDGE-INGESTION | AI knowledge ingestion specialist | H1 | Convert supported authorized document extracts into evidence-bearing entity relationship and constraint suggestions. | retrieve_authorized_evidence<br>validate_knowledge_schema<br>create_review_suggestion | KnowledgeIngestionOutput | Strict PENDING_REVIEW suggestion or fail-closed validation/provider error. |
+| AGENT-AI-ENTITY-RESOLUTION | AI entity resolution specialist | H1 | Compare tenant-local authorized entity candidates and explain a duplicate or conflict proposal without merging. | retrieve_authorized_entities<br>validate_resolution_schema<br>create_review_suggestion | EntityResolutionOutput | PENDING_REVIEW match/conflict proposal or abstention; automatic_merge_allowed is always false. |
+| AGENT-AI-EVENT-UNDERSTANDING | AI event understanding specialist | H1 | Convert natural-language reports into typed event candidates and possible impacts for deterministic event-engine review. | retrieve_authorized_context<br>validate_event_candidate<br>create_review_suggestion | EventUnderstandingOutput | PENDING_REVIEW event candidate; actual_effects_calculated is always false. |
+| AGENT-AI-CAUSAL-ANALYSIS | AI causal explanation specialist | H1 | Explain supplied graph paths events and deterministic results while distinguishing evidence assumptions and unknowns. | retrieve_authorized_graph_context<br>validate_causal_chain<br>create_review_suggestion | CausalAnalysisOutput | Evidence-linked PENDING_REVIEW explanation; probabilities_calculated is always false. |
+| AGENT-AI-SIMULATION-PLANNING | AI simulation planning specialist | H1 | Propose bounded typed scenario inputs for confirmation and deterministic simulation. | retrieve_authorized_snapshot<br>validate_registered_scenario_operations<br>create_review_suggestion | SimulationPlanningOutput | PENDING_REVIEW scenario plan; simulation_executed is always false. |
+| AGENT-AI-PREDICTION-EXPLANATION | AI prediction explanation specialist | H1 | Explain supplied validated prediction values drivers uncertainty and mitigations without recalculation. | retrieve_authorized_prediction_evidence<br>validate_numeric_preservation<br>create_review_suggestion | PredictionExplanationOutput | PENDING_REVIEW explanation; prediction_recalculated is always false. |
+| AGENT-AI-TECHNICAL-KNOWLEDGE | AI technical knowledge specialist | H1 | Extract cited capabilities limitations dependencies constraints and failure modes from technical sources. | retrieve_authorized_technical_evidence<br>validate_technical_schema<br>create_review_suggestion | TechnicalKnowledgeOutput | Strict PENDING_REVIEW technical-fact suggestion or fail-closed validation/provider error. |
 
 ### Authority Invariant
 
@@ -5961,6 +6053,7 @@ Source: `docs/enterprise-digital-twin/catalogs/screens.yaml`
 | UX-AUDIT | Audit explorer | H1 | Filter export verify and correlate security and action evidence. |  |  |  |
 | UX-ASSET-TWIN | Synthetic physical-asset twin | H1 | Live synthetic telemetry spatial component inspection deterministic analytics lifecycle history and simulator-only control. |  |  |  |
 | UX-EVENT-INTELLIGENCE | Event intelligence workspace | H1 | Interpret untrusted event reports resolve entities inspect bounded causal impacts compare before and after route scenarios review synthetic mutations and roll them back. |  |  |  |
+| UX-AI-CONTROL | AI Control Center | H1 | Inspect provider and vector readiness run seven bounded agents import private evidence search permission-trimmed knowledge explain results review suggestions and inspect token cost provenance and failures without exposing credentials or permitting model mutations. |  |  |  |
 | UX-ADMIN | Tenant administration | H2 | SSO SCIM membership policy retention residency keys and break-glass. |  |  |  |
 | UX-ONTOLOGY | Ontology studio | H2 | Versioned domain packages constraints mappings migrations and impact preview. |  |  |  |
 | UX-WORKFLOW | Workflow builder | H3 | Typed steps policies approvals budgets simulation and test fixtures. |  |  |  |
@@ -6118,12 +6211,14 @@ Source: `docs/enterprise-digital-twin/catalogs/acceptance.yaml`
 | AC-DATA-001 | Ingestion idempotency | Duplicate reordered and replayed observations produce the same canonical state digest. |
 | AC-DATA-002 | Projection rebuild | Neo4j and search/vector projections rebuild from authoritative claims and preserve expected oracle digest and ACLs. |
 | AC-DATA-003 | Reversible merge | A false entity merge is undone without losing identities evidence history or unrelated relationships. |
+| AC-DATA-004 | Operational data quality | All six operational event categories and direct data points retain source owner update reliability confidence duplicate conflict stale and bounded propagation evidence through replay and tenant isolation. |
 | AC-CON-001 | Signed webhook defense | Invalid stale replayed and wrong-tenant GitHub and Jira webhooks are denied and audited. |
 | AC-CON-002 | Reconciliation recovery | Missed webhook and partial backfill recover through cursor reconciliation without duplicate state. |
+| AC-CON-003 | Integration and MCP registry | ERP CRM HRIS accounting API database document and MCP definitions validate authentication schema mapping permission cadence error tool and connected-data policy without storing credentials or executing tools in the API. |
 | AC-AI-001 | Citation quality | Golden set citation precision is at least 0.95 and material unsupported claim rate is below 0.01. |
 | AC-AI-002 | Abstention | Missing conflicting restricted and stale evidence cases produce calibrated uncertainty or abstention. |
 | AC-AI-003 | Prompt-injection resistance | Adversarial connector content cannot change policy reveal other data or invoke unauthorized tools. |
-| AC-AI-004 | Tool accuracy | Tool choice and exact argument accuracy meet the approved task rubric on golden and adversarial cases. |
+| AC-AI-004 | Provider and agent integrity | The real Llama route plus every specialized agent meets schema evidence authority numeric-preservation routing retry timeout token-cost and exact-argument rubrics; no model or review directly mutates state. |
 | AC-ACT-001 | Dual approval | Requester self-approval single approval expired approval changed payload and wrong-policy approval all fail. |
 | AC-ACT-002 | Single external effect | Concurrent duplicate and replayed execution creates or updates exactly one Jira remediation issue. |
 | AC-ACT-003 | Compensation | Authorized rollback restores the captured prior state or records a human-action-required terminal state. |
@@ -6167,7 +6262,7 @@ A test or evaluation covers only the exact REQ/QAR identifiers enumerated in cov
 | TST-TEN-001 | Tenant isolation and authorization adversarial suite | security_test | H1 | security-engineering<br>data-platform | Exercise server-derived context, RLS, tenant-qualified relations, namespace isolation, ACL revocation, cache barriers, delegation ceilings, and cross-tenant identifier substitution. | Zero cross-tenant existence or content disclosure and no authorization decision derived from caller-supplied tenant context. | output/test-evidence/TST-TEN-001.json | REQ-TEN-001<br>REQ-TEN-002<br>REQ-TEN-003<br>REQ-TEN-004<br>REQ-TEN-005 |  |
 | TST-DATA-001 | Canonical data, provenance, projection, and lifecycle suite | contract_test | H1<br>H2 | data-platform | Validate canonical schemas, tenant-qualified keys, claim/evidence chains, reversible resolution, deterministic graph rebuilds, ontology extension constraints, retention, deletion, and permission revocation. | Replays are byte-identical, projections rebuild from PostgreSQL/object storage, provenance is complete, and deletion/revocation removes every serving path within the declared SLO. | output/test-evidence/TST-DATA-001.json | REQ-DATA-001<br>REQ-DATA-002<br>REQ-DATA-003<br>REQ-DATA-004<br>REQ-DATA-005<br>REQ-DATA-006<br>REQ-DATA-007<br>REQ-DATA-008<br>REQ-DATA-009<br>QAR-PRV-001 |  |
 | TST-CON-001 | GitHub and Jira connector certification suite | contract_test | H1<br>H2 | connector-platform | Validate package manifests, content-addressed schemas, positive and negative fixtures, exact permissions/events/egress, duplicate and out-of-order ingress, cursor recovery, reconciliation, tombstones, and connector SDK lifecycle behavior. | Only frozen allowlists validate; retries and recovery produce deterministic observations; invalid, replayed, oversized, or misbound input has no canonical effect. | output/test-evidence/TST-CON-001.json | REQ-CON-001<br>REQ-CON-002<br>REQ-CON-003<br>REQ-CON-004<br>REQ-CON-005<br>QAR-SYNC-001<br>QAR-COR-001 |  |
-| TST-AI-001 | Grounded AI safety and quality evaluation | evaluation | H1 | ai-platform<br>security-engineering | Run golden and adversarial cases for citations, abstention, ACL-filtered context, tool selection and arguments, trace grading, prompt injection, workload routing, approved fallback, cost budgets, and model failure. | Thresholds in the acceptance catalog pass on pinned snapshots; inaccessible evidence never enters context; no unapproved fallback or tool authority is exercised. | output/test-evidence/TST-AI-001.json | REQ-AI-001<br>REQ-AI-002<br>REQ-AI-003<br>REQ-AI-004<br>REQ-AI-005<br>REQ-AI-006<br>REQ-AI-007<br>REQ-AI-008<br>QAR-AI-001<br>QAR-AI-002<br>QAR-COST-001 |  |
+| TST-AI-001 | Grounded AI safety and quality evaluation | evaluation | H1 | ai-platform<br>security-engineering | Run provider transport failure retry timeout refusal and malformed-schema tests plus golden and adversarial cases for all seven agents citations abstention ACL-filtered lexical/vector retrieval tenant isolation prompt injection workload routing approved fallback controlled memory review-only suggestions token/cost accounting and model failure; include a separately enabled real Llama integration run. | Thresholds in the acceptance catalog pass on the exact evaluated configuration; inaccessible evidence never enters context; every knowledge-changing output remains PENDING_REVIEW with mutation_performed false; no unapproved fallback test double or tool authority satisfies live release evidence. | output/test-evidence/TST-AI-001.json | REQ-AI-001<br>REQ-AI-002<br>REQ-AI-003<br>REQ-AI-004<br>REQ-AI-005<br>REQ-AI-006<br>REQ-AI-007<br>REQ-AI-008<br>QAR-AI-001<br>QAR-AI-002<br>QAR-COST-001 |  |
 | TST-ACT-001 | Exact-payload Jira action safety suite | security_test | H1<br>H3 | workflow-platform<br>security-engineering | Exercise preview canonicalization, two-role approval, expiry, payload/version/credential/policy mutation, replay, at-most-one send, ambiguous result verification, receipt evidence, and authorized compensation. | Every negative case performs zero writes; the approved fixture performs one field-limited PUT; replay returns the original receipt; rollback is idempotent and audited. | output/test-evidence/TST-ACT-001.json | REQ-ACT-001<br>REQ-ACT-002<br>REQ-ACT-003<br>REQ-ACT-004 |  |
 | TST-SIM-001 | Seeded launch-delay simulation verification | numerical_test | H1<br>H3 | simulation-team | Validate scenario schema and compiler, dependency-DAG rejection, seeded PERT sampling, quantile and sensitivity calculations, snapshot immutability, baseline comparison, missing-data warnings, and prohibited inference labels. | Identical snapshots and seeds produce byte-identical forecasts; expected p50/p80/p95 and critical paths match the frozen oracle within declared tolerances. | output/test-evidence/TST-SIM-001.json | REQ-SIM-001<br>REQ-SIM-002<br>REQ-SIM-003<br>REQ-SIM-004<br>REQ-SIM-005<br>QAR-SIM-001 |  |
 | TST-UX-001 | Permission-aware UX and accessibility journey suite | accessibility_test | H1 | web-experience | Test keyboard and screen-reader journeys for organizational question, citation inspection, context confirmation, scenario comparison, exact Jira preview, dual approval, receipt, and rollback across permission variants. | WCAG-aligned interactions preserve provenance and uncertainty, inaccessible content is not disclosed, and sensitive actions require explicit confirmation states. | output/test-evidence/TST-UX-001.json | REQ-UX-001<br>REQ-UX-002<br>REQ-UX-003<br>REQ-UX-004<br>QAR-ACC-001 |  |
@@ -6204,8 +6299,8 @@ The files listed here are normative and outrank prose when precedence applies. T
 
 | Contract | Format | Contract Version | Bytes | Sha256 Prefix |
 | --- | --- | --- | --- | --- |
-| contracts/openapi/enterprise-digital-twin.openapi.yaml | OpenAPI | 3.1.0 | 90302 | 2a705f5527c39e93 |
-| contracts/asyncapi/events.asyncapi.yaml | AsyncAPI | 3.0.0 | 11584 | e2890a41a2ffc414 |
+| contracts/openapi/enterprise-digital-twin.openapi.yaml | OpenAPI | 3.1.0 | 119904 | 1f4ec5f457465e30 |
+| contracts/asyncapi/events.asyncapi.yaml | AsyncAPI | 3.0.0 | 21448 | dadb9cd19c75d693 |
 | contracts/graphql/schema.graphql | GraphQL SDL | H2 read-only | 1821 | a2022c3047cc24cf |
 | contracts/proto/digital_twin.proto | Protocol Buffers | proto3 | 2135 | 0df177382df6ce9e |
 | contracts/schemas/canonical.schema.json | JSON Schema | schema | 42318 | e4b3a9f4e790ed88 |
@@ -6213,6 +6308,9 @@ The files listed here are normative and outrank prose when precedence applies. T
 | contracts/schemas/simulation-snapshot.schema.json | JSON Schema | schema | 6829 | 9327595d390c11df |
 | contracts/schemas/event-intelligence.schema.json | JSON Schema | schema | 41707 | c6bdb7b696a59522 |
 | contracts/schemas/event-intelligence-event-changed.v1.schema.json | JSON Schema | schema | 4840 | cb994d57740ebd12 |
+| contracts/schemas/ai-intelligence.schema.json | JSON Schema | schema | 15924 | 9bf85834d51664ab |
+| contracts/schemas/data-foundation.schema.json | JSON Schema | schema | 9917 | b307a026af71ac28 |
+| contracts/schemas/decision-intelligence.schema.json | JSON Schema | schema | 6895 | 516641a98777f946 |
 | contracts/schemas/connector-manifest.schema.json | JSON Schema | schema | 15787 | 9cdc3461a964833c |
 | contracts/schemas/ontology-package.schema.json | JSON Schema | schema | 2229 | 892a31ef901f8764 |
 | contracts/schemas/plugin-manifest.schema.json | JSON Schema | schema | 4561 | 1b76a3407e508fa9 |
@@ -7304,6 +7402,6 @@ Pooled graph isolation remains weaker than PostgreSQL RLS. H1 accepts this only 
 
 # Build Provenance
 
-Manifest SHA-256: `e1f17b58c501cb97f8aca9201379fa56cf1930406b353b980e72891b9609eaa9`
+Manifest SHA-256: `1bff7b94a20f8237ac9f5e80752d250b5142d2518d17595fb334740711464ebb`
 
 Generated by `scripts/build_blueprint.py`; generated editions are not edited directly.

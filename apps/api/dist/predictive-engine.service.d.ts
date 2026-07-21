@@ -1,0 +1,37 @@
+import { DatabaseService } from './database.service';
+import { DecisionWorkerService } from './decision-worker.service';
+import { RequestContext } from './domain';
+export declare class PredictiveEngineService {
+    private readonly database;
+    private readonly worker;
+    constructor(database: DatabaseService, worker: DecisionWorkerService);
+    registerModel(ctx: RequestContext, input: Record<string, unknown>, idempotencyKey: string): Promise<Record<string, unknown>>;
+    listModels(ctx: RequestContext, input: Record<string, unknown>): Promise<Record<string, unknown>>;
+    getModel(ctx: RequestContext, modelId: string): Promise<Record<string, unknown>>;
+    createPrediction(ctx: RequestContext, input: Record<string, unknown>, idempotencyKey: string): Promise<Record<string, unknown>>;
+    recordOutcome(ctx: RequestContext, predictionId: string, input: Record<string, unknown>, idempotencyKey: string, ifMatch: string | undefined): Promise<Record<string, unknown>>;
+    validateOutcome(ctx: RequestContext, predictionId: string, input: Record<string, unknown>, idempotencyKey: string, ifMatch: string | undefined): Promise<Record<string, unknown>>;
+    submitKnowledge(ctx: RequestContext, input: Record<string, unknown>, idempotencyKey: string): Promise<Record<string, unknown>>;
+    getPrediction(ctx: RequestContext, predictionId: string): Promise<Record<string, unknown>>;
+    private observations;
+    private assertTarget;
+    private descriptors;
+    private numberArray;
+    private modelKind;
+    private predictionKind;
+    private modelStatus;
+    private model;
+    private run;
+    private knowledge;
+    private modelView;
+    private runView;
+    private assertEtag;
+    private assertRead;
+    private assertPredictionRun;
+    private assertModelAdmin;
+    private resourceId;
+    private stateHash;
+    private round;
+    private commitCreate;
+    private commit;
+}

@@ -3,6 +3,7 @@ import {
   DatabaseMutationConflict,
   DatabaseService,
   EventMutationAudit,
+  EventMutationGuard,
   EventMutationRecord,
 } from './database.service';
 import { RequestContext, etag, newId, nowIso, sha256, stableUuid, traceId } from './domain';
@@ -905,7 +906,7 @@ export class TwinGraphService {
       ...mutation.records,
       { kind: HISTORY_KIND, id: history.event_id, payload: history },
     ];
-    const guard = {
+    const guard: EventMutationGuard = {
       idempotency: {
         operation: `${ctx.actor.actor_id}:${mutation.action}`,
         key: mutation.idempotencyKey,
@@ -1375,9 +1376,11 @@ export class TwinGraphService {
     return sha256(domain);
   }
 
-  private changedFields(before: Record<string, unknown>, after: Record<string, unknown>): string[] {
-    return [...new Set([...Object.keys(before), ...Object.keys(after)])]
-      .filter((key) => key !== 'state_hash' && sha256({ value: before[key] }) !== sha256({ value: after[key] }))
+  private changedFields(before: object, after: object): string[] {
+    const previous = before as Record<string, unknown>;
+    const current = after as Record<string, unknown>;
+    return [...new Set([...Object.keys(previous), ...Object.keys(current)])]
+      .filter((key) => key !== 'state_hash' && sha256({ value: previous[key] }) !== sha256({ value: current[key] }))
       .sort();
   }
 
@@ -1528,7 +1531,10 @@ export class TwinGraphService {
     this.assertSafeJson(value, field, new Set<object>());
     const serialized = JSON.stringify(value);
     if (serialized.length > maximumBytes) throw this.invalid('payload_too_large', `${field} exceeds its ${maximumBytes}-byte limit.`);
-    return structuredClone(value) as Record<string, unknown>;
+    // Normalize parser-specific null-prototype objects at the trust boundary.
+    // The recursive validation above has already rejected non-JSON values,
+    // cycles, unsafe keys, and secret-shaped fields.
+    return JSON.parse(serialized) as Record<string, unknown>;
   }
 
   private assertSafeJson(value: unknown, path: string, ancestors: Set<object>): void {

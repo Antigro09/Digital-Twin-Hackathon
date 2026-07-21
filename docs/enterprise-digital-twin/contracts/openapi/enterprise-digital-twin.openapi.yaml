@@ -19,13 +19,180 @@ tags:
   - {name: Knowledge}
   - {name: Agents}
   - {name: AI Intelligence}
+  - {name: Twin Data Foundation}
   - {name: Simulation}
+  - {name: Predictive Intelligence}
+  - {name: AI Model Registry}
   - {name: Actions}
   - {name: Connectors}
   - {name: Audit}
   - {name: Physical Assets}
   - {name: Administration}
 paths:
+  /v1/twin/simulation/snapshots:
+    post:
+      tags: [Simulation]
+      operationId: createDecisionSimulationSnapshot
+      description: Seals an immutable authorized graph-backed aggregate-variable snapshot. Tenant identity is server-derived.
+      parameters: [{$ref: '#/components/parameters/IdempotencyKey'}]
+      requestBody: {required: true, content: {application/json: {schema: {$ref: '../schemas/decision-intelligence.schema.json#/$defs/SnapshotCreate'}}}}
+      responses:
+        '201': {description: Immutable decision snapshot with canonical digest., headers: {ETag: {schema: {type: string}}}, content: {application/json: {schema: {type: object}}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/twin/simulation/snapshots/{snapshot_id}:
+    get:
+      tags: [Simulation]
+      operationId: getDecisionSimulationSnapshot
+      parameters: [{name: snapshot_id, in: path, required: true, schema: {type: string, format: uuid}}]
+      responses:
+        '200': {description: Tenant-scoped immutable decision snapshot., headers: {ETag: {schema: {type: string}}}, content: {application/json: {schema: {type: object}}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/twin/simulation/scenarios:
+    post:
+      tags: [Simulation]
+      operationId: createDecisionScenario
+      parameters: [{$ref: '#/components/parameters/IdempotencyKey'}]
+      requestBody: {required: true, content: {application/json: {schema: {$ref: '../schemas/decision-intelligence.schema.json#/$defs/ScenarioCreate'}}}}
+      responses:
+        '201': {description: Draft root branch and confirmation digest., headers: {ETag: {schema: {type: string}}}, content: {application/json: {schema: {type: object}}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/twin/simulation/scenarios/{scenario_id}/branches:
+    get:
+      tags: [Simulation]
+      operationId: listDecisionScenarioBranches
+      parameters: [{name: scenario_id, in: path, required: true, schema: {type: string, format: uuid}}]
+      responses:
+        '200': {description: Up to 100 branches for the tenant scenario., content: {application/json: {schema: {type: object}}}}
+        default: {$ref: '#/components/responses/Problem'}
+    post:
+      tags: [Simulation]
+      operationId: createDecisionScenarioBranch
+      parameters:
+        - {name: scenario_id, in: path, required: true, schema: {type: string, format: uuid}}
+        - {$ref: '#/components/parameters/IdempotencyKey'}
+      requestBody: {required: true, content: {application/json: {schema: {$ref: '../schemas/decision-intelligence.schema.json#/$defs/BranchCreate'}}}}
+      responses:
+        '201': {description: Draft child branch bound to a confirmed parent., headers: {ETag: {schema: {type: string}}}, content: {application/json: {schema: {type: object}}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/twin/simulation/scenarios/{scenario_id}/branches/{branch_id}/confirm:
+    post:
+      tags: [Simulation]
+      operationId: confirmDecisionScenarioBranch
+      parameters:
+        - {name: scenario_id, in: path, required: true, schema: {type: string, format: uuid}}
+        - {name: branch_id, in: path, required: true, schema: {type: string, format: uuid}}
+        - {$ref: '#/components/parameters/IdempotencyKey'}
+        - {$ref: '#/components/parameters/IfMatch'}
+      requestBody: {required: true, content: {application/json: {schema: {$ref: '../schemas/decision-intelligence.schema.json#/$defs/ScenarioConfirmation'}}}}
+      responses:
+        '201': {description: Immutable confirmed branch., headers: {ETag: {schema: {type: string}}}, content: {application/json: {schema: {type: object}}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/twin/simulation/runs:
+    post:
+      tags: [Simulation]
+      operationId: runDecisionSimulation
+      description: Executes confirmed changes and deterministic relationship propagation. It never invokes prediction or an LLM.
+      parameters: [{$ref: '#/components/parameters/IdempotencyKey'}]
+      requestBody: {required: true, content: {application/json: {schema: {$ref: '../schemas/decision-intelligence.schema.json#/$defs/SimulationRunCreate'}}}}
+      responses:
+        '201': {description: Durable simulation result and baseline comparison., content: {application/json: {schema: {type: object}}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/twin/simulation/runs/{simulation_id}:
+    get:
+      tags: [Simulation]
+      operationId: getDecisionSimulation
+      parameters: [{name: simulation_id, in: path, required: true, schema: {type: string, format: uuid}}]
+      responses:
+        '200': {description: Tenant-scoped durable simulation run., content: {application/json: {schema: {type: object}}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/twin/simulation/comparisons:
+    post:
+      tags: [Simulation]
+      operationId: compareDecisionSimulationBranches
+      requestBody: {required: true, content: {application/json: {schema: {$ref: '../schemas/decision-intelligence.schema.json#/$defs/SimulationComparisonCreate'}}}}
+      responses:
+        '200': {description: Baseline comparisons for two to ten distinct branch runs., content: {application/json: {schema: {type: object}}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/twin/prediction/models:
+    post:
+      tags: [AI Model Registry]
+      operationId: registerPredictiveModel
+      parameters: [{$ref: '#/components/parameters/IdempotencyKey'}]
+      requestBody: {required: true, content: {application/json: {schema: {$ref: '../schemas/decision-intelligence.schema.json#/$defs/ModelRegister'}}}}
+      responses:
+        '201': {description: Versioned non-LLM model definition., headers: {ETag: {schema: {type: string}}}, content: {application/json: {schema: {type: object}}}}
+        default: {$ref: '#/components/responses/Problem'}
+    get:
+      tags: [AI Model Registry]
+      operationId: listPredictiveModels
+      parameters:
+        - {name: kind, in: query, schema: {type: string}}
+        - {name: prediction_kind, in: query, schema: {type: string}}
+        - {name: status, in: query, schema: {type: string}}
+        - {name: limit, in: query, schema: {type: integer, minimum: 1, maximum: 100, default: 50}}
+        - {name: cursor, in: query, schema: {type: string, maxLength: 2000}}
+      responses:
+        '200': {description: Bounded tenant model page., content: {application/json: {schema: {type: object}}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/twin/prediction/models/{model_id}:
+    get:
+      tags: [AI Model Registry]
+      operationId: getPredictiveModel
+      parameters: [{name: model_id, in: path, required: true, schema: {type: string, format: uuid}}]
+      responses:
+        '200': {description: Model inputs outputs version accuracy owner and trigger., headers: {ETag: {schema: {type: string}}}, content: {application/json: {schema: {type: object}}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/twin/prediction/runs:
+    post:
+      tags: [Predictive Intelligence]
+      operationId: createPrediction
+      description: Processes historical data through an active registered non-LLM model and returns forecast confidence and limitations.
+      parameters: [{$ref: '#/components/parameters/IdempotencyKey'}]
+      requestBody: {required: true, content: {application/json: {schema: {$ref: '../schemas/decision-intelligence.schema.json#/$defs/PredictionCreate'}}}}
+      responses:
+        '201': {description: Pending-outcome prediction., headers: {ETag: {schema: {type: string}}}, content: {application/json: {schema: {type: object}}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/twin/prediction/runs/{prediction_id}:
+    get:
+      tags: [Predictive Intelligence]
+      operationId: getPrediction
+      parameters: [{name: prediction_id, in: path, required: true, schema: {type: string, format: uuid}}]
+      responses:
+        '200': {description: Tenant-scoped prediction and validation state., headers: {ETag: {schema: {type: string}}}, content: {application/json: {schema: {type: object}}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/twin/prediction/runs/{prediction_id}/outcomes:
+    post:
+      tags: [Predictive Intelligence]
+      operationId: recordPredictionOutcome
+      parameters:
+        - {name: prediction_id, in: path, required: true, schema: {type: string, format: uuid}}
+        - {$ref: '#/components/parameters/IdempotencyKey'}
+        - {$ref: '#/components/parameters/IfMatch'}
+      requestBody: {required: true, content: {application/json: {schema: {$ref: '../schemas/decision-intelligence.schema.json#/$defs/OutcomeRecord'}}}}
+      responses:
+        '201': {description: Real observed outcome awaiting user validation., headers: {ETag: {schema: {type: string}}}, content: {application/json: {schema: {type: object}}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/twin/prediction/runs/{prediction_id}/validations:
+    post:
+      tags: [Predictive Intelligence]
+      operationId: validatePredictionOutcome
+      parameters:
+        - {name: prediction_id, in: path, required: true, schema: {type: string, format: uuid}}
+        - {$ref: '#/components/parameters/IdempotencyKey'}
+        - {$ref: '#/components/parameters/IfMatch'}
+      requestBody: {required: true, content: {application/json: {schema: {$ref: '../schemas/decision-intelligence.schema.json#/$defs/ValidationRecord'}}}}
+      responses:
+        '201': {description: Validation metrics plus updated model accuracy and learning revision., headers: {ETag: {schema: {type: string}}}, content: {application/json: {schema: {type: object}}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/twin/prediction/knowledge:
+    post:
+      tags: [Predictive Intelligence]
+      operationId: submitPredictionKnowledge
+      parameters: [{$ref: '#/components/parameters/IdempotencyKey'}]
+      requestBody: {required: true, content: {application/json: {schema: {$ref: '../schemas/decision-intelligence.schema.json#/$defs/KnowledgeSubmit'}}}}
+      responses:
+        '201': {description: Pending-review historical outcome specification rule correction or expert knowledge., content: {application/json: {schema: {type: object}}}}
+        default: {$ref: '#/components/responses/Problem'}
   /v1/me:
     get:
       tags: [Administration]
@@ -984,6 +1151,177 @@ paths:
       requestBody: {required: true, content: {application/json: {schema: {$ref: '#/components/schemas/AiLearningOutcomeRequest'}}}}
       responses:
         '201': {description: Evidence-bound validated learning-memory receipt with both mutation flags false., headers: {Cache-Control: {schema: {type: string, const: 'private, no-store'}}}, content: {application/json: {schema: {$ref: '#/components/schemas/AiLearningOutcomeReceipt'}}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/twin/data-architecture:
+    get:
+      tags: [Twin Data Foundation]
+      operationId: getTwinDataArchitecture
+      description: Returns the governed application, graph, AI-knowledge, and historical-metrics plane catalog. It never provides a cross-store query bypass.
+      x-edt-required-capabilities: [connector.admin]
+      responses:
+        '200': {description: Tenant data-plane ownership and routing catalog., content: {application/json: {schema: {type: object, required: [schema_version, data_planes, write_routing, invariants]}}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/twin/event-types:
+    get:
+      tags: [Twin Data Foundation]
+      operationId: listTwinEventTypes
+      x-edt-authorization-any-of: [connector.admin, scenario.create, 'evidence.read.*']
+      responses:
+        '200': {description: Six standard operational event categories and the custom type naming rule., content: {application/json: {schema: {type: object}}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/twin/events:
+    get:
+      tags: [Twin Data Foundation]
+      operationId: listTwinOperationalEvents
+      x-edt-authorization-any-of: [connector.admin, scenario.create, 'evidence.read.*']
+      parameters:
+        - {name: category, in: query, schema: {enum: [employee_change, system_failure, customer_change, financial_change, market_change, operational_change]}}
+        - {name: severity, in: query, schema: {enum: [info, low, medium, high, critical]}}
+        - {name: outcome, in: query, schema: {enum: [observed, mitigated, resolved, failed, unknown]}}
+        - {name: limit, in: query, schema: {type: integer, minimum: 1, maximum: 100}}
+        - {name: cursor, in: query, schema: {type: string, maxLength: 2000}}
+      responses:
+        '200': {description: Classification-filtered keyset-paginated event history., content: {application/json: {schema: {type: object}}}}
+        default: {$ref: '#/components/responses/Problem'}
+    post:
+      tags: [Twin Data Foundation]
+      operationId: recordTwinOperationalEvent
+      description: Atomically records the canonical event, its quality-bearing data point, audit evidence, and transactional outbox message after bounded graph propagation.
+      x-edt-required-capabilities: [connector.admin]
+      parameters: [{$ref: '#/components/parameters/IdempotencyKey'}]
+      requestBody: {required: true, content: {application/json: {schema: {$ref: '../schemas/data-foundation.schema.json#/$defs/eventCreate'}}}}
+      responses:
+        '201': {description: Recorded event with source, ownership, quality, confidence, and persisted propagation snapshot., content: {application/json: {schema: {type: object, required: [event, data_watermark, etag]}}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/twin/events/{eventId}:
+    get:
+      tags: [Twin Data Foundation]
+      operationId: getTwinOperationalEvent
+      x-edt-authorization-any-of: [connector.admin, scenario.create, 'evidence.read.*']
+      parameters: [{$ref: '#/components/parameters/EventId'}]
+      responses:
+        '200': {description: One authorized operational event., content: {application/json: {schema: {type: object}}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/twin/events/{eventId}/impact-analysis:
+    post:
+      tags: [Twin Data Foundation]
+      operationId: recalculateTwinEventImpact
+      description: Compares the immutable recorded propagation snapshot with a bounded analysis of the current graph.
+      x-edt-authorization-any-of: [connector.admin, scenario.create, 'evidence.read.*']
+      parameters: [{$ref: '#/components/parameters/EventId'}]
+      requestBody: {required: true, content: {application/json: {schema: {type: object, properties: {max_depth: {type: integer, minimum: 1, maximum: 6}, max_impacts: {type: integer, minimum: 1, maximum: 250}}, additionalProperties: false}}}}
+      responses:
+        '200': {description: Persisted and current bounded propagation results., content: {application/json: {schema: {type: object}}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/twin/data-points:
+    get:
+      tags: [Twin Data Foundation]
+      operationId: listTwinDataPoints
+      x-edt-authorization-any-of: [connector.admin, scenario.create, 'evidence.read.*']
+      parameters:
+        - {name: subject_node_id, in: query, schema: {type: string, format: uuid}}
+        - {name: metric, in: query, schema: {type: string, maxLength: 160}}
+        - {name: limit, in: query, schema: {type: integer, minimum: 1, maximum: 100}}
+        - {name: cursor, in: query, schema: {type: string, maxLength: 2000}}
+      responses:
+        '200': {description: Classification-filtered keyset-paginated quality-bearing data points., content: {application/json: {schema: {type: object}}}}
+        default: {$ref: '#/components/responses/Problem'}
+    post:
+      tags: [Twin Data Foundation]
+      operationId: recordTwinDataPoint
+      description: Records an immutable observation and deterministically assesses duplicate, conflict, freshness, and confidence signals.
+      x-edt-required-capabilities: [connector.admin]
+      parameters: [{$ref: '#/components/parameters/IdempotencyKey'}]
+      requestBody: {required: true, content: {application/json: {schema: {$ref: '../schemas/data-foundation.schema.json#/$defs/dataPointCreate'}}}}
+      responses:
+        '201': {description: Recorded data point with provenance and quality assessment., content: {application/json: {schema: {type: object}}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/twin/data-points/{dataPointId}:
+    get:
+      tags: [Twin Data Foundation]
+      operationId: getTwinDataPoint
+      x-edt-authorization-any-of: [connector.admin, scenario.create, 'evidence.read.*']
+      parameters: [{name: dataPointId, in: path, required: true, schema: {type: string, format: uuid}}]
+      responses:
+        '200': {description: One authorized data point., content: {application/json: {schema: {type: object}}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/twin/connectors:
+    get:
+      tags: [Twin Data Foundation]
+      operationId: listTwinConnectorDefinitions
+      x-edt-required-capabilities: [connector.admin]
+      responses:
+        '200': {description: Governed connector definitions without credential material., content: {application/json: {schema: {type: object}}}}
+        default: {$ref: '#/components/responses/Problem'}
+    post:
+      tags: [Twin Data Foundation]
+      operationId: createTwinConnectorDefinition
+      description: Registers ERP, CRM, HRIS, accounting, API, database, or document integration policy metadata. Registration does not execute the connector.
+      x-edt-required-capabilities: [connector.admin]
+      parameters: [{$ref: '#/components/parameters/IdempotencyKey'}]
+      requestBody: {required: true, content: {application/json: {schema: {$ref: '../schemas/data-foundation.schema.json#/$defs/connectorDefinition'}}}}
+      responses:
+        '201': {description: Registered connector definition and concurrency ETag., content: {application/json: {schema: {type: object}}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/twin/connectors/{connectorId}:
+    get:
+      tags: [Twin Data Foundation]
+      operationId: getTwinConnectorDefinition
+      x-edt-required-capabilities: [connector.admin]
+      parameters: [{name: connectorId, in: path, required: true, schema: {type: string, format: uuid}}]
+      responses:
+        '200': {description: Connector definition., content: {application/json: {schema: {type: object}}}}
+        default: {$ref: '#/components/responses/Problem'}
+    patch:
+      tags: [Twin Data Foundation]
+      operationId: updateTwinConnectorDefinition
+      x-edt-required-capabilities: [connector.admin]
+      parameters:
+        - {name: connectorId, in: path, required: true, schema: {type: string, format: uuid}}
+        - {$ref: '#/components/parameters/IdempotencyKey'}
+        - {$ref: '#/components/parameters/IfMatch'}
+      requestBody: {required: true, content: {application/json: {schema: {type: object, minProperties: 1}}}}
+      responses:
+        '200': {description: Updated connector definition., content: {application/json: {schema: {type: object}}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/twin/mcp-servers:
+    get:
+      tags: [Twin Data Foundation]
+      operationId: listTwinMcpServerDefinitions
+      x-edt-required-capabilities: [connector.admin]
+      responses:
+        '200': {description: Governed MCP server definitions., content: {application/json: {schema: {type: object}}}}
+        default: {$ref: '#/components/responses/Problem'}
+    post:
+      tags: [Twin Data Foundation]
+      operationId: createTwinMcpServerDefinition
+      description: Registers MCP name, purpose, secret reference, tools, permissions, and connected data. Registration does not create a transport or execute tools.
+      x-edt-required-capabilities: [connector.admin]
+      parameters: [{$ref: '#/components/parameters/IdempotencyKey'}]
+      requestBody: {required: true, content: {application/json: {schema: {$ref: '../schemas/data-foundation.schema.json#/$defs/mcpServerDefinition'}}}}
+      responses:
+        '201': {description: Registered MCP definition and concurrency ETag., content: {application/json: {schema: {type: object}}}}
+        default: {$ref: '#/components/responses/Problem'}
+  /v1/twin/mcp-servers/{serverId}:
+    get:
+      tags: [Twin Data Foundation]
+      operationId: getTwinMcpServerDefinition
+      x-edt-required-capabilities: [connector.admin]
+      parameters: [{name: serverId, in: path, required: true, schema: {type: string, format: uuid}}]
+      responses:
+        '200': {description: MCP server definition., content: {application/json: {schema: {type: object}}}}
+        default: {$ref: '#/components/responses/Problem'}
+    patch:
+      tags: [Twin Data Foundation]
+      operationId: updateTwinMcpServerDefinition
+      x-edt-required-capabilities: [connector.admin]
+      parameters:
+        - {name: serverId, in: path, required: true, schema: {type: string, format: uuid}}
+        - {$ref: '#/components/parameters/IdempotencyKey'}
+        - {$ref: '#/components/parameters/IfMatch'}
+      requestBody: {required: true, content: {application/json: {schema: {type: object, minProperties: 1}}}}
+      responses:
+        '200': {description: Updated MCP server definition., content: {application/json: {schema: {type: object}}}}
         default: {$ref: '#/components/responses/Problem'}
 components:
   securitySchemes:

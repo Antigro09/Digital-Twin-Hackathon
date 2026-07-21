@@ -128,6 +128,20 @@ The API now includes a tenant-scoped canonical graph foundation under `/v1/twin`
 
 Tenant graph administrators can register namespaced custom node and relationship types, then create or conditionally update graph records. Default node types cover organization, business, technology, operations, and financial entities. Read APIs provide filtering and search, bounded traversal, dependency analysis, weighted impact propagation, and structural critical-node ranking. Graph writes require the existing `connector.admin` capability; reads are classification-filtered and never accept a caller-selected tenant. The API rejects secret-like property names and unbounded graph queries. See the controller routes in `apps/api/src/twin-graph.controller.ts` for the precise contract.
 
+## Data and integration foundation
+
+The Phase 2 foundation is available under `/v1/twin`. Operational events cover employee, system, customer, financial, market, and operational changes; every event records source, time, affected nodes, severity, outcome, ownership, reliability, confidence, deterministic data-quality evidence, and a bounded relationship-propagation snapshot. Direct data points use the same provenance and quality model, including duplicate, one-day conflict, and freshness detection.
+
+`/v1/twin/data-architecture` declares the four governed planes: authoritative PostgreSQL application records, rebuildable Neo4j graph projection, isolated AI/vector knowledge, and append-only historical metrics/raw-object retention. Connector definitions for ERP, CRM, HRIS, accounting, APIs, databases, and documents are managed under `/v1/twin/connectors`; MCP server definitions are managed under `/v1/twin/mcp-servers`. Registries store governed secret references rather than credential values and deliberately do not execute connectors or MCP tools inside the API process.
+
+Migration `003_data_integration_foundation.sql` database-enforces tenant/resource identity, record shapes, quality score ranges, active integration names, and query indexes. The REST, event, and JSON Schema contracts are versioned in `docs/enterprise-digital-twin/contracts`, and `apps/api/test/data-integration-foundation.e2e-spec.ts` is the executable Phase 2 acceptance suite.
+
+## Simulation and predictive intelligence foundation
+
+The next decision layer is split across `/v1/twin/simulation/*` and `/v1/twin/prediction/*`. Simulation seals graph-backed snapshots, creates and confirms typed branches for aggregate hiring, pricing, supplier, expansion, and budget changes, runs bounded relationship propagation and deterministic derived-metric rules, and compares each outcome with its immutable baseline. Prediction registers versioned non-LLM models, processes bounded historical observations for revenue, expense, churn, aggregate workforce, and risk forecasts, returns confidence evidence, then records real outcomes and human validation before updating rolling accuracy and bounded calibration state.
+
+The Nest API owns authorization, lifecycle, PostgreSQL persistence, idempotency, audit, and outbox records. The Python worker owns the pure mathematics and fails closed; simulation never calls prediction and neither path invokes an LLM or oracle substitute. Submitted technical specifications, company rules, corrections, historical outcomes, and expert knowledge remain pending review. Migration `004_decision_intelligence_foundation.sql`, ADR-019, the OpenAPI/AsyncAPI/JSON Schema contracts, `apps/api/test/decision-intelligence.e2e-spec.ts`, and `apps/ai-worker/tests/test_decision_engines.py` are the implementation evidence.
+
 ## Deliberate boundaries
 
 - Only the allowlisted synthetic Jira issue `AST-142` can be mutated in H1.

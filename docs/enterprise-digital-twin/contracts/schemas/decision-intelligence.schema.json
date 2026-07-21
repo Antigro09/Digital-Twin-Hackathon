@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://enterprise-digital-twin.example/schemas/decision-intelligence.schema.json",
+  "title": "Decision Intelligence Foundation",
+  "type": "object",
+  "$defs": {
+    "VariableMap": {
+      "type": "object",
+      "maxProperties": 50,
+      "propertyNames": {"pattern": "^[a-z][a-z0-9_]{0,63}$"},
+      "additionalProperties": {"type": "number", "minimum": -1000000000000, "maximum": 1000000000000}
+    },
+    "SnapshotNodeInput": {
+      "type": "object", "additionalProperties": false, "required": ["node_id", "variables"],
+      "properties": {"node_id": {"type": "string", "format": "uuid"}, "variables": {"$ref": "#/$defs/VariableMap"}}
+    },
+    "SnapshotCreate": {
+      "type": "object", "additionalProperties": false, "required": ["nodes"],
+      "properties": {
+        "as_of": {"type": "string", "format": "date-time"},
+        "nodes": {"type": "array", "minItems": 1, "maxItems": 100, "items": {"$ref": "#/$defs/SnapshotNodeInput"}},
+        "assumptions": {"type": "array", "maxItems": 100, "items": {"type": "string", "minLength": 1, "maxLength": 500}}
+      }
+    },
+    "ScenarioChange": {
+      "type": "object", "additionalProperties": false, "required": ["node_id", "variable", "operation", "value"],
+      "properties": {
+        "node_id": {"type": "string", "format": "uuid"}, "variable": {"type": "string", "pattern": "^[a-z][a-z0-9_]{0,63}$"},
+        "operation": {"enum": ["set", "add", "multiply"]}, "value": {"type": "number", "minimum": -1000000000000, "maximum": 1000000000000}
+      }
+    },
+    "ScenarioCreate": {
+      "type": "object", "additionalProperties": false, "required": ["snapshot_id", "kind", "name", "changes"],
+      "properties": {
+        "snapshot_id": {"type": "string", "format": "uuid"},
+        "kind": {"enum": ["hiring", "pricing_change", "supplier_failure", "expansion", "budget_change"]},
+        "name": {"type": "string", "minLength": 1, "maxLength": 200},
+        "changes": {"type": "array", "minItems": 1, "maxItems": 100, "items": {"$ref": "#/$defs/ScenarioChange"}},
+        "assumptions": {"type": "array", "maxItems": 100, "items": {"type": "string", "maxLength": 500}},
+        "max_depth": {"type": "integer", "minimum": 1, "maximum": 6, "default": 4}
+      }
+    },
+    "BranchCreate": {
+      "type": "object", "additionalProperties": false, "required": ["parent_branch_id", "changes"],
+      "properties": {
+        "parent_branch_id": {"type": "string", "format": "uuid"}, "name": {"type": "string", "maxLength": 200},
+        "kind": {"enum": ["hiring", "pricing_change", "supplier_failure", "expansion", "budget_change"]},
+        "changes": {"type": "array", "minItems": 1, "maxItems": 100, "items": {"$ref": "#/$defs/ScenarioChange"}},
+        "assumptions": {"type": "array", "maxItems": 100, "items": {"type": "string", "maxLength": 500}},
+        "max_depth": {"type": "integer", "minimum": 1, "maximum": 6}
+      }
+    },
+    "ScenarioConfirmation": {
+      "type": "object", "additionalProperties": false, "required": ["scenario_digest"],
+      "properties": {"scenario_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"}}
+    },
+    "SimulationRunCreate": {
+      "type": "object", "additionalProperties": false, "required": ["branch_id"],
+      "properties": {"branch_id": {"type": "string", "format": "uuid"}}
+    },
+    "SimulationComparisonCreate": {
+      "type": "object", "additionalProperties": false, "required": ["simulation_ids"],
+      "properties": {"simulation_ids": {"type": "array", "minItems": 2, "maxItems": 10, "uniqueItems": true, "items": {"type": "string", "format": "uuid"}}}
+    },
+    "ModelRegister": {
+      "type": "object", "additionalProperties": false,
+      "required": ["name", "kind", "algorithm", "inputs", "outputs", "model_version", "trigger", "status"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1, "maxLength": 200},
+        "kind": {"enum": ["forecasting", "optimization", "anomaly_detection", "computer_vision", "classification"]},
+        "prediction_kind": {"type": ["string", "null"], "enum": ["revenue", "expense", "customer_churn", "workforce", "risk", null]},
+        "algorithm": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9._:/-]{0,119}$"},
+        "inputs": {"type": "array", "minItems": 1, "maxItems": 50, "items": {"type": "object"}},
+        "outputs": {"type": "array", "minItems": 1, "maxItems": 50, "items": {"type": "object"}},
+        "model_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:[-+][a-zA-Z0-9.-]+)?$"},
+        "accuracy": {"type": "object"}, "owner_id": {"type": ["string", "null"], "format": "uuid"},
+        "trigger": {"type": "object"}, "status": {"enum": ["draft", "active", "retired"]}
+      }
+    },
+    "Observation": {
+      "type": "object", "additionalProperties": false, "required": ["observed_at", "value"],
+      "properties": {"observed_at": {"type": "string", "format": "date-time"}, "value": {"type": "number"}, "features": {"$ref": "#/$defs/VariableMap"}}
+    },
+    "PredictionCreate": {
+      "type": "object", "additionalProperties": false, "required": ["model_id", "target", "horizon_steps", "observations"],
+      "properties": {
+        "model_id": {"type": "string", "format": "uuid"}, "target": {"type": "string", "pattern": "^[a-z][a-z0-9_]{0,63}$"},
+        "horizon_steps": {"type": "integer", "minimum": 1, "maximum": 36},
+        "observations": {"type": "array", "minItems": 3, "maxItems": 10000, "items": {"$ref": "#/$defs/Observation"}}
+      }
+    },
+    "OutcomeRecord": {
+      "type": "object", "additionalProperties": false, "required": ["actual_values", "observed_at", "source"],
+      "properties": {"actual_values": {"type": "array", "minItems": 1, "maxItems": 36, "items": {"type": "number"}}, "observed_at": {"type": "string", "format": "date-time"}, "source": {"type": "object"}}
+    },
+    "ValidationRecord": {
+      "type": "object", "additionalProperties": false, "required": ["decision"],
+      "properties": {"decision": {"enum": ["confirmed", "corrected"]}, "corrected_actual_values": {"type": "array", "maxItems": 36, "items": {"type": "number"}}, "expert_notes": {"type": "string", "maxLength": 2000}}
+    },
+    "KnowledgeSubmit": {
+      "type": "object", "additionalProperties": false, "required": ["category", "title", "content", "source"],
+      "properties": {
+        "category": {"enum": ["historical_outcome", "technical_specification", "company_rule", "correction", "expert_knowledge"]},
+        "model_id": {"type": ["string", "null"], "format": "uuid"}, "prediction_id": {"type": ["string", "null"], "format": "uuid"},
+        "title": {"type": "string", "minLength": 1, "maxLength": 300}, "content": {"type": "object"},
+        "source": {"type": "object"}, "owner_id": {"type": ["string", "null"], "format": "uuid"}
+      }
+    }
+  }
+}

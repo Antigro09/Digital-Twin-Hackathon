@@ -46,6 +46,7 @@ export class TwinGraphController {
   }
 
   @Post('/search')
+  @HttpCode(HttpStatus.OK)
   search(@Req() request: FastifyRequest, @Body() body: Record<string, unknown>): Promise<Record<string, unknown>> {
     return this.graph.search(this.contexts.resolve(request), body);
   }
@@ -56,11 +57,13 @@ export class TwinGraphController {
   }
 
   @Post('/traversals')
+  @HttpCode(HttpStatus.OK)
   traverse(@Req() request: FastifyRequest, @Body() body: Record<string, unknown>): Promise<Record<string, unknown>> {
     return this.graph.traverse(this.contexts.resolve(request), body);
   }
 
   @Post('/impact-analysis')
+  @HttpCode(HttpStatus.OK)
   impactAnalysis(@Req() request: FastifyRequest, @Body() body: Record<string, unknown>): Promise<Record<string, unknown>> {
     return this.graph.analyzeImpact(this.contexts.resolve(request), body);
   }

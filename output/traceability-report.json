@@ -904,7 +904,8 @@
     {
       "acceptance": [
         "AC-CON-001",
-        "AC-CON-002"
+        "AC-CON-002",
+        "AC-CON-003"
       ],
       "artifacts": [
         "chapters/06-ingestion-connectors-sync.md",
@@ -918,6 +919,8 @@
       ],
       "contracts": [
         "contracts/schemas/connector-manifest.schema.json",
+        "contracts/schemas/data-foundation.schema.json",
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml",
         "contracts/connectors/github/manifest.json",
         "contracts/connectors/github/schemas/raw-envelope.schema.json",
         "contracts/connectors/github/schemas/raw-payload.schema.json",
@@ -956,7 +959,8 @@
     {
       "acceptance": [
         "AC-CON-001",
-        "AC-CON-002"
+        "AC-CON-002",
+        "AC-CON-003"
       ],
       "artifacts": [
         "chapters/06-ingestion-connectors-sync.md",
@@ -970,6 +974,8 @@
       ],
       "contracts": [
         "contracts/schemas/connector-manifest.schema.json",
+        "contracts/schemas/data-foundation.schema.json",
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml",
         "contracts/connectors/github/manifest.json",
         "contracts/connectors/github/schemas/raw-envelope.schema.json",
         "contracts/connectors/github/schemas/raw-payload.schema.json",
@@ -1008,7 +1014,8 @@
     {
       "acceptance": [
         "AC-CON-001",
-        "AC-CON-002"
+        "AC-CON-002",
+        "AC-CON-003"
       ],
       "artifacts": [
         "chapters/06-ingestion-connectors-sync.md",
@@ -1022,6 +1029,8 @@
       ],
       "contracts": [
         "contracts/schemas/connector-manifest.schema.json",
+        "contracts/schemas/data-foundation.schema.json",
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml",
         "contracts/connectors/github/manifest.json",
         "contracts/connectors/github/schemas/raw-envelope.schema.json",
         "contracts/connectors/github/schemas/raw-payload.schema.json",
@@ -1060,7 +1069,8 @@
     {
       "acceptance": [
         "AC-CON-001",
-        "AC-CON-002"
+        "AC-CON-002",
+        "AC-CON-003"
       ],
       "artifacts": [
         "chapters/06-ingestion-connectors-sync.md",
@@ -1074,6 +1084,8 @@
       ],
       "contracts": [
         "contracts/schemas/connector-manifest.schema.json",
+        "contracts/schemas/data-foundation.schema.json",
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml",
         "contracts/connectors/github/manifest.json",
         "contracts/connectors/github/schemas/raw-envelope.schema.json",
         "contracts/connectors/github/schemas/raw-payload.schema.json",
@@ -1112,7 +1124,8 @@
     {
       "acceptance": [
         "AC-CON-001",
-        "AC-CON-002"
+        "AC-CON-002",
+        "AC-CON-003"
       ],
       "artifacts": [
         "chapters/06-ingestion-connectors-sync.md",
@@ -1126,6 +1139,8 @@
       ],
       "contracts": [
         "contracts/schemas/connector-manifest.schema.json",
+        "contracts/schemas/data-foundation.schema.json",
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml",
         "contracts/connectors/github/manifest.json",
         "contracts/connectors/github/schemas/raw-envelope.schema.json",
         "contracts/connectors/github/schemas/raw-payload.schema.json",
@@ -1166,6 +1181,7 @@
         "AC-DATA-001",
         "AC-DATA-002",
         "AC-DATA-003",
+        "AC-DATA-004",
         "AC-PRV-001"
       ],
       "artifacts": [
@@ -1181,7 +1197,10 @@
       ],
       "contracts": [
         "contracts/schemas/canonical.schema.json",
-        "contracts/schemas/ontology-package.schema.json"
+        "contracts/schemas/ontology-package.schema.json",
+        "contracts/schemas/data-foundation.schema.json",
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml",
+        "contracts/asyncapi/events.asyncapi.yaml"
       ],
       "controls": [
         "CTRL-DAT-001",
@@ -1210,6 +1229,7 @@
         "AC-DATA-001",
         "AC-DATA-002",
         "AC-DATA-003",
+        "AC-DATA-004",
         "AC-PRV-001"
       ],
       "artifacts": [
@@ -1225,7 +1245,10 @@
       ],
       "contracts": [
         "contracts/schemas/canonical.schema.json",
-        "contracts/schemas/ontology-package.schema.json"
+        "contracts/schemas/ontology-package.schema.json",
+        "contracts/schemas/data-foundation.schema.json",
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml",
+        "contracts/asyncapi/events.asyncapi.yaml"
       ],
       "controls": [
         "CTRL-DAT-001",
@@ -1254,6 +1277,7 @@
         "AC-DATA-001",
         "AC-DATA-002",
         "AC-DATA-003",
+        "AC-DATA-004",
         "AC-PRV-001"
       ],
       "artifacts": [
@@ -1269,7 +1293,10 @@
       ],
       "contracts": [
         "contracts/schemas/canonical.schema.json",
-        "contracts/schemas/ontology-package.schema.json"
+        "contracts/schemas/ontology-package.schema.json",
+        "contracts/schemas/data-foundation.schema.json",
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml",
+        "contracts/asyncapi/events.asyncapi.yaml"
       ],
       "controls": [
         "CTRL-DAT-001",
@@ -1298,6 +1325,7 @@
         "AC-DATA-001",
         "AC-DATA-002",
         "AC-DATA-003",
+        "AC-DATA-004",
         "AC-PRV-001"
       ],
       "artifacts": [
@@ -1313,7 +1341,10 @@
       ],
       "contracts": [
         "contracts/schemas/canonical.schema.json",
-        "contracts/schemas/ontology-package.schema.json"
+        "contracts/schemas/ontology-package.schema.json",
+        "contracts/schemas/data-foundation.schema.json",
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml",
+        "contracts/asyncapi/events.asyncapi.yaml"
       ],
       "controls": [
         "CTRL-DAT-001",
@@ -1342,6 +1373,7 @@
         "AC-DATA-001",
         "AC-DATA-002",
         "AC-DATA-003",
+        "AC-DATA-004",
         "AC-PRV-001"
       ],
       "artifacts": [
@@ -1357,7 +1389,10 @@
       ],
       "contracts": [
         "contracts/schemas/canonical.schema.json",
-        "contracts/schemas/ontology-package.schema.json"
+        "contracts/schemas/ontology-package.schema.json",
+        "contracts/schemas/data-foundation.schema.json",
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml",
+        "contracts/asyncapi/events.asyncapi.yaml"
       ],
       "controls": [
         "CTRL-DAT-001",
@@ -1386,6 +1421,7 @@
         "AC-DATA-001",
         "AC-DATA-002",
         "AC-DATA-003",
+        "AC-DATA-004",
         "AC-PRV-001"
       ],
       "artifacts": [
@@ -1401,7 +1437,10 @@
       ],
       "contracts": [
         "contracts/schemas/canonical.schema.json",
-        "contracts/schemas/ontology-package.schema.json"
+        "contracts/schemas/ontology-package.schema.json",
+        "contracts/schemas/data-foundation.schema.json",
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml",
+        "contracts/asyncapi/events.asyncapi.yaml"
       ],
       "controls": [
         "CTRL-DAT-001",
@@ -1430,6 +1469,7 @@
         "AC-DATA-001",
         "AC-DATA-002",
         "AC-DATA-003",
+        "AC-DATA-004",
         "AC-PRV-001"
       ],
       "artifacts": [
@@ -1445,7 +1485,10 @@
       ],
       "contracts": [
         "contracts/schemas/canonical.schema.json",
-        "contracts/schemas/ontology-package.schema.json"
+        "contracts/schemas/ontology-package.schema.json",
+        "contracts/schemas/data-foundation.schema.json",
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml",
+        "contracts/asyncapi/events.asyncapi.yaml"
       ],
       "controls": [
         "CTRL-DAT-001",
@@ -1474,6 +1517,7 @@
         "AC-DATA-001",
         "AC-DATA-002",
         "AC-DATA-003",
+        "AC-DATA-004",
         "AC-PRV-001"
       ],
       "artifacts": [
@@ -1489,7 +1533,10 @@
       ],
       "contracts": [
         "contracts/schemas/canonical.schema.json",
-        "contracts/schemas/ontology-package.schema.json"
+        "contracts/schemas/ontology-package.schema.json",
+        "contracts/schemas/data-foundation.schema.json",
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml",
+        "contracts/asyncapi/events.asyncapi.yaml"
       ],
       "controls": [
         "CTRL-DAT-001",
@@ -1518,6 +1565,7 @@
         "AC-DATA-001",
         "AC-DATA-002",
         "AC-DATA-003",
+        "AC-DATA-004",
         "AC-PRV-001"
       ],
       "artifacts": [
@@ -1533,7 +1581,10 @@
       ],
       "contracts": [
         "contracts/schemas/canonical.schema.json",
-        "contracts/schemas/ontology-package.schema.json"
+        "contracts/schemas/ontology-package.schema.json",
+        "contracts/schemas/data-foundation.schema.json",
+        "contracts/openapi/enterprise-digital-twin.openapi.yaml",
+        "contracts/asyncapi/events.asyncapi.yaml"
       ],
       "controls": [
         "CTRL-DAT-001",

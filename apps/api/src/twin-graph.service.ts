@@ -918,7 +918,9 @@ export class TwinGraphService {
       },
       expectedRecords: state.persisted
         ? [{ kind: GRAPH_METADATA_KIND, id: state.metadata.metadata_id, expected: { version: state.metadata.version } }]
-        : [],
+        // The first write must atomically claim the tenant metadata record.
+        // Without this guard two cold API replicas could both commit version 1.
+        : [{ kind: GRAPH_METADATA_KIND, id: state.metadata.metadata_id, absent: true }],
     };
     try {
       const result = await this.database.commitEventMutation(

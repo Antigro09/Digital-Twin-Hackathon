@@ -54,7 +54,8 @@ export interface EventMutationIdempotencyGuard {
 export interface EventMutationExpectedRecord {
   kind: string;
   id: string;
-  expected: Record<string, JsonPrimitive>;
+  expected?: Record<string, JsonPrimitive>;
+  absent?: true;
 }
 
 export interface EventMutationGuard {
@@ -80,11 +81,23 @@ export interface InMemoryOutboxEntry {
   readonly payload: JsonValue;
 }
 
+export interface RecordListPageOptions {
+  filters?: Record<string, JsonPrimitive>;
+  limit?: number;
+  cursor?: string;
+}
+
+export interface RecordListPage<T> {
+  items: T[];
+  nextCursor: string | null;
+}
+
 @Injectable()
 export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(DatabaseService.name);
   private readonly inMemoryOutboxByTenant = new Map<string, InMemoryOutboxEntry[]>();
   private readonly inMemoryRecords = new Map<string, unknown>();
+  private readonly inMemoryRecordCreatedAt = new Map<string, string>();
   private readonly inMemoryIdempotency = new Map<string, { requestHash: string; responseRef: string; outboxPosition: number }>();
   private readonly inMemoryAuditTail = new Map<string, EventMutationAudit>();
   private nextInMemoryOutboxPosition = 1;
@@ -130,7 +143,9 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
       }
       const serialized = JSON.stringify(payload);
       if (serialized === undefined) throw new TypeError(`record ${kind}/${id} is not JSON-serializable.`);
-      this.inMemoryRecords.set(this.inMemoryRecordKey(tenantId, kind, id), JSON.parse(serialized) as unknown);
+      const key = this.inMemoryRecordKey(tenantId, kind, id);
+      if (!this.inMemoryRecords.has(key)) this.inMemoryRecordCreatedAt.set(key, new Date().toISOString());
+      this.inMemoryRecords.set(key, JSON.parse(serialized) as unknown);
       return;
     }
     if (kind === 'event_audit_evidence') {
@@ -205,6 +220,63 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
     });
   }
 
+  /**
+   * Bounded, keyset-paginated access to JSON records. Filters are restricted to
+   * top-level JSON primitives and are parameterized as JSONB containment, so
+   * callers never contribute SQL identifiers or expressions.
+   */
+  async listPage<T>(tenantId: string, kind: string, options: RecordListPageOptions = {}): Promise<RecordListPage<T>> {
+    const filters = options.filters ?? {};
+    const limit = options.limit ?? 100;
+    this.validatePageOptions(filters, limit);
+    const cursor = options.cursor === undefined ? undefined : this.decodeRecordCursor(options.cursor);
+    if (!this.pool) {
+      const prefix = `${tenantId}:${kind}:`;
+      const candidates = [...this.inMemoryRecords.entries()]
+        .filter(([key]) => key.startsWith(prefix))
+        .map(([key, value]) => ({
+          key,
+          recordId: key.slice(prefix.length),
+          createdAt: this.inMemoryRecordCreatedAt.get(key) ?? '',
+          value,
+        }))
+        .filter((candidate) => this.matchesPayloadFilters(candidate.value, filters))
+        .filter((candidate) => !cursor || this.beforeCursor(candidate.createdAt, candidate.recordId, cursor))
+        .sort((left, right) => right.createdAt.localeCompare(left.createdAt) || right.recordId.localeCompare(left.recordId));
+      const page = candidates.slice(0, limit);
+      const next = candidates.length > limit ? page[page.length - 1] : undefined;
+      return {
+        items: page.map((candidate) => structuredClone(candidate.value) as T),
+        nextCursor: next ? this.encodeRecordCursor(next.createdAt, next.recordId) : null,
+      };
+    }
+    return this.withTenant(tenantId, async (client) => {
+      const parameters: Array<string | number> = [tenantId, kind, JSON.stringify(filters)];
+      let cursorClause = '';
+      if (cursor) {
+        parameters.push(cursor.createdAt, cursor.recordId);
+        cursorClause = ` and (created_at, record_id) < ($${parameters.length - 1}::timestamptz, $${parameters.length}::uuid)`;
+      }
+      parameters.push(limit + 1);
+      const result = await client.query<{ payload: T; created_at: Date | string; record_id: string }>(
+        `select payload, created_at, record_id::text as record_id
+           from edt.records
+          where tenant_id = $1::uuid
+            and kind = $2
+            and payload @> $3::jsonb${cursorClause}
+          order by created_at desc, record_id desc
+          limit $${parameters.length}`,
+        parameters,
+      );
+      const page = result.rows.slice(0, limit);
+      const next = result.rows.length > limit ? page[page.length - 1] : undefined;
+      return {
+        items: page.map((row) => row.payload),
+        nextCursor: next ? this.encodeRecordCursor(this.recordCreatedAt(next.created_at), next.record_id) : null,
+      };
+    });
+  }
+
   async commitEventMutation<TRecordPayload = unknown, TOutboxPayload = unknown>(
     tenantId: string,
     records: readonly EventMutationRecord<TRecordPayload>[],
@@ -250,9 +322,13 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
         payload: JSON.parse(positionedOutboxPayload) as JsonValue,
       };
       for (const record of positionedRecords) {
-        this.inMemoryRecords.set(this.inMemoryRecordKey(tenantId, record.kind, record.id), record.payload);
+        const key = this.inMemoryRecordKey(tenantId, record.kind, record.id);
+        if (!this.inMemoryRecords.has(key)) this.inMemoryRecordCreatedAt.set(key, new Date().toISOString());
+        this.inMemoryRecords.set(key, record.payload);
       }
-      this.inMemoryRecords.set(this.inMemoryRecordKey(tenantId, 'event_audit_evidence', audit.audit_id), auditPayload);
+      const auditKey = this.inMemoryRecordKey(tenantId, 'event_audit_evidence', audit.audit_id);
+      if (!this.inMemoryRecords.has(auditKey)) this.inMemoryRecordCreatedAt.set(auditKey, new Date().toISOString());
+      this.inMemoryRecords.set(auditKey, auditPayload);
       this.inMemoryOutboxByTenant.set(tenantId, [...(this.inMemoryOutboxByTenant.get(tenantId) ?? []), entry]);
       this.inMemoryAuditTail.set(tenantId, structuredClone(audit));
       if (guard) {
@@ -395,10 +471,13 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
       throw new TypeError('Event mutation idempotency response reference or expiry is invalid.');
     }
     for (const record of guard.expectedRecords) {
-      if (!record.kind || !record.id || !Object.keys(record.expected).length) {
-        throw new TypeError('Every authoritative event mutation record guard must declare expected fields.');
+      if (!record.kind || !record.id || (record.absent !== true && !Object.keys(record.expected ?? {}).length)) {
+        throw new TypeError('Every authoritative event mutation record guard must declare expected fields or require an absent record.');
       }
-      this.serializeJson(record.expected, `guard ${record.kind}/${record.id}`);
+      if (record.absent === true && record.expected !== undefined) {
+        throw new TypeError('An authoritative event mutation record guard cannot require both an absent record and expected fields.');
+      }
+      if (record.expected) this.serializeJson(record.expected, `guard ${record.kind}/${record.id}`);
     }
   }
 
@@ -503,11 +582,15 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   }
 
   private assertExpectedPayload(record: EventMutationExpectedRecord, payload: unknown): void {
+    if (record.absent === true) {
+      if (payload === undefined) return;
+      throw new DatabaseMutationConflict('authoritative_record_exists', `The authoritative ${record.kind} record already exists.`);
+    }
     if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
       throw new DatabaseMutationConflict('authoritative_record_missing', `The authoritative ${record.kind} record is unavailable.`);
     }
     const actual = payload as Record<string, unknown>;
-    for (const [field, expected] of Object.entries(record.expected)) {
+    for (const [field, expected] of Object.entries(record.expected ?? {})) {
       if (actual[field] === expected) continue;
       const projection = record.kind === 'event_projection_snapshot';
       const code = field === 'state_hash' && projection
@@ -556,6 +639,49 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
 
   private inMemoryRecordKey(tenantId: string, kind: string, id: string): string {
     return `${tenantId}:${kind}:${id}`;
+  }
+
+  private validatePageOptions(filters: Record<string, JsonPrimitive>, limit: number): void {
+    if (!Number.isInteger(limit) || limit < 1 || limit > 500) {
+      throw new TypeError('Record page limit must be an integer between 1 and 500.');
+    }
+    for (const [key, value] of Object.entries(filters)) {
+      if (!/^[a-z][a-z0-9_]{0,63}$/.test(key)) throw new TypeError(`Record filter ${key} is invalid.`);
+      if (value !== null && typeof value !== 'boolean' && typeof value !== 'number' && typeof value !== 'string') {
+        throw new TypeError(`Record filter ${key} must be a JSON primitive.`);
+      }
+      if (typeof value === 'number' && !Number.isFinite(value)) throw new TypeError(`Record filter ${key} must be finite.`);
+    }
+  }
+
+  private matchesPayloadFilters(payload: unknown, filters: Record<string, JsonPrimitive>): boolean {
+    if (!payload || typeof payload !== 'object' || Array.isArray(payload)) return false;
+    const record = payload as Record<string, unknown>;
+    return Object.entries(filters).every(([key, value]) => record[key] === value);
+  }
+
+  private encodeRecordCursor(createdAt: string, recordId: string): string {
+    return Buffer.from(JSON.stringify({ created_at: createdAt, record_id: recordId }), 'utf8').toString('base64url');
+  }
+
+  private decodeRecordCursor(value: string): { createdAt: string; recordId: string } {
+    try {
+      const decoded = JSON.parse(Buffer.from(value, 'base64url').toString('utf8')) as { created_at?: unknown; record_id?: unknown };
+      if (typeof decoded.created_at !== 'string' || Number.isNaN(Date.parse(decoded.created_at)) || typeof decoded.record_id !== 'string' || !/^[0-9a-f-]{36}$/i.test(decoded.record_id)) {
+        throw new TypeError('invalid cursor');
+      }
+      return { createdAt: decoded.created_at, recordId: decoded.record_id };
+    } catch {
+      throw new TypeError('Record page cursor is invalid.');
+    }
+  }
+
+  private beforeCursor(createdAt: string, recordId: string, cursor: { createdAt: string; recordId: string }): boolean {
+    return createdAt < cursor.createdAt || (createdAt === cursor.createdAt && recordId < cursor.recordId);
+  }
+
+  private recordCreatedAt(value: Date | string): string {
+    return typeof value === 'string' ? value : value.toISOString();
   }
 
   private inMemoryIdempotencyKey(tenantId: string, guard: EventMutationGuard): string {

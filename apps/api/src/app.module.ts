@@ -17,10 +17,12 @@ import { EventProjectionService } from './event-projection.service';
 import { FixtureService } from './fixture.service';
 import { KnowledgeController } from './knowledge.controller';
 import { SimulationController } from './simulation.controller';
+import { TwinGraphController } from './twin-graph.controller';
+import { TwinGraphService } from './twin-graph.service';
 
 @Module({
-  controllers: [DemoAuthController, AdminController, KnowledgeController, AgentController, SimulationController, ActionController, AssetTwinController, EventIntelligenceController, AiGatewayController],
-  providers: [FixtureService, DemoAuthService, ContextService, DatabaseService, EventProjectionService, DemoStoreService, AssetTwinService, EventIntelligenceService, AiGatewayService],
+  controllers: [DemoAuthController, AdminController, KnowledgeController, AgentController, SimulationController, ActionController, AssetTwinController, EventIntelligenceController, AiGatewayController, TwinGraphController],
+  providers: [FixtureService, DemoAuthService, ContextService, DatabaseService, EventProjectionService, DemoStoreService, AssetTwinService, EventIntelligenceService, AiGatewayService, TwinGraphService],
 })
 export class AppModule implements NestModule {
   configure(_consumer: MiddlewareConsumer): void {

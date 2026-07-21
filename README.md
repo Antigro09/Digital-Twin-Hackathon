@@ -122,6 +122,12 @@ This validates metadata, stable identifiers, traceability, contracts, catalogs, 
 | `deploy/opentofu` | H2 cloud-neutral infrastructure wrapper |
 | `scripts` | Demo lifecycle, live verification, specification build, and validation tooling |
 
+## Extensible twin graph foundation
+
+The API now includes a tenant-scoped canonical graph foundation under `/v1/twin`. It stores nodes, first-class relationships, typed history events, source references, confidence, ownership, simulation hooks, and AI capability descriptors through the existing PostgreSQL/RLS, audit-chain, idempotency, and transactional-outbox path. Neo4j remains a rebuildable projection rather than an authority.
+
+Tenant graph administrators can register namespaced custom node and relationship types, then create or conditionally update graph records. Default node types cover organization, business, technology, operations, and financial entities. Read APIs provide filtering and search, bounded traversal, dependency analysis, weighted impact propagation, and structural critical-node ranking. Graph writes require the existing `connector.admin` capability; reads are classification-filtered and never accept a caller-selected tenant. The API rejects secret-like property names and unbounded graph queries. See the controller routes in `apps/api/src/twin-graph.controller.ts` for the precise contract.
+
 ## Deliberate boundaries
 
 - Only the allowlisted synthetic Jira issue `AST-142` can be mutated in H1.

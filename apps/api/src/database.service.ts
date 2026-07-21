@@ -1,5 +1,5 @@
 import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { Pool, PoolClient } from 'pg';
 import { sha256 } from './domain';
@@ -462,7 +462,23 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
         where tenant_id = $1::uuid and kind = 'event_action_receipt' and record_id = $2::uuid`,
       [tenantId, row.response_ref],
     );
-    const outboxPosition = Number(receipt.rows[0]?.payload?.outbox_position);
+    let outboxPosition = Number(receipt.rows[0]?.payload?.outbox_position);
+    // Generic domain mutations (for example, graph history events) use their
+    // durable history event as the idempotency response reference rather than
+    // manufacturing an action receipt. Their transactional outbox payload
+    // binds that response reference through history_event_id.
+    if (!Number.isSafeInteger(outboxPosition) || outboxPosition < 1) {
+      const historyOutbox = await client.query<{ outbox_id: string }>(
+        `select outbox_id
+           from edt.outbox
+          where tenant_id = $1::uuid
+            and payload->>'history_event_id' = $2::text
+          order by outbox_id desc
+          limit 1`,
+        [tenantId, row.response_ref],
+      );
+      outboxPosition = Number(historyOutbox.rows[0]?.outbox_id);
+    }
     if (!Number.isSafeInteger(outboxPosition) || outboxPosition < 1) {
       throw new DatabaseMutationConflict('idempotency_response_missing', 'The authoritative idempotent response is unavailable.');
     }
@@ -642,12 +658,86 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   private async migrate(): Promise<void> {
     if (!this.pool) return;
     const candidates = [
-      resolve(process.cwd(), 'apps/api/db/migrations/001_init.sql'),
-      resolve(process.cwd(), 'db/migrations/001_init.sql'),
-      resolve(__dirname, '../db/migrations/001_init.sql'),
+      resolve(process.cwd(), 'apps/api/db/migrations'),
+      resolve(process.cwd(), 'db/migrations'),
+      resolve(__dirname, '../db/migrations'),
     ];
-    const path = candidates.find((candidate) => existsSync(candidate));
-    if (!path) throw new Error('Database migration 001_init.sql was not found');
-    await this.pool.query(readFileSync(path, 'utf8'));
+    const directory = candidates.find((candidate) => existsSync(resolve(candidate, '001_init.sql')));
+    if (!directory) throw new Error('Database migration directory containing 001_init.sql was not found');
+    const migrations = readdirSync(directory)
+      .filter((name) => /^\d{3,}_[a-z0-9_]+\.sql$/i.test(name))
+      .sort((left, right) => left.localeCompare(right));
+    if (!migrations.length || migrations[0] !== '001_init.sql') {
+      throw new Error('Database migrations must begin with 001_init.sql.');
+    }
+    for (const name of migrations) {
+      const sql = readFileSync(resolve(directory, name), 'utf8');
+      if (name !== '001_init.sql') {
+        await this.pool.query(`create table if not exists edt.schema_migrations (
+          migration_name text primary key,
+          checksum char(64) not null,
+          applied_at timestamptz not null default transaction_timestamp()
+        )`);
+        const applied = await this.pool.query<{ checksum: string }>(
+          'select checksum from edt.schema_migrations where migration_name = $1',
+          [name],
+        );
+        const checksum = sha256(sql);
+        if (applied.rows[0]) {
+          if (applied.rows[0].checksum !== checksum) {
+            throw new Error(`Applied migration ${name} has a different checksum; create a new migration instead of editing it.`);
+          }
+          continue;
+        }
+        const client = await this.pool.connect();
+        try {
+          await client.query('begin');
+          await client.query(sql);
+          await client.query('insert into edt.schema_migrations(migration_name, checksum) values ($1, $2)', [name, checksum]);
+          await client.query('commit');
+        } catch (error) {
+          await client.query('rollback');
+          throw error;
+        } finally {
+          client.release();
+        }
+        continue;
+      }
+      const checksum = sha256(sql);
+      const ledgerExists = await this.pool.query<{ exists: boolean }>(
+        `select to_regclass('edt.schema_migrations') is not null as exists`,
+      );
+      if (ledgerExists.rows[0]?.exists) {
+        const applied = await this.pool.query<{ checksum: string }>(
+          'select checksum from edt.schema_migrations where migration_name = $1',
+          [name],
+        );
+        if (applied.rows[0]) {
+          if (applied.rows[0].checksum !== checksum) {
+            throw new Error('Applied migration 001_init.sql has a different checksum; create a new migration instead of editing it.');
+          }
+          continue;
+        }
+      }
+      // Existing demo databases predate the migration ledger. Run the
+      // idempotent baseline once, then record its immutable checksum.
+      await this.pool.query(sql);
+      await this.pool.query(`create table if not exists edt.schema_migrations (
+        migration_name text primary key,
+        checksum char(64) not null,
+        applied_at timestamptz not null default transaction_timestamp()
+      )`);
+      await this.pool.query(
+        `insert into edt.schema_migrations(migration_name, checksum)
+         values ($1, $2)
+         on conflict (migration_name) do update set checksum = excluded.checksum
+         where edt.schema_migrations.checksum = excluded.checksum`,
+        [name, checksum],
+      );
+      const verified = await this.pool.query<{ checksum: string }>('select checksum from edt.schema_migrations where migration_name = $1', [name]);
+      if (verified.rows[0]?.checksum !== checksum) {
+        throw new Error('Applied migration 001_init.sql has a different checksum; create a new migration instead of editing it.');
+      }
+    }
   }
 }

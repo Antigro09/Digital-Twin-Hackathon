@@ -80,7 +80,7 @@ end
 $$;
 
 create index if not exists records_twin_event_category_time_idx
-  on edt.records(tenant_id, (payload->>'category'), ((payload->>'occurred_at')::timestamptz) desc, record_id)
+  on edt.records(tenant_id, (payload->>'category'), (payload->>'occurred_at') desc, record_id)
   where kind = 'twin_event';
 
 create index if not exists records_twin_event_severity_outcome_idx
@@ -96,7 +96,7 @@ create index if not exists records_twin_data_point_source_quality_idx
   where kind = 'twin_data_point';
 
 create index if not exists records_twin_data_point_subject_metric_idx
-  on edt.records(tenant_id, (payload->>'subject_key'), (payload->>'metric_key'), ((payload->>'observed_at')::timestamptz) desc, record_id)
+  on edt.records(tenant_id, (payload->>'subject_key'), (payload->>'metric_key'), (payload->>'observed_at') desc, record_id)
   where kind = 'twin_data_point';
 
 create index if not exists records_twin_data_point_payload_gin_idx

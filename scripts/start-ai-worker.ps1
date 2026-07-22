@@ -13,6 +13,19 @@ $envFile = Join-Path $root '.env'
 $venvRoot = Join-Path $env:USERPROFILE '.edt-runtime\ai-worker-venv'
 $venvPython = Join-Path $venvRoot 'Scripts\python.exe'
 
+try {
+  $existingHealth = Invoke-RestMethod -Uri "http://127.0.0.1:$Port/health/ready" -TimeoutSec 2
+  if ($existingHealth.status -eq 'ready') {
+    Write-Output "Native AI worker is already running at http://127.0.0.1:$Port."
+    exit 0
+  }
+} catch {}
+
+$listener = Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1
+if ($listener) {
+  throw "Port $Port is already in use by another process. Stop that process or choose a different EDT_AI_PORT before starting the native AI worker."
+}
+
 if (-not (Test-Path -LiteralPath $envFile)) {
   throw 'Missing .env. Copy .env.example to .env, then run npm run demo once to generate the local credentials.'
 }

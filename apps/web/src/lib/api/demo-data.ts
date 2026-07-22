@@ -229,7 +229,7 @@ export const MEMBERSHIPS: ActorContext = {
       tenantAlias: "tnt_aster",
       tenantName: "Aster Labs",
       role: "Local demo graph administrator",
-      capabilities: ["graph:read", "connector.admin", "questions:ask", "scenario:write", "action:propose", "event:read", "event:interpret", "event:review", "event:apply", "event:rollback"],
+      capabilities: ["graph:read", "connector.admin", "questions:ask", "scenario:write", "simulation.run", "evidence.read.aster_orion", "action:propose", "event:read", "event:interpret", "event:review", "event:apply", "event:rollback"],
     },
     {
       membershipId: "mem_aster_operator",

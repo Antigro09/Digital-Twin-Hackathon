@@ -23,7 +23,9 @@ roles:
     grants: [evidence.read.aster_orion, action.approve.security]
     denials: [action.approve.operations, action.approve.duplicate_slot, action.payload.modify]
   usr_aster_admin:
-    grants: [connector.admin, policy.admin, fixture.reset]
+    # The access-key-gated local demo administrator can exercise every
+    # review-only AI specialist. Production roles remain policy-defined.
+    grants: [connector.admin, policy.admin, fixture.reset, evidence.read.aster_orion, scenario.create, simulation.run]
     denials: [action.approve.unless_separately_granted]
   usr_beacon_analyst:
     grants: [evidence.read.beacon, scenario.create, simulation.run, asset.read]

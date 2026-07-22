@@ -134,6 +134,7 @@ export function AIControlCenter({ api, sourceMode }: { api: DigitalTwinApi; sour
       </div>
 
       <ProviderReadiness status={status} />
+      <EnterpriseAnalystRegistry />
       <AgentActivity activity={activity} />
       <AgentRunner status={status} api={api} onResult={(result) => {
         setActivity((current) => current ? { ...current, recent: [result.run, ...current.recent.filter((item) => item.runId !== result.run.runId)] } : current);
@@ -146,6 +147,22 @@ export function AIControlCenter({ api, sourceMode }: { api: DigitalTwinApi; sour
       }} />
       <ExplainThis api={api} enabled={graphAgentReady} />
     </div>
+  );
+}
+
+const enterpriseAnalysts = [
+  { name: "Financial Analyst", purpose: "Revenue, cost, cash flow, profit, ROI and financial stability", tools: "Graph read · financial calculations · scenario proposals", permissions: "ai.run.financial · graph.read.financial", memory: "Session + validated tenant", skills: "Health review · forecast · investment ROI", loops: "Daily predictions · monthly forecasts" },
+  { name: "Operations Analyst", purpose: "Constraints, dependencies, capacity, efficiency and operational impact", tools: "Graph read · operations calculations · scenario proposals", permissions: "ai.run.operations · graph.read.operations", memory: "Session + validated tenant", skills: "Health review · inefficiency discovery · capacity scenario", loops: "Daily refresh · weekly inefficiencies" },
+  { name: "Risk Analyst", purpose: "Financial, operational, customer, market, regulatory and dependency risk", tools: "Graph read · risk calculations · scenario proposals", permissions: "ai.run.risk · graph.read.risk", memory: "Session + validated tenant", skills: "Risk register · dependency risk · market impact", loops: "Daily risk check · monthly scenarios" },
+];
+
+function EnterpriseAnalystRegistry() {
+  return (
+    <Panel className="analyst-registry" aria-labelledby="analyst-registry-title">
+      <div className="section-title-row"><div><p className="eyebrow">Governed coworkers</p><h2 id="analyst-registry-title">Enterprise analyst registry</h2></div><StatusPill tone="info">Proposal authority only</StatusPill></div>
+      <div className="analyst-table-wrap"><table className="analyst-table"><thead><tr><th>Agent / purpose</th><th>Tools</th><th>Permissions</th><th>Memory</th><th>Skills</th><th>Loops</th></tr></thead><tbody>{enterpriseAnalysts.map((agent) => <tr key={agent.name}><td><strong>{agent.name}</strong><small>{agent.purpose}</small></td><td>{agent.tools}</td><td><code>{agent.permissions}</code></td><td>{agent.memory}</td><td>{agent.skills}</td><td>{agent.loops}</td></tr>)}</tbody></table></div>
+      <p className="analyst-boundary">Every run is tenant-scoped, permission-checked, evidence-cited, explained, logged, and returned for review. Agents and autonomous loops cannot directly mutate authoritative graph or external systems.</p>
+    </Panel>
   );
 }
 

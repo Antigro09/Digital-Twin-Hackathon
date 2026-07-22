@@ -850,6 +850,7 @@ export interface DigitalTwinApi {
   getTwinGraph(signal?: AbortSignal): Promise<TwinGraph>;
   createTwinNode(input: { typeId: string; label: string }, signal?: AbortSignal): Promise<TwinNodeSummary>;
   createTwinRelationship(input: { typeId: string; sourceNodeId: string; targetNodeId: string }, signal?: AbortSignal): Promise<TwinRelationship>;
+  createTwinRelationshipType(input: { typeId: string; displayName: string; description: string }, signal?: AbortSignal): Promise<TwinRelationshipType>;
   askLaunchRisk(question: string, mode: AnswerMode, signal?: AbortSignal): Promise<CitedAnswer>;
   createScenario(deltaWorkdays: number, signal?: AbortSignal): Promise<ScenarioDraft>;
   confirmScenario(scenarioId: string, digest: string, etag: string, signal?: AbortSignal): Promise<ScenarioDraft>;

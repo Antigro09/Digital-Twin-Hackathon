@@ -73,6 +73,7 @@ import type {
   TwinGraph,
   TwinNodeSummary,
   TwinRelationship,
+  TwinRelationshipType,
 } from "./types";
 import { ApiProblem } from "./types";
 
@@ -172,6 +173,11 @@ export class DemoDigitalTwinApi implements DigitalTwinApi {
     await this.delay(signal);
     const relationship: TwinRelationship = { relationship_id: `demo-relationship-${Date.now()}`, type_id: input.typeId, source_node_id: input.sourceNodeId, target_node_id: input.targetNodeId, state: "active" };
     this.twinRelationships.push(relationship); return clone(relationship);
+  }
+
+  async createTwinRelationshipType(input: { typeId: string; displayName: string; description: string }, signal?: AbortSignal): Promise<TwinRelationshipType> {
+    await this.delay(signal);
+    return { type_id: input.typeId, display_name: input.displayName, domain: "custom", description: input.description, allowed_source_types: [], allowed_target_types: [] };
   }
 
   async interpretEvent(input: string, intent: EventIntent, signal?: AbortSignal): Promise<EventInterpretation> {
@@ -1120,6 +1126,11 @@ export class FetchDigitalTwinApi implements DigitalTwinApi {
   async createTwinRelationship(input: { typeId: string; sourceNodeId: string; targetNodeId: string }, signal?: AbortSignal): Promise<TwinRelationship> {
     const response = await this.request<Wire>("/v1/twin/relationships", { method: "POST", headers: this.mutation("twin-relationship"), body: JSON.stringify({ type_id: input.typeId, source_node_id: input.sourceNodeId, target_node_id: input.targetNodeId }), signal });
     return response.relationship as TwinRelationship;
+  }
+
+  async createTwinRelationshipType(input: { typeId: string; displayName: string; description: string }, signal?: AbortSignal): Promise<TwinRelationshipType> {
+    const response = await this.request<Wire>("/v1/twin/relationship-types", { method: "POST", headers: this.mutation("twin-relationship-type"), body: JSON.stringify({ type_id: input.typeId, display_name: input.displayName, domain: "custom", description: input.description, property_schema: {}, impact_direction: "forward", acyclic: false, allowed_source_types: [], allowed_target_types: [] }), signal });
+    return response.relationship_type as TwinRelationshipType;
   }
 
   async askLaunchRisk(question: string, mode: AnswerMode, signal?: AbortSignal): Promise<CitedAnswer> {

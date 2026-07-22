@@ -45,19 +45,20 @@ def _boolean(name: str, default: bool = False) -> bool:
     return raw.strip().casefold() in {"1", "true", "yes", "on"}
 
 
-def _endpoint(name: str, value: str) -> str:
+def _endpoint(name: str, value: str, *, allow_docker_host_gateway: bool = False) -> str:
     parsed = urlparse(value)
     loopback = parsed.hostname in {"localhost", "127.0.0.1", "::1"}
+    docker_host_gateway = allow_docker_host_gateway and parsed.hostname == "host.docker.internal"
     if (
         not parsed.hostname
-        or parsed.scheme not in ({"https"} if not loopback else {"https", "http"})
+        or parsed.scheme not in ({"https"} if not (loopback or docker_host_gateway) else {"https", "http"})
         or parsed.username is not None
         or parsed.password is not None
         or parsed.fragment
     ):
         raise DomainError(
             "invalid_ai_configuration",
-            f"{name} must be an HTTPS endpoint (HTTP is limited to loopback).",
+            f"{name} must be an HTTPS endpoint (HTTP is limited to loopback or the explicit Docker host gateway).",
             status_code=500,
         )
     return value
@@ -192,7 +193,7 @@ class AISettings:
             ),
             ollama_api_key=ollama_key,
             ollama_model=ollama_model,
-            ollama_endpoint=_endpoint("OLLAMA_ENDPOINT", os.getenv("OLLAMA_ENDPOINT", "").strip() or "http://host.docker.internal:11434/api/chat"),
+            ollama_endpoint=_endpoint("OLLAMA_ENDPOINT", os.getenv("OLLAMA_ENDPOINT", "").strip() or "http://host.docker.internal:11434/api/chat", allow_docker_host_gateway=True),
             anthropic_api_key=anthropic_key,
             anthropic_model=anthropic_model,
             anthropic_endpoint=_endpoint(

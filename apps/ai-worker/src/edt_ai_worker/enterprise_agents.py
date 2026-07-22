@@ -56,6 +56,16 @@ ANALYST_PROFILES = {
         ("daily_risk_check", "monthly_scenarios"),
         ("Risk", "Contract", "Customer", "Vendor", "Competitor", "Market", "Regulation", "EconomicFactor", "Asset", "Project"),
     ),
+    "marketing_analyst": AnalystProfile(
+        "marketing_analyst", 1,
+        "Explain aggregate campaign value, funnel behavior, market trends, marketing risk, and budget allocation from authorized company graph evidence.",
+        ("graph.read", "marketing.calculate", "simulation.propose", "knowledge.search"),
+        ("ai.run.marketing", "graph.read.marketing", "simulation.create"),
+        (MemoryScope.SESSION, MemoryScope.VALIDATED_TENANT),
+        ("campaign_performance", "customer_segment_behavior", "marketing_budget_optimization", "marketing_reality_check"),
+        ("daily_predictions", "weekly_inefficiencies", "monthly_forecasts"),
+        ("MarketingDepartment", "MarketingEmployee", "MarketingRole", "Campaign", "CustomerSegment", "Lead", "Brand", "MarketingChannel", "MarketingAgency", "MarketTrend", "Product", "RevenueStream", "Risk"),
+    ),
 }
 
 

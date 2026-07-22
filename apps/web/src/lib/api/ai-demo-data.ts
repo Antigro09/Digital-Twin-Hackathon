@@ -24,6 +24,7 @@ export const AI_DEMO_STATUS: AiStatus = {
     { agentType: "simulation_planning", label: "Simulation planning", purpose: "Draft explicit isolated scenario assumptions.", authorityBoundary: "Unavailable offline; no reality mutation authority.", canRun: false },
     { agentType: "prediction_explanation", label: "Prediction explanation", purpose: "Explain an existing model result and its uncertainty.", authorityBoundary: "Unavailable offline; does not create a prediction.", canRun: false },
     { agentType: "technical_knowledge", label: "Technical knowledge", purpose: "Answer technical questions from private evidence.", authorityBoundary: "Unavailable offline; connector administration is required.", canRun: false },
+    { agentType: "marketing_analyst", label: "Marketing analyst", purpose: "Analyze aggregate campaigns, segments, trends, risk, and budget opportunities from graph evidence.", authorityBoundary: "Unavailable offline; no individual profiling or budget mutation authority.", canRun: false },
   ],
   knowledgeImport: {
     enabled: false,

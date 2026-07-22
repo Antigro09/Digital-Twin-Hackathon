@@ -11,6 +11,7 @@ All agents have a distinct purpose, prompt, temperature, route classification, a
 | `simulation_planning` | Draft variables and assumptions | Execute or modify the deterministic engine |
 | `prediction_explanation` | Explain supplied prediction values and draft recommendations | Recalculate predictions |
 | `technical_knowledge` | Propose capabilities, limitations, dependencies, and failure modes | Persist unreviewed technical facts |
+| `marketing_analyst` | Explain aggregate campaign value, segment behavior, trends, risk, and budget opportunities | Profile individuals, target protected traits, mutate budgets, or apply recommendations |
 
 ## Prompt contract
 

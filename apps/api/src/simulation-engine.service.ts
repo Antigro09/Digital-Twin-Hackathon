@@ -376,6 +376,8 @@ export class SimulationEngineService {
     const required: Record<ScenarioKind, string[]> = {
       hiring: ['headcount'], pricing_change: ['price'], supplier_failure: ['supplier_availability'],
       expansion: ['capacity', 'locations'], budget_change: ['budget'],
+      marketing_budget: ['marketing_budget'], marketing_channel_mix: ['channel_budget_share'],
+      market_entry: ['market_reach'], segment_targeting: ['segment_reach'],
     };
     if (!changes.some((change) => required[kind].includes(change.variable))) {
       throw invalid('scenario_driver_required', `${kind} requires a change to ${required[kind].join(' or ')}.`);

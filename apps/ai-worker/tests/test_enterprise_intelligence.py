@@ -13,7 +13,7 @@ TENANT = UUID("10000000-0000-4000-8000-000000000001")
 
 
 def test_analyst_profiles_are_bounded_and_graph_aware():
-    assert set(ANALYST_PROFILES) == {"financial_analyst", "operations_analyst", "risk_analyst"}
+    assert set(ANALYST_PROFILES) == {"financial_analyst", "operations_analyst", "risk_analyst", "marketing_analyst"}
     for profile in ANALYST_PROFILES.values():
         assert profile.purpose and profile.tools and profile.permissions
         assert profile.memory and profile.skills and profile.loops and profile.graph_node_types

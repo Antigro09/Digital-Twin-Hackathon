@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from datetime import datetime
 from typing import Literal
 from uuid import UUID
@@ -9,8 +10,11 @@ from pydantic import Field, field_validator, model_validator
 from .models import StrictModel
 
 
-ScenarioKind = Literal["hiring", "pricing_change", "supplier_failure", "expansion", "budget_change"]
-PredictionKind = Literal["revenue", "expense", "customer_churn", "workforce", "risk"]
+ScenarioKind = Literal["hiring", "pricing_change", "supplier_failure", "expansion", "budget_change", "marketing_budget", "marketing_channel_mix", "market_entry", "segment_targeting"]
+PredictionKind = Literal["revenue", "expense", "customer_churn", "workforce", "risk", "marketing_conversion"]
+SENSITIVE_MARKETING_FEATURE = re.compile(
+    r"(?:^|_)(race|ethnicity|religion|disability|sexual_orientation|health|biometric|political_affiliation|customer_id|lead_id|contact_id|person_id|device_id|email|phone|cookie|ip_address|individual)(?:_|$)"
+)
 
 
 class SimulationNode(StrictModel):
@@ -83,6 +87,10 @@ class DecisionScenario(StrictModel):
             "supplier_failure": {"supplier_availability"},
             "expansion": {"capacity", "locations"},
             "budget_change": {"budget"},
+            "marketing_budget": {"marketing_budget"},
+            "marketing_channel_mix": {"channel_budget_share"},
+            "market_entry": {"market_reach"},
+            "segment_targeting": {"segment_reach"},
         }[self.kind]
         if not any(change.variable in required for change in self.changes):
             raise ValueError(f"{self.kind} requires a change to one of: {', '.join(sorted(required))}")
@@ -164,9 +172,13 @@ class PredictiveRequest(StrictModel):
     def enforce_prediction_boundary(self) -> "PredictiveRequest":
         if self.kind == "workforce" and self.target not in {"headcount", "workforce_capacity", "open_positions"}:
             raise ValueError("workforce predictions are limited to aggregate headcount, capacity, or open positions")
+        if self.kind == "marketing_conversion" and self.target not in {"aggregate_conversion_rate", "qualified_lead_count", "customer_count"}:
+            raise ValueError("marketing predictions are limited to approved aggregate targets")
         forbidden = {"employee_id", "person_id", "performance", "productivity", "attrition", "hiring_score"}
         if self.target in forbidden or any(key in forbidden for item in self.observations for key in item.features):
             raise ValueError("person-level or employment-decision prediction is prohibited")
+        if self.kind == "marketing_conversion" and any(SENSITIVE_MARKETING_FEATURE.search(key) for item in self.observations for key in item.features):
+            raise ValueError("person identifiers and protected or inferred sensitive traits are prohibited in marketing predictions")
         return self
 
 

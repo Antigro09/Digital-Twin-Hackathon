@@ -13,6 +13,7 @@ const AGENT_TYPES = [
   'simulation_planning',
   'prediction_explanation',
   'technical_knowledge',
+  'marketing_analyst',
 ] as const;
 
 type AgentType = (typeof AGENT_TYPES)[number];
@@ -354,7 +355,7 @@ export class AiGatewayService {
     if (!Array.isArray(record.providers) || record.providers.length > 10) throw new Error('providers');
     for (const item of record.providers) {
       const provider = this.responseRecord(item);
-      this.enumValue(provider.provider, 'provider', ['llama', 'openai'] as const);
+      this.enumValue(provider.provider, 'provider', ['llama', 'openai', 'anthropic', 'custom'] as const);
       if (typeof provider.configured !== 'boolean') throw new Error('configured');
       if (provider.model !== null && provider.model !== undefined) this.requiredString(provider.model, 'model');
       if (provider.live_provider_verified !== false) throw new Error('live provider verification');
@@ -387,7 +388,7 @@ export class AiGatewayService {
       if (activity.agent_type !== null && activity.agent_type !== undefined) this.enumValue(activity.agent_type, 'agent_type', AGENT_TYPES);
       this.enumValue(activity.kind, 'kind', ['agent_run', 'document_import', 'retrieval', 'suggestion_review', 'learning_outcome'] as const);
       this.enumValue(activity.state, 'state', ['running', 'succeeded', 'failed'] as const);
-      if (activity.provider !== null && activity.provider !== undefined) this.enumValue(activity.provider, 'provider', ['llama', 'openai'] as const);
+      if (activity.provider !== null && activity.provider !== undefined) this.enumValue(activity.provider, 'provider', ['llama', 'openai', 'anthropic', 'custom'] as const);
       if (activity.model !== null && activity.model !== undefined) this.requiredString(activity.model, 'model');
       this.enumValue(activity.cost_status, 'cost_status', ['priced', 'unpriced', 'not_applicable'] as const);
       if (!Array.isArray(activity.evidence_ids)) throw new Error('evidence_ids');
@@ -614,6 +615,7 @@ export class AiGatewayService {
       simulation_planning: 'simulation.run',
       prediction_explanation: 'simulation.run',
       technical_knowledge: 'connector.admin',
+      marketing_analyst: 'simulation.run',
     };
     this.requireCapability(context, required[agentType], 'ai_agent_capability_denied', 'The authenticated actor is not permitted to run this AI capability.');
   }
@@ -671,7 +673,7 @@ export class AiGatewayService {
         'ai.run',
       )];
     }
-    if (!['causal_analysis', 'simulation_planning', 'prediction_explanation'].includes(agentType)) return [];
+    if (!['causal_analysis', 'simulation_planning', 'prediction_explanation', 'marketing_analyst'].includes(agentType)) return [];
     const evidence: JsonRecord[] = [];
     const traversal = this.store.traverse(context, { template: 'delivery_dependencies', max_nodes: 25 });
     const graphNodes = Array.isArray(traversal.nodes) ? traversal.nodes.slice(0, 20) : [];
@@ -873,7 +875,7 @@ export class AiGatewayService {
       this.requiredString(evidence.source_locator, 'source_locator');
     }
     this.responseRecord(suggestion.output);
-    this.enumValue(suggestion.provider, 'provider', ['llama', 'openai'] as const);
+    this.enumValue(suggestion.provider, 'provider', ['llama', 'openai', 'anthropic', 'custom'] as const);
     this.requiredString(suggestion.model, 'model');
     const usage = this.responseRecord(suggestion.usage);
     this.nonNegativeInteger(usage.input_tokens, 'input_tokens');

@@ -142,6 +142,23 @@ def output_for_agent(agent_type: str, evidence_id: UUID, locator: str) -> dict:
             "dependencies": ["PostgreSQL"],
             "failure_modes": [],
         },
+        "marketing_analyst": {
+            **common,
+            "campaign_findings": ["The cited campaign has an aggregate conversion signal."],
+            "customer_behavior_findings": [],
+            "market_trend_findings": [],
+            "risks": ["Attribution remains uncertain."],
+            "recommendations": [{
+                "title": "Review channel allocation",
+                "reasoning": "The authorized aggregate evidence supports a bounded allocation review.",
+                "affected_node_ids": ["76000000-0000-4000-8000-000000000021"],
+                "confidence_score": 0.7,
+                "expected_impact": {"direction": "increase", "metric": "aggregate_conversion_rate"},
+                "evidence_ids": [str(evidence_id)],
+            }],
+            "simulation_executed": False,
+            "graph_mutation_performed": False,
+        },
     }
     return values[agent_type]
 
@@ -378,7 +395,7 @@ def test_unconfigured_selected_provider_fails_without_fake_fallback(monkeypatch)
     assert failure.value.code == "ai_provider_not_configured"
 
 
-def test_all_seven_agents_are_specialized_and_review_bounded():
+def test_all_agents_are_specialized_and_review_bounded():
     assert {item.value for item in AGENT_SPECS} == {
         "knowledge_ingestion",
         "entity_resolution",
@@ -387,9 +404,10 @@ def test_all_seven_agents_are_specialized_and_review_bounded():
         "simulation_planning",
         "prediction_explanation",
         "technical_knowledge",
+        "marketing_analyst",
     }
-    assert len({spec.schema_name for spec in AGENT_SPECS.values()}) == 7
-    assert len({spec.purpose for spec in AGENT_SPECS.values()}) == 7
+    assert len({spec.schema_name for spec in AGENT_SPECS.values()}) == 8
+    assert len({spec.purpose for spec in AGENT_SPECS.values()}) == 8
     for spec in AGENT_SPECS.values():
         schema = spec.output_model.model_json_schema()
         status_schema = schema["properties"]["status"]

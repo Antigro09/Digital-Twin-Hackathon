@@ -136,7 +136,7 @@ const RUN_ID = "60000000-0000-4000-8000-000000000001";
 const SUGGESTION_ID = "70000000-0000-4000-8000-000000000001";
 const REVIEW_ID = "80000000-0000-4000-8000-000000000001";
 
-const allAgentTypes = ["knowledge_ingestion", "entity_resolution", "event_understanding", "causal_analysis", "simulation_planning", "prediction_explanation", "technical_knowledge"];
+const allAgentTypes = ["knowledge_ingestion", "entity_resolution", "event_understanding", "causal_analysis", "simulation_planning", "prediction_explanation", "technical_knowledge", "marketing_analyst"];
 const evidenceWire = { evidence_id: EVIDENCE_ID, document_id: DOCUMENT_ID, source_locator: "jira/AST-142", media_type: "application/json", classification: "internal", snippet: "AST-142 blocks certification.", relevance: 0.98, confidence: 0.96, indexed_at: "2026-07-13T15:00:00Z", security_flags: [] };
 const suggestionWire = {
   suggestion_id: SUGGESTION_ID,

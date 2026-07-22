@@ -98,10 +98,15 @@ describe('AI gateway facade (e2e)', () => {
     fetchMock
       .mockResolvedValueOnce(jsonResponse({
         status: 'ready',
-        providers: [{ provider: 'llama', configured: true, model: 'llama-test', live_provider_verified: false }],
+        providers: [
+          { provider: 'llama', configured: true, model: 'llama-test', live_provider_verified: false },
+          { provider: 'openai', configured: false, model: null, live_provider_verified: false },
+          { provider: 'anthropic', configured: false, model: null, live_provider_verified: false },
+          { provider: 'custom', configured: false, model: null, live_provider_verified: false },
+        ],
         agents: [
           'knowledge_ingestion', 'entity_resolution', 'event_understanding', 'causal_analysis',
-          'simulation_planning', 'prediction_explanation', 'technical_knowledge',
+          'simulation_planning', 'prediction_explanation', 'technical_knowledge', 'marketing_analyst',
         ],
         storage_backend: 'sqlite',
         durable_store_ready: true,
@@ -117,6 +122,7 @@ describe('AI gateway facade (e2e)', () => {
     const status = await request(app.getHttpServer()).get('/v1/ai/status').set(headers).expect(200);
     expect(status.headers['cache-control']).toBe('private, no-store');
     expect(status.body.model_outputs_mutate_state).toBe(false);
+    expect(status.body.providers.map((item: { provider: string }) => item.provider)).toEqual(['llama', 'openai', 'anthropic', 'custom']);
     await request(app.getHttpServer()).get('/v1/ai/activity?page_size=7').set(headers).expect(200);
     await request(app.getHttpServer()).get('/v1/ai/suggestions?page_size=9').set(headers).expect(200);
 

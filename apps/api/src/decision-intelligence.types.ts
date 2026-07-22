@@ -1,9 +1,9 @@
 export const DECISION_INTELLIGENCE_SCHEMA_VERSION = 'edt.decision-intelligence/1.0.0' as const;
 
-export const SCENARIO_KINDS = ['hiring', 'pricing_change', 'supplier_failure', 'expansion', 'budget_change'] as const;
+export const SCENARIO_KINDS = ['hiring', 'pricing_change', 'supplier_failure', 'expansion', 'budget_change', 'marketing_budget', 'marketing_channel_mix', 'market_entry', 'segment_targeting'] as const;
 export type ScenarioKind = (typeof SCENARIO_KINDS)[number];
 
-export const PREDICTION_KINDS = ['revenue', 'expense', 'customer_churn', 'workforce', 'risk'] as const;
+export const PREDICTION_KINDS = ['revenue', 'expense', 'customer_churn', 'workforce', 'risk', 'marketing_conversion'] as const;
 export type PredictionKind = (typeof PREDICTION_KINDS)[number];
 
 export const MODEL_KINDS = ['forecasting', 'optimization', 'anomaly_detection', 'computer_vision', 'classification'] as const;

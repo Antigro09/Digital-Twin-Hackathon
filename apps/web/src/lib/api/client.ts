@@ -2226,7 +2226,7 @@ export class FetchDigitalTwinApi implements DigitalTwinApi {
   }
 
   private isAiAgentType(value: string): value is AiAgentRunInput["agentType"] {
-    return ["knowledge_ingestion", "entity_resolution", "event_understanding", "causal_analysis", "simulation_planning", "prediction_explanation", "technical_knowledge"].includes(value);
+    return ["knowledge_ingestion", "entity_resolution", "event_understanding", "causal_analysis", "simulation_planning", "prediction_explanation", "technical_knowledge", "marketing_analyst"].includes(value);
   }
 
   private aiAgentLabel(value: string): string {
@@ -2235,7 +2235,7 @@ export class FetchDigitalTwinApi implements DigitalTwinApi {
 
   private aiAgentInput(input: AiAgentRunInput): Wire {
     if (input.agentType === "event_understanding") return { event_text: input.input };
-    if (input.agentType === "causal_analysis" || input.agentType === "prediction_explanation" || input.agentType === "technical_knowledge") return { question: input.input };
+    if (input.agentType === "causal_analysis" || input.agentType === "prediction_explanation" || input.agentType === "technical_knowledge" || input.agentType === "marketing_analyst") return { question: input.input };
     if (input.agentType === "entity_resolution") return { description: input.input };
     return { objective: input.input };
   }
@@ -2244,7 +2244,7 @@ export class FetchDigitalTwinApi implements DigitalTwinApi {
     if (["knowledge_ingestion", "entity_resolution", "technical_knowledge"].includes(agentType)) {
       return this.hasServerCapability("connector.admin", "connector:admin");
     }
-    if (agentType === "prediction_explanation") {
+    if (agentType === "prediction_explanation" || agentType === "marketing_analyst") {
       return this.hasServerCapability("simulation.run", "scenario:write");
     }
     return this.hasServerCapability("scenario.create", "scenario:write");

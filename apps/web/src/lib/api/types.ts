@@ -626,7 +626,7 @@ export type EventBranchComparison = {
 };
 
 export type AiExecutionMode = "connected" | "offline_ui_preview";
-export type AiAgentType = "knowledge_ingestion" | "entity_resolution" | "event_understanding" | "causal_analysis" | "simulation_planning" | "prediction_explanation" | "technical_knowledge";
+export type AiAgentType = "knowledge_ingestion" | "entity_resolution" | "event_understanding" | "causal_analysis" | "simulation_planning" | "prediction_explanation" | "technical_knowledge" | "marketing_analyst";
 export type AiAgentRunStatus = "queued" | "running" | "succeeded" | "PENDING_REVIEW" | "approved" | "rejected" | "failed" | "cancelled";
 export type AiSuggestionStatus = "PENDING_REVIEW";
 export type AiClassification = "public" | "internal" | "confidential" | "restricted";

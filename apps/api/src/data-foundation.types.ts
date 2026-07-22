@@ -44,6 +44,7 @@ export const DEFAULT_EVENT_TYPES: ReadonlyArray<{
   { type_id: 'edt.event/FinancialChange', category: 'financial_change', display_name: 'Financial change', description: 'A revenue, expense, cost, liability, or investment change.' },
   { type_id: 'edt.event/MarketChange', category: 'market_change', display_name: 'Market change', description: 'An external market, competitor, regulatory, or macroeconomic change.' },
   { type_id: 'edt.event/OperationalChange', category: 'operational_change', display_name: 'Operational change', description: 'A process, workflow, task, asset, equipment, or delivery change.' },
+  { type_id: 'edt.event/MarketingFunnelTransition', category: 'customer_change', display_name: 'Marketing funnel transition', description: 'An aggregate cohort movement to the next marketing funnel stage; individual propensity records are prohibited.' },
 ] as const;
 
 export interface CanonicalDataSource {

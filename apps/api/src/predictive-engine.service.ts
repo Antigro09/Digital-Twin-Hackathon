@@ -40,6 +40,7 @@ const MODEL_VERSION = /^[0-9]+\.[0-9]+\.[0-9]+(?:[-+][a-z0-9.-]+)?$/i;
 const FORECAST_ALGORITHMS = new Set(['linear_trend', 'bounded_linear_trend']);
 const TARGET = /^[a-z][a-z0-9_]{0,63}$/;
 const FORBIDDEN_TARGET = /(?:^|_)(employee_id|person_id|performance|productivity|attrition|hiring_score)(?:_|$)/;
+const FORBIDDEN_MARKETING_FEATURE = /(?:^|_)(race|ethnicity|religion|disability|sexual_orientation|health|biometric|political_affiliation|customer_id|lead_id|contact_id|person_id|device_id|email|phone|cookie|ip_address|individual)(?:_|$)/;
 
 @Injectable()
 export class PredictiveEngineService {
@@ -118,6 +119,9 @@ export class PredictiveEngineService {
     const target = requiredString(input.target, 'target', 64);
     this.assertTarget(model.prediction_kind, target);
     const observations = this.observations(input.observations);
+    if (model.prediction_kind === 'marketing_conversion' && observations.some((item) => Object.keys(item.features).some((name) => FORBIDDEN_MARKETING_FEATURE.test(name)))) {
+      throw invalid('marketing_sensitive_feature_prohibited', 'Person identifiers and protected or inferred sensitive traits are prohibited in marketing predictions.');
+    }
     const horizonSteps = boundedInteger(input.horizon_steps, 'horizon_steps', 1, 36);
     const predictionId = this.resourceId(ctx, 'prediction.run', idempotencyKey);
     const featureBatchId = stableUuid(`${predictionId}:feature-batch`);
@@ -351,6 +355,9 @@ export class PredictiveEngineService {
   private assertTarget(kind: PredictionKind, target: string): void {
     if (kind === 'workforce' && !['headcount', 'workforce_capacity', 'open_positions'].includes(target)) {
       throw invalid('workforce_prediction_prohibited', 'Workforce prediction is limited to aggregate headcount, capacity, or open positions.');
+    }
+    if (kind === 'marketing_conversion' && !['aggregate_conversion_rate', 'qualified_lead_count', 'customer_count'].includes(target)) {
+      throw invalid('marketing_prediction_prohibited', 'Marketing prediction is limited to aggregate conversion rate, qualified lead count, or customer count.');
     }
     if (!TARGET.test(target) || FORBIDDEN_TARGET.test(target)) throw invalid('invalid_prediction_target', 'The target must be an aggregate metric identifier.');
   }

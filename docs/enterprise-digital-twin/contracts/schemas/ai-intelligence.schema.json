@@ -21,7 +21,8 @@
         "causal_analysis",
         "simulation_planning",
         "prediction_explanation",
-        "technical_knowledge"
+        "technical_knowledge",
+        "marketing_analyst"
       ]
     },
     "classification": {
@@ -54,7 +55,7 @@
       "additionalProperties": false,
       "required": ["provider", "configured", "model", "live_provider_verified"],
       "properties": {
-        "provider": {"enum": ["llama", "openai"]},
+        "provider": {"enum": ["llama", "openai", "anthropic", "custom"]},
         "configured": {"type": "boolean"},
         "model": {"type": ["string", "null"], "minLength": 1, "maxLength": 500},
         "live_provider_verified": {"const": false, "description": "Static configuration never proves a live provider call; release evidence may set an external verification result, but this runtime status remains fail-closed."}
@@ -67,7 +68,7 @@
       "properties": {
         "status": {"enum": ["ready", "degraded"]},
         "providers": {"type": "array", "maxItems": 10, "items": {"$ref": "#/$defs/providerStatus"}},
-        "agents": {"type": "array", "minItems": 7, "maxItems": 7, "uniqueItems": true, "items": {"$ref": "#/$defs/agentType"}},
+        "agents": {"type": "array", "minItems": 8, "maxItems": 8, "uniqueItems": true, "items": {"$ref": "#/$defs/agentType"}},
         "storage_backend": {"type": "string", "minLength": 1, "maxLength": 100},
         "durable_store_ready": {"type": "boolean"},
         "vector_configured": {"type": "boolean"},

@@ -125,9 +125,11 @@ export class TwinEventService {
     const dataPointId = this.dataPointId(ctx, 'event', idempotencyKey);
     const { typeId, category } = this.eventType(input.type_id, input.category);
     const occurredAt = isoTimestamp(input.occurred_at, 'occurred_at');
-    const details = safeRecord(input.details ?? {}, 'details', MAX_EVENT_DETAILS_BYTES);
+    const rawDetails = safeRecord(input.details ?? {}, 'details', MAX_EVENT_DETAILS_BYTES);
     const affectedNodeIds = this.affectedNodeIds(input.affected_node_ids);
-    const affectedClassifications = await this.affectedNodeClassifications(ctx, affectedNodeIds);
+    const affectedNodes = await this.affectedNodes(ctx, affectedNodeIds);
+    const details = typeId === 'edt.event/MarketingFunnelTransition' ? this.marketingFunnelDetails(rawDetails, affectedNodeIds, affectedNodes) : rawDetails;
+    const affectedClassifications = affectedNodes.map((node) => this.nodeClassification(node));
     const severity = this.severity(input.severity ?? 'info');
     const outcome = this.outcome(input.outcome ?? 'observed');
     const reliabilityScore = score(input.reliability_score, 'reliability_score', 0.8);
@@ -230,7 +232,7 @@ export class TwinEventService {
     const state = await this.state(ctx.tenantId);
     const dataPointId = this.dataPointId(ctx, 'direct', idempotencyKey);
     const subjectNodeId = optionalUuid(input.subject_node_id, 'subject_node_id');
-    const subjectClassification = subjectNodeId ? await this.nodeClassification(ctx, subjectNodeId) : undefined;
+    const subjectClassification = subjectNodeId ? await this.nodeClassificationForId(ctx, subjectNodeId) : undefined;
     const value = safeJsonValue(input.value, 'value', MAX_DATA_VALUE_BYTES);
     const metric = requiredString(input.metric, 'metric', 160);
     const source = this.source(input.source, sha256(value), nowIso());
@@ -588,6 +590,32 @@ export class TwinEventService {
     return value as TwinEventCategory;
   }
 
+  private marketingFunnelDetails(input: Record<string, unknown>, affectedNodeIds: string[], affectedNodes: Record<string, unknown>[]): Record<string, unknown> {
+    assertExactKeys(input, ['campaign_id', 'segment_id', 'from_stage', 'to_stage', 'cohort_count'], 'Marketing funnel transition details');
+    const stages = ['awareness', 'interest', 'lead', 'qualified_lead', 'customer', 'retention'];
+    const fromStage = requiredString(input.from_stage, 'details.from_stage', 32);
+    const toStage = requiredString(input.to_stage, 'details.to_stage', 32);
+    if (!stages.includes(fromStage) || !stages.includes(toStage) || stages.indexOf(toStage) !== stages.indexOf(fromStage) + 1) {
+      throw invalid('invalid_funnel_transition', 'Marketing funnel movement must advance exactly one aggregate stage.');
+    }
+    const campaignId = uuid(input.campaign_id, 'details.campaign_id');
+    const segmentId = uuid(input.segment_id, 'details.segment_id');
+    if (!affectedNodeIds.includes(campaignId) || !affectedNodeIds.includes(segmentId)) {
+      throw invalid('invalid_funnel_nodes', 'Campaign and segment must both be tenant-verified affected graph nodes.');
+    }
+    const typeByNodeId = new Map(affectedNodes.map((node) => [node.node_id, node.type_id]));
+    if (typeByNodeId.get(campaignId) !== 'edt.core/Campaign' || typeByNodeId.get(segmentId) !== 'edt.core/CustomerSegment') {
+      throw invalid('invalid_funnel_node_types', 'Funnel transitions require a Campaign and CustomerSegment node.');
+    }
+    return {
+      campaign_id: campaignId,
+      segment_id: segmentId,
+      from_stage: fromStage,
+      to_stage: toStage,
+      cohort_count: boundedInteger(input.cohort_count, 'details.cohort_count', 1, 1_000_000_000),
+    };
+  }
+
   private severity(value: unknown): TwinEventSeverity {
     if (typeof value !== 'string' || !EVENT_SEVERITIES.includes(value as TwinEventSeverity)) {
       throw invalid('invalid_event_severity', `severity must be one of ${EVENT_SEVERITIES.join(', ')}.`);
@@ -608,17 +636,24 @@ export class TwinEventService {
     return nodeIds.map((nodeId, index) => uuid(nodeId, `affected_node_ids[${index}]`));
   }
 
-  private async affectedNodeClassifications(ctx: RequestContext, nodeIds: string[]): Promise<TwinClassification[]> {
-    return Promise.all(nodeIds.map((nodeId) => this.nodeClassification(ctx, nodeId)));
+  private async affectedNodes(ctx: RequestContext, nodeIds: string[]): Promise<Record<string, unknown>[]> {
+    return Promise.all(nodeIds.map(async (nodeId) => {
+      const response = await this.graph.getNode(ctx, nodeId);
+      const node = response.node;
+      if (!node || typeof node !== 'object' || Array.isArray(node)) throw notFound();
+      return node as Record<string, unknown>;
+    }));
   }
 
-  private async nodeClassification(ctx: RequestContext, nodeId: string): Promise<TwinClassification> {
-    const response = await this.graph.getNode(ctx, nodeId);
-    const node = response.node;
-    if (!node || typeof node !== 'object' || Array.isArray(node)) throw notFound();
-    const metadata = (node as Record<string, unknown>).metadata;
+  private nodeClassification(node: Record<string, unknown>): TwinClassification {
+    const metadata = node.metadata;
     if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata)) throw notFound();
     return classification((metadata as Record<string, unknown>).classification, 'node.metadata.classification');
+  }
+
+  private async nodeClassificationForId(ctx: RequestContext, nodeId: string): Promise<TwinClassification> {
+    const [node] = await this.affectedNodes(ctx, [nodeId]);
+    return this.nodeClassification(node);
   }
 
   private propagationOptions(value: unknown): PropagationOptions {

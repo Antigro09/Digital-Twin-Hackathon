@@ -50,6 +50,14 @@ def _apply_derived_rules(state: dict[str, dict[str, float]]) -> None:
             variables["budget_variance"] = _round(variables["budget"] - variables["expense"])
         if "demand" in variables and "capacity" in variables:
             variables["capacity_gap"] = _round(variables["capacity"] - variables["demand"])
+        if "impressions" in variables and "impression_to_lead_rate" in variables:
+            variables["leads"] = _round(variables["impressions"] * variables["impression_to_lead_rate"])
+        if "leads" in variables and "lead_to_customer_rate" in variables:
+            variables["customers"] = _round(variables["leads"] * variables["lead_to_customer_rate"])
+        if "customers" in variables and "customer_lifetime_value" in variables:
+            variables["revenue_impact"] = _round(variables["customers"] * variables["customer_lifetime_value"])
+        if "marketing_budget" in variables and "revenue_impact" in variables:
+            variables["campaign_roi"] = _round((variables["revenue_impact"] - variables["marketing_budget"]) / variables["marketing_budget"]) if variables["marketing_budget"] else 0.0
 
 
 def run_decision_simulation(request: DecisionSimulationRequest, context: TenantContext) -> DecisionSimulationResult:
@@ -185,7 +193,7 @@ def run_prediction(request: PredictiveRequest, context: TenantContext) -> Predic
     forecast: list[ForecastPoint] = []
     for step in range(1, request.horizon_steps + 1):
         raw_value = intercept + slope * (x[-1] + cadence * step) + request.calibration_bias
-        if request.algorithm == "bounded_linear_trend" or request.kind in {"customer_churn", "risk"}:
+        if request.algorithm == "bounded_linear_trend" or request.kind in {"customer_churn", "risk"} or request.target == "aggregate_conversion_rate":
             raw_value = max(0.0, min(1.0, raw_value))
         interval = 1.96 * residual_error * sqrt(1 + step / max(1, len(y)))
         lower = raw_value - interval

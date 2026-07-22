@@ -23,6 +23,7 @@ class AgentType(str, Enum):
     SIMULATION_PLANNING = "simulation_planning"
     PREDICTION_EXPLANATION = "prediction_explanation"
     TECHNICAL_KNOWLEDGE = "technical_knowledge"
+    MARKETING_ANALYST = "marketing_analyst"
 
 
 class Classification(str, Enum):
@@ -149,6 +150,25 @@ class TechnicalKnowledgeOutput(PendingOutput):
     failure_modes: list[str] = Field(default_factory=list, max_length=100)
 
 
+class MarketingRecommendation(StrictModel):
+    title: str = Field(min_length=1, max_length=300)
+    reasoning: str = Field(min_length=1, max_length=3000)
+    affected_node_ids: list[UUID] = Field(min_length=1, max_length=100)
+    confidence_score: float = Field(ge=0, le=1)
+    expected_impact: dict[str, JsonValue] = Field(min_length=1, max_length=30)
+    evidence_ids: list[UUID] = Field(min_length=1, max_length=50)
+
+
+class MarketingAnalystOutput(PendingOutput):
+    campaign_findings: list[str] = Field(default_factory=list, max_length=100)
+    customer_behavior_findings: list[str] = Field(default_factory=list, max_length=100)
+    market_trend_findings: list[str] = Field(default_factory=list, max_length=100)
+    risks: list[str] = Field(default_factory=list, max_length=100)
+    recommendations: list[MarketingRecommendation] = Field(default_factory=list, max_length=50)
+    simulation_executed: Literal[False] = False
+    graph_mutation_performed: Literal[False] = False
+
+
 AgentOutput = (
     KnowledgeIngestionOutput
     | EntityResolutionOutput
@@ -157,6 +177,7 @@ AgentOutput = (
     | SimulationPlanningOutput
     | PredictionExplanationOutput
     | TechnicalKnowledgeOutput
+    | MarketingAnalystOutput
 )
 
 

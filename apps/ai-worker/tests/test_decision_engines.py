@@ -1,3 +1,4 @@
+from copy import deepcopy
 from datetime import datetime, timezone
 from uuid import UUID
 
@@ -138,6 +139,10 @@ def test_workforce_prediction_rejects_person_level_targets():
     ("supplier_failure", "supplier_availability"),
     ("expansion", "capacity"),
     ("budget_change", "budget"),
+    ("marketing_budget", "marketing_budget"),
+    ("marketing_channel_mix", "channel_budget_share"),
+    ("market_entry", "market_reach"),
+    ("segment_targeting", "segment_reach"),
 ])
 def test_all_typed_scenario_families_execute(kind: str, variable: str):
     snapshot = decision_snapshot()
@@ -170,6 +175,7 @@ def test_all_typed_scenario_families_execute(kind: str, variable: str):
     ("customer_churn", "churn_rate", "bounded_linear_trend"),
     ("workforce", "headcount", "linear_trend"),
     ("risk", "risk_score", "bounded_linear_trend"),
+    ("marketing_conversion", "aggregate_conversion_rate", "bounded_linear_trend"),
 ])
 def test_all_prediction_families_execute(kind: str, target: str, algorithm: str):
     result = run_prediction(PredictiveRequest.model_validate({
@@ -187,5 +193,28 @@ def test_all_prediction_families_execute(kind: str, target: str, algorithm: str)
     }), TenantContext(ASTER_TENANT_ID))
     assert result.kind == kind
     assert result.forecast[0].value >= 0
-    if kind in {"customer_churn", "risk"}:
+    if kind in {"customer_churn", "risk", "marketing_conversion"}:
         assert result.forecast[0].value <= 1
+
+
+def test_marketing_prediction_rejects_sensitive_features_and_individual_targets():
+    base = {
+        "prediction_id": "86000000-0000-4000-8000-000000000001",
+        "tenant_id": str(ASTER_TENANT_ID), "model_id": "87000000-0000-4000-8000-000000000001",
+        "model_version": "1.0.0", "kind": "marketing_conversion", "algorithm": "bounded_linear_trend",
+        "requested_at": "2026-07-21T12:00:00Z", "horizon_steps": 1,
+        "observations": [
+            {"observed_at": f"2026-0{month}-01T00:00:00Z", "value": .1 * month, "features": {}}
+            for month in (1, 2, 3)
+        ],
+    }
+    with pytest.raises(ValidationError):
+        PredictiveRequest.model_validate({**base, "target": "individual_conversion_score"})
+    sensitive = {**deepcopy(base), "target": "aggregate_conversion_rate"}
+    sensitive["observations"][0]["features"] = {"inferred_religion_score": 1}
+    with pytest.raises(ValidationError):
+        PredictiveRequest.model_validate(sensitive)
+    identified = {**deepcopy(base), "target": "aggregate_conversion_rate"}
+    identified["observations"][1]["features"] = {"hashed_customer_id": 42}
+    with pytest.raises(ValidationError):
+        PredictiveRequest.model_validate(identified)

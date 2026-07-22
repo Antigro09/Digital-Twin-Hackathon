@@ -1087,7 +1087,7 @@ paths:
       x-edt-agent-capabilities:
         connector.admin: [knowledge_ingestion, entity_resolution, technical_knowledge]
         scenario.create: [event_understanding]
-        simulation.run: [causal_analysis, simulation_planning, prediction_explanation]
+        simulation.run: [causal_analysis, simulation_planning, prediction_explanation, marketing_analyst]
       parameters: [{$ref: '#/components/parameters/IdempotencyKey'}]
       requestBody: {required: true, content: {application/json: {schema: {$ref: '#/components/schemas/AiAgentRunRequest'}}}}
       responses:

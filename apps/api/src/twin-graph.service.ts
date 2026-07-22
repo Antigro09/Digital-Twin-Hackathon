@@ -1653,6 +1653,17 @@ export class TwinGraphService {
       ['CostCenter', 'Financial', 'Cost center.'],
       ['Investment', 'Financial', 'Investment or capital allocation.'],
       ['Liability', 'Financial', 'Liability or obligation.'],
+      ['MarketingDepartment', 'Marketing', 'Marketing department connected to the owning company.'],
+      ['MarketingEmployee', 'Marketing', 'Marketing employee assignment; individual propensity scoring is prohibited.'],
+      ['MarketingRole', 'Marketing', 'Marketing responsibility or position.'],
+      ['Campaign', 'Marketing', 'Marketing campaign with governed budget, period, and aggregate outcomes.'],
+      ['CustomerSegment', 'Marketing', 'Aggregate customer segment without protected or inferred sensitive traits.'],
+      ['Lead', 'Marketing', 'Lead aggregate or consented CRM record subject to source ACLs and retention.'],
+      ['Brand', 'Marketing', 'Brand or product-brand identity.'],
+      ['MarketingChannel', 'Marketing', 'Marketing delivery channel.'],
+      ['MarketingAgency', 'Marketing', 'External marketing agency or service provider.'],
+      ['MarketTrend', 'Marketing', 'Observed external trend with source provenance.'],
+      ['MarketingFunnel', 'Marketing', 'Aggregate awareness-to-retention funnel snapshot.'],
     ];
     return groups.map(([suffix, domain, description]) => ({
       type_id: `edt.core/${suffix}`,
@@ -1684,7 +1695,27 @@ export class TwinGraphService {
       ['SUPPLIED_BY', 'Item to vendor relationship. Impact propagates from vendor to item.', 'reverse', false],
       ['LOCATED_IN', 'Entity to location relationship.', 'bidirectional', false],
       ['RELATES_TO', 'Descriptive relationship with no impact propagation.', 'none', false],
+      ['TARGETS', 'Campaign targets an aggregate customer segment.', 'forward', false],
+      ['GENERATES', 'Campaign or channel generates aggregate leads.', 'forward', false],
+      ['IMPACTS_REVENUE', 'Campaign, channel, or trend contributes to a revenue impact.', 'forward', false],
+      ['INTERESTED_IN', 'Customer segment has evidenced aggregate interest in a product.', 'forward', false],
+      ['USES_CHANNEL', 'Campaign allocates activity or budget to a marketing channel.', 'forward', false],
+      ['PROMOTES', 'Campaign promotes a product or brand.', 'forward', false],
+      ['MANAGED_BY', 'Campaign or brand is managed by a department, employee, or agency.', 'reverse', false],
+      ['IN_FUNNEL_STAGE', 'Aggregate segment or lead cohort occupies a funnel stage.', 'forward', false],
+      ['INFLUENCED_BY', 'Marketing outcome is influenced by a sourced market trend.', 'reverse', false],
     ];
+    const marketingEndpoints: Record<string, { source: string[]; target: string[] }> = {
+      TARGETS: { source: ['Campaign'], target: ['CustomerSegment'] },
+      GENERATES: { source: ['Campaign', 'MarketingChannel'], target: ['Lead'] },
+      IMPACTS_REVENUE: { source: ['Campaign', 'MarketingChannel', 'MarketTrend'], target: ['RevenueStream'] },
+      INTERESTED_IN: { source: ['CustomerSegment'], target: ['Product'] },
+      USES_CHANNEL: { source: ['Campaign'], target: ['MarketingChannel'] },
+      PROMOTES: { source: ['Campaign'], target: ['Product', 'Brand'] },
+      MANAGED_BY: { source: ['Campaign', 'Brand'], target: ['MarketingDepartment', 'MarketingEmployee', 'MarketingAgency'] },
+      IN_FUNNEL_STAGE: { source: ['CustomerSegment', 'Lead'], target: ['MarketingFunnel'] },
+      INFLUENCED_BY: { source: ['Campaign', 'CustomerSegment', 'Brand'], target: ['MarketTrend'] },
+    };
     return definitions.map(([suffix, description, impactDirection, acyclic]) => ({
       type_id: `edt.core/${suffix}`,
       display_name: suffix,
@@ -1699,8 +1730,8 @@ export class TwinGraphService {
       directional: true,
       impact_direction: impactDirection,
       acyclic,
-      allowed_source_types: [],
-      allowed_target_types: [],
+      allowed_source_types: (marketingEndpoints[suffix]?.source ?? []).map((type) => `edt.core/${type}`),
+      allowed_target_types: (marketingEndpoints[suffix]?.target ?? []).map((type) => `edt.core/${type}`),
     }));
   }
 }

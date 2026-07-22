@@ -14,6 +14,7 @@ from .intelligence_models import (
     EntityResolutionOutput,
     EventUnderstandingOutput,
     KnowledgeIngestionOutput,
+    MarketingAnalystOutput,
     PredictionExplanationOutput,
     SimulationPlanningOutput,
     TechnicalKnowledgeOutput,
@@ -98,6 +99,13 @@ AGENT_SPECS: dict[AgentType, AgentSpec] = {
         "extract proposed capabilities, limitations, dependencies, and failure modes from technical sources",
         0.0,
         False,
+    ),
+    AgentType.MARKETING_ANALYST: AgentSpec(
+        AgentType.MARKETING_ANALYST,
+        MarketingAnalystOutput,
+        "analyze aggregate campaigns, customer-segment behavior, market trends, marketing risks, and budget opportunities from authorized graph evidence without individual profiling",
+        0.1,
+        True,
     ),
 }
 

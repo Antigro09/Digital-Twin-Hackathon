@@ -6,6 +6,17 @@ from edt_ai_worker.api import app
 from edt_ai_worker.tenancy import ASTER_TENANT_ID
 
 
+def test_worker_root_describes_the_internal_service_without_exposing_configuration():
+    response = TestClient(app).get("/")
+    assert response.status_code == 200
+    assert response.json() == {
+        "service": "edt-ai-worker",
+        "status": "running",
+        "ui_url": "http://localhost:3000",
+        "readiness_url": "/health/ready",
+    }
+
+
 def test_internal_service_token_is_constant_time_gated_and_never_echoed(monkeypatch):
     secret = "internal-worker-secret-value"
     monkeypatch.setenv("AI_WORKER_SHARED_SECRET", secret)

@@ -62,6 +62,16 @@ class Health(BaseModel):
     engine_version: str
 
 
+class WorkerLanding(BaseModel):
+    """Safe browser-facing description for the host-local internal worker."""
+
+    model_config = ConfigDict(extra="forbid")
+    service: str
+    status: str
+    ui_url: str
+    readiness_url: str
+
+
 app = FastAPI(
     title="Enterprise Digital Twin AI Gateway and Simulation Worker",
     version=__version__,
@@ -127,6 +137,16 @@ async def request_validation_handler(_: Request, exc: RequestValidationError) ->
         for error in exc.errors()
     ]
     return _problem(422, "invalid_request", "Request body failed structural validation.", redacted)
+
+
+@app.get("/", response_model=WorkerLanding, include_in_schema=False)
+def landing() -> WorkerLanding:
+    return WorkerLanding(
+        service="edt-ai-worker",
+        status="running",
+        ui_url="http://localhost:3000",
+        readiness_url="/health/ready",
+    )
 
 
 @app.get("/health/live", response_model=Health)

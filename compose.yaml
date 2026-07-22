@@ -151,7 +151,7 @@ services:
       - minio-data:/data
     ports:
       - "${MINIO_API_PORT:-9000}:9000"
-      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+      - "${MINIO_CONSOLE_PORT:-9101}:9001"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://127.0.0.1:9000/minio/health/live"]
       interval: 10s

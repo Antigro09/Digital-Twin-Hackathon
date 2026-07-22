@@ -82,6 +82,12 @@ class AISettings:
     openai_api_key: str | None
     openai_model: str | None
     openai_endpoint: str
+    anthropic_api_key: str | None
+    anthropic_model: str | None
+    anthropic_endpoint: str
+    custom_api_key: str | None
+    custom_model: str | None
+    custom_endpoint: str | None
     embedding_api_key: str | None
     embedding_model: str | None
     embedding_endpoint: str
@@ -103,15 +109,18 @@ class AISettings:
     shared_secret: str | None
     llama_pricing: ProviderPricing
     openai_pricing: ProviderPricing
+    anthropic_pricing: ProviderPricing
+    custom_pricing: ProviderPricing
 
     @classmethod
     def from_env(cls) -> "AISettings":
         default_provider = os.getenv("AI_PROVIDER_DEFAULT", "llama").strip().casefold()
         reasoning_provider = os.getenv("AI_REASONING_PROVIDER", default_provider).strip().casefold()
-        if default_provider not in {"llama", "openai"} or reasoning_provider not in {"llama", "openai"}:
+        supported_providers = {"llama", "openai", "anthropic", "custom"}
+        if default_provider not in supported_providers or reasoning_provider not in supported_providers:
             raise DomainError(
                 "invalid_ai_configuration",
-                "AI provider selectors must be either llama or openai.",
+                "AI provider selectors must be llama, openai, anthropic, or custom.",
                 status_code=500,
             )
 
@@ -129,6 +138,11 @@ class AISettings:
         llama_reasoning_model = os.getenv("LLAMA_REASONING_MODEL", "").strip() or llama_model
         openai_key = os.getenv("OPENAI_API_KEY", "").strip() or None
         openai_model = os.getenv("OPENAI_MODEL", "").strip() or None
+        anthropic_key = os.getenv("ANTHROPIC_API_KEY", "").strip() or None
+        anthropic_model = os.getenv("ANTHROPIC_MODEL", "").strip() or None
+        custom_key = os.getenv("CUSTOM_AI_API_KEY", "").strip() or None
+        custom_model = os.getenv("CUSTOM_AI_MODEL", "").strip() or None
+        custom_endpoint_raw = os.getenv("CUSTOM_AI_ENDPOINT", "").strip()
         embedding_key = os.getenv("AI_EMBEDDING_API_KEY", "").strip() or openai_key
         embedding_model = os.getenv("AI_EMBEDDING_MODEL", "").strip() or None
 
@@ -141,6 +155,16 @@ class AISettings:
         if openai_key and not openai_model:
             raise DomainError(
                 "invalid_ai_configuration", "OPENAI_MODEL is required with OPENAI_API_KEY.", status_code=500
+            )
+        if anthropic_key and not anthropic_model:
+            raise DomainError(
+                "invalid_ai_configuration", "ANTHROPIC_MODEL is required with ANTHROPIC_API_KEY.", status_code=500
+            )
+        if custom_key and (not custom_model or not custom_endpoint_raw):
+            raise DomainError(
+                "invalid_ai_configuration",
+                "CUSTOM_AI_MODEL and CUSTOM_AI_ENDPOINT are required with CUSTOM_AI_API_KEY.",
+                status_code=500,
             )
 
         return cls(
@@ -158,6 +182,15 @@ class AISettings:
                 os.getenv("OPENAI_ENDPOINT", "").strip()
                 or "https://api.openai.com/v1/responses",
             ),
+            anthropic_api_key=anthropic_key,
+            anthropic_model=anthropic_model,
+            anthropic_endpoint=_endpoint(
+                "ANTHROPIC_ENDPOINT",
+                os.getenv("ANTHROPIC_ENDPOINT", "").strip() or "https://api.anthropic.com/v1/messages",
+            ),
+            custom_api_key=custom_key,
+            custom_model=custom_model,
+            custom_endpoint=_endpoint("CUSTOM_AI_ENDPOINT", custom_endpoint_raw) if custom_endpoint_raw else None,
             embedding_api_key=embedding_key,
             embedding_model=embedding_model,
             embedding_endpoint=_endpoint(
@@ -203,6 +236,14 @@ class AISettings:
                 _decimal("AI_OPENAI_INPUT_USD_PER_MILLION"),
                 _decimal("AI_OPENAI_OUTPUT_USD_PER_MILLION"),
             ),
+            anthropic_pricing=ProviderPricing(
+                _decimal("AI_ANTHROPIC_INPUT_USD_PER_MILLION"),
+                _decimal("AI_ANTHROPIC_OUTPUT_USD_PER_MILLION"),
+            ),
+            custom_pricing=ProviderPricing(
+                _decimal("AI_CUSTOM_INPUT_USD_PER_MILLION"),
+                _decimal("AI_CUSTOM_OUTPUT_USD_PER_MILLION"),
+            ),
         )
 
     def secret_values(self) -> tuple[str, ...]:
@@ -211,6 +252,8 @@ class AISettings:
             for value in (
                 self.llama_api_key,
                 self.openai_api_key,
+                self.anthropic_api_key,
+                self.custom_api_key,
                 self.embedding_api_key,
                 self.shared_secret,
             )

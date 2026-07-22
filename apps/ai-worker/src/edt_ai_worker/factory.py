@@ -4,7 +4,7 @@ from .embeddings import OpenAICompatibleEmbeddingProvider
 from .gateway import AIGateway
 from .intelligence_models import ProviderName
 from .memory import ControlledMemory
-from .providers import LlamaProvider, OpenAIResponsesProvider
+from .providers import AnthropicMessagesProvider, CustomEndpointProvider, LlamaProvider, OpenAIResponsesProvider
 from .rag import KnowledgeIndex
 from .routing import ModelRouter
 from .settings import AISettings
@@ -19,6 +19,10 @@ def create_gateway(settings: AISettings | None = None) -> AIGateway:
         providers[ProviderName.LLAMA] = LlamaProvider(settings)
     if settings.openai_api_key and settings.openai_model:
         providers[ProviderName.OPENAI] = OpenAIResponsesProvider(settings)
+    if settings.anthropic_api_key and settings.anthropic_model:
+        providers[ProviderName.ANTHROPIC] = AnthropicMessagesProvider(settings)
+    if settings.custom_api_key and settings.custom_model and settings.custom_endpoint:
+        providers[ProviderName.CUSTOM] = CustomEndpointProvider(settings)
     embedding_provider = None
     if settings.embedding_api_key and settings.embedding_model:
         embedding_provider = OpenAICompatibleEmbeddingProvider(settings)

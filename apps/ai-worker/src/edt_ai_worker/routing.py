@@ -35,8 +35,12 @@ class ModelRouter:
             )
         if provider_name == ProviderName.LLAMA:
             model = self.settings.llama_reasoning_model if spec.high_reasoning else self.settings.llama_model
-        else:
+        elif provider_name == ProviderName.OPENAI:
             model = self.settings.openai_model
+        elif provider_name == ProviderName.ANTHROPIC:
+            model = self.settings.anthropic_model
+        else:
+            model = self.settings.custom_model
         if not model:
             raise DomainError(
                 "ai_provider_not_configured",

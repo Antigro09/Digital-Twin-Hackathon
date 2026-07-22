@@ -470,7 +470,7 @@ class OpenAIResponsesProvider(AIProvider):
         last_retryable = False
         for attempt in range(self.settings.max_retries + 1):
             try:
-                response = self.client.post(self.settings.openai_endpoint, json=payload)
+                response = self.client.post(self._endpoint(), json=payload)
                 if response.status_code >= 400:
                     last_retryable = response.status_code in {408, 409, 429} or response.status_code >= 500
                     if last_retryable and attempt < self.settings.max_retries:
@@ -528,3 +528,82 @@ class OpenAIResponsesProvider(AIProvider):
             "The AI provider could not complete the request.",
             status_code=503,
         )
+
+
+    def _endpoint(self) -> str:
+        return self.settings.openai_endpoint
+
+
+class AnthropicMessagesProvider(AIProvider):
+    """Anthropic Messages adapter with local structured-output enforcement."""
+
+    name = ProviderName.ANTHROPIC
+
+    def __init__(self, settings: AISettings, *, client: httpx.Client | None = None) -> None:
+        if not settings.anthropic_api_key or not settings.anthropic_model:
+            raise DomainError("ai_provider_not_configured", "The requested AI provider is not configured.", status_code=503)
+        self.settings = settings
+        self.client = client or httpx.Client(
+            timeout=float(settings.timeout_seconds),
+            headers={
+                "x-api-key": settings.anthropic_api_key,
+                "anthropic-version": "2023-06-01",
+                "content-type": "application/json",
+            },
+        )
+
+    def generate(self, request: ProviderRequest) -> ProviderResponse:
+        started = time.monotonic()
+        payload = {
+            "model": request.model,
+            "system": request.system_prompt,
+            "messages": [{"role": "user", "content": request.user_prompt}],
+            "max_tokens": request.max_output_tokens,
+            "temperature": request.temperature,
+        }
+        try:
+            response = self.client.post(self.settings.anthropic_endpoint, json=payload)
+        except (httpx.TimeoutException, httpx.TransportError) as exc:
+            raise DomainError("ai_provider_unavailable", "The AI provider could not complete the request.", status_code=503) from exc
+        if response.status_code >= 400:
+            retryable = response.status_code in {408, 409, 429} or response.status_code >= 500
+            raise DomainError("ai_provider_unavailable" if retryable else "ai_provider_request_failed", "The AI provider could not complete the request.", status_code=503 if retryable else 502)
+        try:
+            body = response.json()
+            blocks = body["content"]
+            texts = [item["text"] for item in blocks if item.get("type") == "text"]
+            usage = body["usage"]
+            if body.get("stop_reason") != "end_turn" or len(texts) != 1:
+                raise ValueError("incomplete")
+            tokens = TokenUsage(
+                input_tokens=_token_count(usage["input_tokens"], field="input_tokens"),
+                output_tokens=_token_count(usage["output_tokens"], field="output_tokens"),
+                total_tokens=_token_count(usage["input_tokens"], field="input_tokens") + _token_count(usage["output_tokens"], field="output_tokens"),
+            )
+            return ProviderResponse(self.name, str(body.get("model") or request.model), _parse_json_object(texts[0]), tokens, str(body.get("id")) if body.get("id") else None, max(0, int((time.monotonic() - started) * 1000)))
+        except (KeyError, TypeError, ValueError) as exc:
+            raise DomainError("invalid_ai_provider_output", "The AI provider returned malformed output.", status_code=502) from exc
+
+
+class CustomEndpointProvider(OpenAIResponsesProvider):
+    """Governed OpenAI Responses-compatible custom endpoint adapter."""
+
+    name = ProviderName.CUSTOM
+
+    def __init__(self, settings: AISettings, *, client: httpx.Client | None = None, **kwargs: Any) -> None:
+        if not settings.custom_api_key or not settings.custom_model or not settings.custom_endpoint:
+            raise DomainError("ai_provider_not_configured", "The requested AI provider is not configured.", status_code=503)
+        if client is None:
+            client = httpx.Client(
+                timeout=float(settings.timeout_seconds),
+                follow_redirects=False,
+                headers={"Authorization": f"Bearer {settings.custom_api_key}", "Content-Type": "application/json"},
+            )
+        self.settings = settings
+        self.client = client
+        self.sleeper = kwargs.get("sleeper", time.sleep)
+        self.clock = kwargs.get("clock", time.monotonic)
+
+    def _endpoint(self) -> str:
+        assert self.settings.custom_endpoint is not None
+        return self.settings.custom_endpoint

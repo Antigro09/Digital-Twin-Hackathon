@@ -35,6 +35,8 @@ class Classification(str, Enum):
 class ProviderName(str, Enum):
     LLAMA = "llama"
     OPENAI = "openai"
+    ANTHROPIC = "anthropic"
+    CUSTOM = "custom"
 
 
 class TokenUsage(StrictModel):

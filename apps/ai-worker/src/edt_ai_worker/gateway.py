@@ -326,6 +326,8 @@ class AIGateway:
                 configured=ProviderName.OPENAI in self.providers,
                 model=self.settings.openai_model,
             ),
+            ProviderStatus(provider=ProviderName.ANTHROPIC, configured=ProviderName.ANTHROPIC in self.providers, model=self.settings.anthropic_model),
+            ProviderStatus(provider=ProviderName.CUSTOM, configured=ProviderName.CUSTOM in self.providers, model=self.settings.custom_model),
         ]
         selected = {
             ProviderName(self.settings.default_provider),
@@ -644,7 +646,12 @@ class AIGateway:
         return self._prompt(body, selected, history), selected, estimated
 
     def _pricing(self, provider: ProviderName) -> ProviderPricing:
-        return self.settings.llama_pricing if provider == ProviderName.LLAMA else self.settings.openai_pricing
+        return {
+            ProviderName.LLAMA: self.settings.llama_pricing,
+            ProviderName.OPENAI: self.settings.openai_pricing,
+            ProviderName.ANTHROPIC: self.settings.anthropic_pricing,
+            ProviderName.CUSTOM: self.settings.custom_pricing,
+        }[provider]
 
     def run_agent(
         self,

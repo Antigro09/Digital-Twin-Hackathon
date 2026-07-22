@@ -33,13 +33,13 @@ import { Button, Skeleton, StatePanel, StatusPill } from "./ui";
 type View = "overview" | "event" | "ai" | "graph" | "copilot" | "scenario" | "action";
 
 const navigation: Array<{ id: View; label: string; eyebrow: string; glyph: string }> = [
-  { id: "ai", label: "AI Control Center", eyebrow: "Agents + knowledge", glyph: "AI" },
-  { id: "event", label: "Event intelligence", eyebrow: "Causal impact", glyph: "◎" },
-  { id: "overview", label: "Control room", eyebrow: "Launch posture", glyph: "⌂" },
-  { id: "graph", label: "Company graph", eyebrow: "Entities + relationships", glyph: "⌘" },
-  { id: "copilot", label: "Cited analysis", eyebrow: "Grounded Q&A", glyph: "✦" },
-  { id: "scenario", label: "Scenario lab", eyebrow: "Reproducible what-if", glyph: "∆" },
-  { id: "action", label: "Action control", eyebrow: "Approval + rollback", glyph: "↗" },
+  { id: "overview", label: "Company overview", eyebrow: "Operational posture", glyph: "01" },
+  { id: "graph", label: "Knowledge graph", eyebrow: "Entities + relationships", glyph: "02" },
+  { id: "scenario", label: "Simulation engine", eyebrow: "Reproducible scenarios", glyph: "03" },
+  { id: "event", label: "Events", eyebrow: "Causal impact", glyph: "04" },
+  { id: "ai", label: "AI agents", eyebrow: "Models + intelligence", glyph: "05" },
+  { id: "copilot", label: "Analysis reports", eyebrow: "Evidence-led findings", glyph: "06" },
+  { id: "action", label: "Governance", eyebrow: "Approvals + audit", glyph: "07" },
 ];
 
 const viewTitles: Record<View, string> = {
@@ -216,6 +216,9 @@ export function DigitalTwinApp() {
           <div className="mobile-brand"><span className="brand-mark" aria-hidden="true">DT</span><strong>Digital Twin</strong></div>
           <div className="breadcrumb"><span>{activeMembership?.tenantName ?? "Tenant"}</span><i aria-hidden="true">/</i><strong>{currentViewTitle}</strong></div>
           <div className="topbar-actions">
+            <div className="system-readouts" aria-label="System status">
+              <span><i className="readout-online" />System health</span><span>Models: active</span><span>AI: monitored</span>
+            </div>
             <StatusPill tone={apiRef.current?.sourceMode === "connected" ? "positive" : "violet"}>
               {apiRef.current?.sourceMode === "connected" ? "Connected API · trusted local demo auth" : "Local demo data"}
             </StatusPill>
@@ -277,6 +280,7 @@ export function DigitalTwinApp() {
             onCompensate: async () => { if (compensation) await withBusy("compensate", (api) => api.compensate(compensation.compensationId, "edt-h1-compensation-ast142-v8"), setCompensation); },
           })}
         </main>
+        <footer className="system-status-bar"><span><i className="readout-online" /> Data plane: online</span><span>Models: governed</span><span>Last synchronization: {formatDateTime(actor.expiresAt)}</span><span>Processing: {busy ?? "idle"}</span></footer>
       </div>
     </div>
   );

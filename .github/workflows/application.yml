@@ -55,7 +55,13 @@ jobs:
           python -m pip check
 
       - name: Reject High and Critical dependency findings
-        run: npm audit --audit-level=high
+        run: |
+          npm audit --audit-level=high
+          python -m pip install --disable-pip-version-check pip-audit==2.9.0
+          python -m pip_audit --strict
+
+      - name: Continuous security and architecture audit
+        run: python scripts/continuous_audit.py
 
       - name: Validate deployment sources
         run: |

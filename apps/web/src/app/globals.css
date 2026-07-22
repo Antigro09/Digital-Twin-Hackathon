@@ -178,7 +178,6 @@
     padding: 9px 28px;
     background: rgb(248 247 243 / 91%);
     border-bottom: 1px solid var(--line);
-    backdrop-filter: blur(14px);
   }
   .breadcrumb { display: flex; align-items: center; gap: 8px; color: var(--ink-faint); font-size: 12px; min-width: 0; }
   .breadcrumb i { color: #a7b0ab; font-style: normal; }
@@ -796,7 +795,7 @@
     .state-lab { display: none; }
     .context-picker > label, .context-picker small { display: none; }
     .select-wrap { min-width: 210px; }
-    .mobile-nav { position: sticky; top: 0; z-index: 19; display: flex; overflow-x: auto; gap: 3px; padding: 7px 10px; background: rgb(248 247 243 / 95%); border-bottom: 1px solid var(--line); backdrop-filter: blur(12px); }
+    .mobile-nav { position: sticky; top: 0; z-index: 19; display: flex; overflow-x: auto; gap: 3px; padding: 7px 10px; background: #f8f7f3; border-bottom: 1px solid var(--line); }
     .mobile-nav button { display: inline-flex; align-items: center; gap: 5px; flex: 0 0 auto; border: 0; background: transparent; padding: 7px 9px; color: var(--ink-faint); font-size: 9px; font-weight: 700; }
     .mobile-nav button.active { background: var(--sidebar); color: white; }
     .main-content { min-height: calc(100vh - 120px); padding: 22px 16px 50px; }

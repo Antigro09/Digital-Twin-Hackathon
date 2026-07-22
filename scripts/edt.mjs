@@ -2,7 +2,7 @@
 
 import { spawnSync } from "node:child_process";
 import { randomBytes } from "node:crypto";
-import { appendFileSync, existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 const root = resolve(import.meta.dirname, "..");
@@ -56,8 +56,9 @@ function ensureLocalDemoAuth() {
     const matches = [...source.matchAll(new RegExp(`^${name}=(.*)$`, "gm"))];
     return matches.at(-1)?.[1]?.trim().replace(/^(["'])(.*)\1$/, "$2") ?? "";
   };
+  const credentialNames = ["EDT_DEMO_AUTH_SECRET", "EDT_DEMO_AUTH_BOOTSTRAP_KEY", "EDT_DEMO_UI_ACCESS_KEY", "AI_WORKER_SHARED_SECRET", "AI_DATABASE_PASSWORD"];
   const generated = [];
-  for (const name of ["EDT_DEMO_AUTH_SECRET", "EDT_DEMO_AUTH_BOOTSTRAP_KEY", "EDT_DEMO_UI_ACCESS_KEY", "AI_WORKER_SHARED_SECRET", "AI_DATABASE_PASSWORD"]) {
+  for (const name of credentialNames) {
     let value = process.env[name] ?? fromFile(name);
     if (!value) {
       value = randomBytes(48).toString("base64url");
@@ -67,11 +68,14 @@ function ensureLocalDemoAuth() {
     }
     process.env[name] = value;
   }
-  if (generated.length) {
-    const prefix = source.length && !source.endsWith("\n") ? "\n" : "";
-    appendFileSync(envPath, `${prefix}\n# Generated local-demo authentication and internal-service credentials. Do not commit this file.\n${generated.join("\n")}\n`, { encoding: "utf8", mode: 0o600 });
-    process.stdout.write("Generated signed local-demo authentication and internal-service credentials in the ignored .env file.\n");
-  }
+  // Compose reads the first duplicate variable while this helper historically
+  // read the last. Normalize the ignored local .env to one authoritative entry
+  // per credential so UI unlock and service startup always use the same values.
+  const credentialPattern = new RegExp(`^(?:${credentialNames.join("|")})=.*(?:\\r?\\n|$)`, "gm");
+  const normalized = source.replace(credentialPattern, "").trimEnd();
+  const credentialBlock = credentialNames.map((name) => `${name}=${process.env[name]}`).join("\n");
+  writeFileSync(envPath, `${normalized}\n\n# Generated local-demo authentication and internal-service credentials. Do not commit this file.\n${credentialBlock}\n`, { encoding: "utf8", mode: 0o600 });
+  if (generated.length) process.stdout.write("Generated signed local-demo authentication and internal-service credentials in the ignored .env file.\n");
 }
 
 async function issueDemoToken(actorAlias) {

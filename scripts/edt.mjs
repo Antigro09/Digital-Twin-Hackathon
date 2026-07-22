@@ -19,6 +19,35 @@ function compose(...args) {
   run("docker", ["compose", "--file", "compose.yaml", ...args]);
 }
 
+async function nativeAiWorkerReady(port) {
+  try {
+    return (await fetch(`http://127.0.0.1:${port}/health/ready`, { signal: AbortSignal.timeout(1_000) })).ok;
+  } catch {
+    return false;
+  }
+}
+
+async function startNativeAiWorker() {
+  const port = process.env.EDT_AI_PORT ?? "8010";
+  if (await nativeAiWorkerReady(port)) return true;
+  if (process.platform !== "win32") {
+    process.stderr.write("Native AI worker was not started automatically on this platform. Run the equivalent local Python launcher before using AI features.\n");
+    return false;
+  }
+  const result = spawnSync("powershell.exe", ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "scripts/start-ai-worker.ps1", "-Background", "-Port", port], { cwd: root, stdio: "inherit", shell: false });
+  if (result.error || result.status !== 0) {
+    process.stderr.write("Native AI worker was not started. Install Python 3.12, then run npm run ai:local in a separate PowerShell window.\n");
+    return false;
+  }
+  try {
+    await waitFor(`http://127.0.0.1:${port}/health/ready`, "native AI worker", 90_000);
+    return true;
+  } catch {
+    process.stderr.write("Native AI worker did not become ready. Start it with npm run ai:local and inspect its local logs.\n");
+    return false;
+  }
+}
+
 async function waitFor(url, label, timeoutMs = 180_000) {
   const started = Date.now();
   process.stdout.write(`Waiting for ${label}`);
@@ -105,9 +134,11 @@ async function start() {
   const apiPort = process.env.EDT_API_PORT ?? "8080";
   const webPort = process.env.EDT_WEB_PORT ?? "3000";
   await waitFor(`http://127.0.0.1:${apiPort}/readyz`, "API");
+  await startNativeAiWorker();
   await waitFor(`http://127.0.0.1:${webPort}`, "web application");
   await seed();
   process.stdout.write(`Enterprise Digital Twin is ready: http://localhost:${webPort}\n`);
+  process.stdout.write("AI runs natively on this machine; it is not a Docker service.\n");
   process.stdout.write(`Temporal UI: http://localhost:${process.env.TEMPORAL_UI_PORT ?? "8233"}\n`);
 }
 
@@ -137,7 +168,7 @@ async function main() {
       break;
     case "help":
     default:
-      process.stdout.write("Usage: node scripts/edt.mjs <start|seed|verify|auth-token ACTOR|test|status|logs|stop|reset --yes>\n");
+      process.stdout.write("Usage: node scripts/edt.mjs <start|seed|verify|auth-token ACTOR|test|status|logs|stop|reset --yes>\nNative AI: npm run ai:local (foreground) or npm run ai:start (background).\n");
       if (command !== "help") process.exitCode = 2;
   }
 }

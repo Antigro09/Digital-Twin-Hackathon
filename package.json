@@ -21,6 +21,8 @@
     "dev:web": "npm run dev -w @edt/web",
     "dev:sync": "npm run start:dev -w @edt/sync-worker",
     "demo": "node scripts/edt.mjs start",
+    "ai:local": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/start-ai-worker.ps1",
+    "ai:start": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/start-ai-worker.ps1 -Background",
     "demo:seed": "node scripts/edt.mjs seed",
     "demo:verify": "node scripts/edt.mjs verify",
     "demo:token": "node scripts/edt.mjs auth-token"

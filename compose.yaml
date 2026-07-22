@@ -9,13 +9,20 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-edt-local-postgres-only}
     volumes:
       - postgres-data:/var/lib/postgresql/data
+    # The native AI worker uses this host-only binding. It is deliberately not
+    # exposed on all interfaces.
+    ports:
+      - "127.0.0.1:${EDT_AI_POSTGRES_PORT:-5433}:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d edt"]
       interval: 5s
       timeout: 3s
       retries: 20
     restart: unless-stopped
-    networks: [data]
+    # A dedicated non-internal attachment is required for Docker Desktop to
+    # publish the host-only native-worker port; application traffic remains on
+    # the internal data network.
+    networks: [data, native-ai]
 
   postgres-app-db-init:
     image: postgres:17.5-bookworm
@@ -160,70 +167,6 @@ services:
     restart: unless-stopped
     networks: [edge, data]
 
-  ai-worker:
-    build:
-      context: ./apps/ai-worker
-      dockerfile: Dockerfile
-    environment:
-      PYTHONHASHSEED: "0"
-      AI_WORKER_SHARED_SECRET: ${AI_WORKER_SHARED_SECRET:?run npm run demo once to generate the internal AI service credential}
-      AI_STORE_DSN: postgresql://edt_ai_worker:${AI_DATABASE_PASSWORD:?run npm run demo once to generate the AI database credential}@postgres:5432/${EDT_DATABASE_NAME:-edt_hardened}
-      AI_DURABLE_STORE_REQUIRED: "true"
-      AI_PROVIDER_DEFAULT: ${AI_PROVIDER_DEFAULT:-llama}
-      AI_REASONING_PROVIDER: ${AI_REASONING_PROVIDER:-llama}
-      LLAMA_API_KEY: ${LLAMA_API_KEY:-}
-      LLAMA_MODEL: ${LLAMA_MODEL:-}
-      LLAMA_REASONING_MODEL: ${LLAMA_REASONING_MODEL:-}
-      LLAMA_ENDPOINT: ${LLAMA_ENDPOINT:-}
-      OLLAMA_API_KEY: ${OLLAMA_API_KEY:-}
-      OLLAMA_MODEL: ${OLLAMA_MODEL:-}
-      OLLAMA_ENDPOINT: ${OLLAMA_ENDPOINT:-http://host.docker.internal:11434/api/chat}
-      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
-      OPENAI_MODEL: ${OPENAI_MODEL:-}
-      OPENAI_ENDPOINT: ${OPENAI_ENDPOINT:-}
-      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
-      ANTHROPIC_MODEL: ${ANTHROPIC_MODEL:-}
-      ANTHROPIC_ENDPOINT: ${ANTHROPIC_ENDPOINT:-}
-      CUSTOM_AI_API_KEY: ${CUSTOM_AI_API_KEY:-}
-      CUSTOM_AI_MODEL: ${CUSTOM_AI_MODEL:-}
-      CUSTOM_AI_ENDPOINT: ${CUSTOM_AI_ENDPOINT:-}
-      AI_EMBEDDING_API_KEY: ${AI_EMBEDDING_API_KEY:-}
-      AI_EMBEDDING_MODEL: ${AI_EMBEDDING_MODEL:-}
-      AI_EMBEDDING_ENDPOINT: ${AI_EMBEDDING_ENDPOINT:-}
-      AI_VECTOR_DIMENSIONS: ${AI_VECTOR_DIMENSIONS:-256}
-      AI_GATEWAY_TIMEOUT_SECONDS: ${AI_GATEWAY_TIMEOUT_SECONDS:-20}
-      AI_GATEWAY_MAX_RETRIES: ${AI_GATEWAY_MAX_RETRIES:-2}
-      AI_GATEWAY_MAX_INPUT_TOKENS: ${AI_GATEWAY_MAX_INPUT_TOKENS:-24000}
-      AI_GATEWAY_MAX_OUTPUT_TOKENS: ${AI_GATEWAY_MAX_OUTPUT_TOKENS:-4096}
-      AI_GATEWAY_REQUESTS_PER_MINUTE: ${AI_GATEWAY_REQUESTS_PER_MINUTE:-30}
-      AI_GATEWAY_CACHE_TTL_SECONDS: ${AI_GATEWAY_CACHE_TTL_SECONDS:-300}
-      AI_GATEWAY_MAX_CACHE_ENTRIES: ${AI_GATEWAY_MAX_CACHE_ENTRIES:-1000}
-      AI_GATEWAY_MAX_DOCUMENT_BYTES: ${AI_GATEWAY_MAX_DOCUMENT_BYTES:-5242880}
-      AI_MAX_RETRIEVAL_CANDIDATES: ${AI_MAX_RETRIEVAL_CANDIDATES:-10000}
-      AI_SESSION_TTL_MINUTES: ${AI_SESSION_TTL_MINUTES:-60}
-      AI_LLAMA_INPUT_USD_PER_MILLION: ${AI_LLAMA_INPUT_USD_PER_MILLION:-}
-      AI_LLAMA_OUTPUT_USD_PER_MILLION: ${AI_LLAMA_OUTPUT_USD_PER_MILLION:-}
-      AI_OLLAMA_INPUT_USD_PER_MILLION: ${AI_OLLAMA_INPUT_USD_PER_MILLION:-}
-      AI_OLLAMA_OUTPUT_USD_PER_MILLION: ${AI_OLLAMA_OUTPUT_USD_PER_MILLION:-}
-      AI_OPENAI_INPUT_USD_PER_MILLION: ${AI_OPENAI_INPUT_USD_PER_MILLION:-}
-      AI_OPENAI_OUTPUT_USD_PER_MILLION: ${AI_OPENAI_OUTPUT_USD_PER_MILLION:-}
-      AI_ANTHROPIC_INPUT_USD_PER_MILLION: ${AI_ANTHROPIC_INPUT_USD_PER_MILLION:-}
-      AI_ANTHROPIC_OUTPUT_USD_PER_MILLION: ${AI_ANTHROPIC_OUTPUT_USD_PER_MILLION:-}
-      AI_CUSTOM_INPUT_USD_PER_MILLION: ${AI_CUSTOM_INPUT_USD_PER_MILLION:-}
-      AI_CUSTOM_OUTPUT_USD_PER_MILLION: ${AI_CUSTOM_OUTPUT_USD_PER_MILLION:-}
-    depends_on:
-      postgres-app-db-init:
-        condition: service_completed_successfully
-    ports:
-      - "127.0.0.1:${EDT_AI_PORT:-8010}:8080"
-    healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/health/ready', timeout=2)"]
-      interval: 5s
-      timeout: 3s
-      retries: 20
-    restart: unless-stopped
-    networks: [control, data, ai-egress]
-
   api:
     build:
       context: .
@@ -240,14 +183,16 @@ services:
       EDT_DEMO_AUTH_TTL_SECONDS: "900"
       EDT_FROZEN_CLOCK: "true"
       EDT_ALLOW_ORACLE_FALLBACK: "false"
-      AI_WORKER_URL: http://ai-worker:8080
+      # The AI worker is deliberately native on the host, never a Compose
+      # service. Docker Desktop resolves this name to the Windows host.
+      AI_WORKER_URL: ${AI_WORKER_URL:-http://host.docker.internal:8010}
       SIMULATION_WORKER_TIMEOUT_MS: ${SIMULATION_WORKER_TIMEOUT_MS:-60000}
       WEB_ORIGIN: http://localhost:${EDT_WEB_PORT:-3000}
     depends_on:
       postgres-app-db-init:
         condition: service_completed_successfully
-      ai-worker:
-        condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     ports:
       - "${EDT_API_PORT:-8080}:8080"
     healthcheck:
@@ -326,7 +271,7 @@ networks:
     internal: true
   data:
     internal: true
-  ai-egress: {}
+  native-ai: {}
 
 volumes:
   postgres-data: {}

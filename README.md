@@ -6,14 +6,14 @@ The current specification is `1.0.0-rc.1`. Its H1/H2 decisions are Committed, bu
 
 ## Run the complete H1 demo
 
-Prerequisites are Docker Desktop with Compose v2 and Node.js 22 or newer. All demo data and provider effects are synthetic.
+Prerequisites are Docker Desktop with Compose v2, Node.js 22 or newer, and Python 3.12. The AI worker and Ollama run natively on Windows; the remaining platform services run in Docker. All demo data and provider effects are synthetic.
 
 ```powershell
 Copy-Item .env.example .env
 npm run demo
 ```
 
-Open <http://localhost:3000>. The launcher builds all four application workloads, starts PostgreSQL, Temporal, Neo4j, Valkey, and MinIO, waits for readiness, and seeds the isolated Aster and Beacon tenants.
+Open <http://localhost:3000>. The launcher starts the Dockerized web, API, synchronization, PostgreSQL, Temporal, Neo4j, Valkey, and MinIO services, then starts the native AI worker on `127.0.0.1:8010` and seeds the isolated Aster and Beacon tenants.
 
 The application database name is configurable with `EDT_DATABASE_NAME` and defaults to `edt_hardened`. The launcher creates it non-destructively when an older local PostgreSQL volume already exists, leaving a prior `edt` database untouched for audit comparison.
 
@@ -48,11 +48,11 @@ Ollama is a separate native provider, not a Llama API-key alias. For a local Oll
 AI_PROVIDER_DEFAULT=ollama
 AI_REASONING_PROVIDER=ollama
 OLLAMA_MODEL=llama3.2
-OLLAMA_ENDPOINT=http://host.docker.internal:11434/api/chat
+OLLAMA_ENDPOINT=http://127.0.0.1:11434/api/chat
 # OLLAMA_API_KEY=only-for-an-authenticated-proxy-or-hosted-service
 ```
 
-Rebuild and restart with `npm run demo`, then check **AI Control Center**. Provider credentials stay in the AI worker and are never sent to the browser or public API.
+Run `npm run demo`, then check **AI Control Center**. The native launcher creates its Python environment under `%USERPROFILE%\.edt-runtime\ai-worker-venv` on first use, outside the OneDrive workspace and Microsoft Store app-data redirection. If you prefer a visible foreground process, use `npm run ai:local`; `npm run ai:start` runs it in the background. Provider credentials stay in the native AI worker and are never sent to the browser or public API.
 
 Vector retrieval is independently configured because the hosted Llama SDK does not expose an embeddings resource. To enable real semantic embeddings, configure an approved OpenAI-compatible endpoint/model; otherwise imports remain available for lexical retrieval and the UI honestly reports vector retrieval unavailable:
 

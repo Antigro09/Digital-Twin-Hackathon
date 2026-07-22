@@ -41,7 +41,7 @@ describe("DigitalTwinApp H1 journey", () => {
     expect(screen.getByLabelText("Loading Digital Twin")).toBeInTheDocument();
     expect(await screen.findByRole("heading", { name: /one dependency chain/i })).toBeInTheDocument();
     expect(screen.getByRole("navigation", { name: "Primary navigation" })).toBeInTheDocument();
-    expect(screen.getByLabelText("Active membership")).toHaveValue("mem_aster_operator");
+    expect(screen.getByLabelText("Active membership")).toHaveValue("mem_aster_graph_admin");
     expect(screen.getByText("AST-142 is the strongest recorded blocker", { exact: false })).toBeInTheDocument();
   });
 
@@ -61,8 +61,8 @@ describe("DigitalTwinApp H1 journey", () => {
     const selector = await screen.findByLabelText("Active membership");
     await user.selectOptions(selector, "mem_beacon_observer");
     expect(await screen.findByRole("heading", { name: "Launch posture is unavailable." })).toBeInTheDocument();
-    await user.click(within(screen.getByRole("navigation", { name: "Primary navigation" })).getByRole("button", { name: /Evidence graph/ }));
-    expect(await screen.findByRole("heading", { name: "No authorized graph projection" })).toBeInTheDocument();
+    await user.click(within(screen.getByRole("navigation", { name: "Primary navigation" })).getByRole("button", { name: /Company graph/ }));
+    expect(await screen.findByRole("heading", { name: "No company entities yet" })).toBeInTheDocument();
     expect(screen.queryByText("BEACON-CANARY-7Q9K")).not.toBeInTheDocument();
     expect(screen.queryByText("AST-142 · Complete SSO cutover")).not.toBeInTheDocument();
   });
@@ -71,39 +71,13 @@ describe("DigitalTwinApp H1 journey", () => {
     const user = userEvent.setup();
     render(<DigitalTwinApp />);
     await screen.findByRole("heading", { name: /one dependency chain/i });
-    await user.click(within(screen.getByRole("navigation", { name: "Primary navigation" })).getByRole("button", { name: /Evidence graph/ }));
-    expect(await screen.findByRole("heading", { name: "Orion 2.0 launch dependency path" })).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Show accessible path" }));
-    const table = screen.getByRole("table", { name: "Authorized dependency path in traversal order" });
-    expect(within(table).getByText("PR #184")).toBeInTheDocument();
-    expect(within(table).getAllByText("BLOCKS")).toHaveLength(2);
-    await user.click(screen.getByRole("button", { name: /AST-201: Launch certification/ }));
-    expect(screen.getByRole("heading", { name: "Launch certification" })).toBeInTheDocument();
-  });
-
-  it("explores the synthetic pump, streams telemetry, and executes an idempotent control rehearsal", async () => {
-    const user = userEvent.setup();
-    render(<DigitalTwinApp />);
-    await screen.findByRole("heading", { name: /one dependency chain/i });
-    await user.click(within(screen.getByRole("navigation", { name: "Primary navigation" })).getByRole("button", { name: /Asset twin/ }));
-
-    expect(await screen.findByRole("heading", { name: "Interactive asset twin" })).toBeInTheDocument();
-    expect(await screen.findByRole("heading", { name: "Live simulator telemetry" })).toBeInTheDocument();
-    const pump = screen.getByRole("application", { name: /centrifugal pump view/i });
-    pump.focus();
-    await user.keyboard("{ArrowRight}");
-    expect(pump).toHaveAttribute("aria-label", expect.stringContaining("rotated -2 degrees"));
-
-    await user.click(screen.getByRole("button", { name: "Drive-end bearing" }));
-    expect(screen.getByText("Radial bearing with a rising vibration signature.")).toBeInTheDocument();
-
-    await user.click(screen.getByRole("button", { name: "Preview exact command" }));
-    expect(await screen.findByRole("heading", { name: "Set drive speed" })).toBeInTheDocument();
-    await user.click(screen.getByRole("checkbox", { name: /confirm this exact synthetic command/i }));
-    await user.click(screen.getByRole("button", { name: "Execute once in simulation" }));
-    expect(await screen.findByRole("heading", { name: "Synthetic command executed once" })).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Replay same idempotency key" }));
-    expect(await screen.findByRole("heading", { name: "Replay returned the original receipt" })).toBeInTheDocument();
+    await user.click(within(screen.getByRole("navigation", { name: "Primary navigation" })).getByRole("button", { name: /Company graph/ }));
+    expect(await screen.findByRole("heading", { name: "Company relationship map" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Add node" })).toBeInTheDocument();
+    await user.click(screen.getAllByRole("button", { name: "Add node" }).at(-1)!);
+    await user.type(screen.getByLabelText("Name or label"), "Jordan Lee");
+    await user.click(screen.getAllByRole("button", { name: "Add node" }).at(-1)!);
+    expect(await screen.findByRole("heading", { name: "Jordan Lee" })).toBeInTheDocument();
   });
 
   it("interprets an event, explores causal effects, and applies an exact dual-approved synthetic reality update", async () => {

@@ -12,6 +12,7 @@ const ALLOWED_ACTORS = new Set([
   "usr_beacon_analyst",
   "usr_aster_ops_approver",
   "usr_aster_security_approver",
+  "usr_aster_admin",
 ]);
 
 type DemoSession = {

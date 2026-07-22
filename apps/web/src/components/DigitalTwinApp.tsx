@@ -22,7 +22,6 @@ import { ApiProblem } from "@/lib/api/types";
 import { formatDateTime } from "@/lib/format";
 import { ActionWorkspace } from "./ActionWorkspace";
 import { AIControlCenter } from "./AIControlCenter";
-import { AssetTwin } from "./AssetTwin";
 import { CopilotPanel } from "./CopilotPanel";
 import { EventIntelligence } from "./EventIntelligence";
 import { GraphExplorer } from "./GraphExplorer";
@@ -31,12 +30,11 @@ import { Overview } from "./Overview";
 import { ScenarioWorkspace } from "./ScenarioWorkspace";
 import { Button, Skeleton, StatePanel, StatusPill } from "./ui";
 
-type View = "overview" | "event" | "ai" | "asset" | "graph" | "copilot" | "scenario" | "action";
+type View = "overview" | "event" | "ai" | "graph" | "copilot" | "scenario" | "action";
 
 const navigation: Array<{ id: View; label: string; eyebrow: string; glyph: string }> = [
   { id: "ai", label: "AI Control Center", eyebrow: "Agents + knowledge", glyph: "AI" },
   { id: "event", label: "Event intelligence", eyebrow: "Causal impact", glyph: "◎" },
-  { id: "asset", label: "Asset twin", eyebrow: "Physical operations", glyph: "◉" },
   { id: "overview", label: "Control room", eyebrow: "Launch posture", glyph: "⌂" },
   { id: "graph", label: "Company graph", eyebrow: "Entities + relationships", glyph: "⌘" },
   { id: "copilot", label: "Cited analysis", eyebrow: "Grounded Q&A", glyph: "✦" },
@@ -47,7 +45,6 @@ const navigation: Array<{ id: View; label: string; eyebrow: string; glyph: strin
 const viewTitles: Record<View, string> = {
   ai: "AI provider and agent control center",
   event: "Event intelligence and causal impact",
-  asset: "Interactive physical asset twin",
   overview: "Orion launch control room",
   graph: "Company relationship map",
   copilot: "Cited organizational analysis",
@@ -210,7 +207,7 @@ export function DigitalTwinApp() {
             </button>
           ))}
         </nav>
-        <div className="sidebar-boundary"><span aria-hidden="true">◇</span><div><strong>Synthetic H1</strong><p>{isAsterContext ? "External writes limited to allowlisted AST-142 and the asset simulator." : "Read-only tenant context; no external or simulated control writes."}</p></div></div>
+        <div className="sidebar-boundary"><span aria-hidden="true">◇</span><div><strong>Governed local demo</strong><p>{isAsterContext ? "Company graph changes are audited and permission-checked. External actions remain allowlisted." : "Read-only tenant context; no cross-company data or actions are exposed."}</p></div></div>
         <div className="sidebar-footer"><span className="actor-avatar">{actor.actor.initials}</span><div><strong>{actor.actor.displayName}</strong><span>{activeMembership?.role}</span></div><span className="online-dot" title="Authenticated" /></div>
       </aside>
 
@@ -324,7 +321,6 @@ function renderView(props: RenderViewProps) {
     case "ai": return <AIControlCenter api={props.api} sourceMode={props.sourceMode} />;
     case "event": return <EventIntelligence api={props.api} canReview={props.canReviewEvents} canApply={props.canApplyEvents} sourceMode={props.sourceMode} />;
     case "overview": return <Overview graph={props.graph} answer={props.answer} connectors={props.connectors} onNavigate={props.navigate} />;
-    case "asset": return <AssetTwin api={props.api} />;
     case "graph": return <GraphExplorer api={props.api} canManage={props.canManageGraph} />;
     case "copilot": return <CopilotPanel answer={props.answer} busy={props.busy === "question"} onAsk={props.onAsk} />;
     case "scenario": return props.canSimulate ? <ScenarioWorkspace scenario={props.scenario} simulation={props.simulation} busy={props.busy} onCompile={props.onCompile} onConfirm={props.onConfirm} onSimulate={props.onSimulate} /> : <StatePanel type="denied" title="Scenario capability is not delegated" description="The active Beacon Works membership is read-only. Tenant switching never expands authority." />;

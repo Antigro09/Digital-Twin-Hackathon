@@ -221,9 +221,16 @@ export const MEMBERSHIPS: ActorContext = {
     displayName: "Maya Chen",
     initials: "MC",
   },
-  activeMembershipId: "mem_aster_operator",
+  activeMembershipId: "mem_aster_graph_admin",
   expiresAt: "2026-07-13T17:00:00Z",
   memberships: [
+    {
+      membershipId: "mem_aster_graph_admin",
+      tenantAlias: "tnt_aster",
+      tenantName: "Aster Labs",
+      role: "Local demo graph administrator",
+      capabilities: ["graph:read", "connector.admin", "questions:ask", "scenario:write", "action:propose", "event:read", "event:interpret", "event:review", "event:apply", "event:rollback"],
+    },
     {
       membershipId: "mem_aster_operator",
       tenantAlias: "tnt_aster",

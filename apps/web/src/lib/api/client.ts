@@ -947,7 +947,7 @@ export const browserDemoTokenProvider: DemoTokenProvider = async (actorAlias, si
 export class FetchDigitalTwinApi implements DigitalTwinApi {
   readonly sourceMode = "connected" as const;
   private actor = clone(MEMBERSHIPS);
-  private actorAlias = "usr_aster_analyst";
+  private actorAlias = "usr_aster_admin";
   private lastEvidenceIds: string[] = [];
   private snapshot?: Wire;
   private scenario?: ScenarioDraft;
@@ -1045,7 +1045,9 @@ export class FetchDigitalTwinApi implements DigitalTwinApi {
     const membership = this.actor.memberships.find((candidate) => candidate.membershipId === membershipId);
     if (!membership) throw new ApiProblem("That membership is not available to this actor.", 403, "membership_denied", false);
     const previous = this.actorAlias;
-    this.actorAlias = membership.tenantAlias === "tnt_aster" ? "usr_aster_analyst" : "usr_beacon_analyst";
+    this.actorAlias = membership.membershipId === "mem_aster_graph_admin"
+      ? "usr_aster_admin"
+      : membership.tenantAlias === "tnt_aster" ? "usr_aster_analyst" : "usr_beacon_analyst";
     try {
       const identity = await this.request<Wire>("/v1/me", { signal });
       this.captureServerCapabilities(identity);

@@ -19,7 +19,7 @@ describe("FetchDigitalTwinApi trusted local demo authentication", () => {
     await Promise.all([api.getActorContext(), api.getActorContext()]);
     await api.getActorContext();
     expect(tokenProvider).toHaveBeenCalledTimes(1);
-    expect(requests.every((request) => request.headers.get("authorization") === "Bearer signed-token-for-usr_aster_analyst")).toBe(true);
+    expect(requests.every((request) => request.headers.get("authorization") === "Bearer signed-token-for-usr_aster_admin")).toBe(true);
     expect(requests.every((request) => !request.headers.has("x-demo-actor"))).toBe(true);
 
     await api.selectMembership("mem_beacon_observer");

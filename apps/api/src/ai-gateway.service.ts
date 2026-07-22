@@ -358,7 +358,10 @@ export class AiGatewayService {
       this.enumValue(provider.provider, 'provider', ['llama', 'ollama', 'openai', 'anthropic', 'custom'] as const);
       if (typeof provider.configured !== 'boolean') throw new Error('configured');
       if (provider.model !== null && provider.model !== undefined) this.requiredString(provider.model, 'model');
-      if (provider.live_provider_verified !== false) throw new Error('live provider verification');
+      if (typeof provider.live_provider_verified !== 'boolean') throw new Error('live provider verification');
+      if (provider.approved_models !== undefined && (!Array.isArray(provider.approved_models) || provider.approved_models.some((model) => typeof model !== 'string'))) throw new Error('approved models');
+      if (provider.capabilities !== undefined && (!Array.isArray(provider.capabilities) || provider.capabilities.some((capability) => typeof capability !== 'string'))) throw new Error('capabilities');
+      if (provider.detail !== undefined && provider.detail !== null) this.requiredString(provider.detail, 'provider detail');
     }
     if (!Array.isArray(record.agents) || record.agents.length !== AGENT_TYPES.length) throw new Error('agents');
     record.agents.forEach((agent) => this.enumValue(agent, 'agent', AGENT_TYPES));

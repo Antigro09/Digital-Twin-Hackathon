@@ -8,7 +8,7 @@ import pytest
 
 from edt_ai_worker.embeddings import OpenAICompatibleEmbeddingProvider
 from edt_ai_worker.errors import DomainError
-from edt_ai_worker.providers import LlamaProvider, OpenAIResponsesProvider, ProviderRequest
+from edt_ai_worker.providers import LlamaProvider, OllamaProvider, OpenAIResponsesProvider, ProviderRequest
 from edt_ai_worker.settings import AISettings
 
 
@@ -45,6 +45,14 @@ def provider_request() -> ProviderRequest:
         max_output_tokens=500,
         actor_hash="a" * 64,
     )
+
+
+def ollama_settings(monkeypatch) -> AISettings:
+    monkeypatch.setenv("AI_STORE_DSN", "sqlite:///:memory:")
+    monkeypatch.setenv("OLLAMA_MODEL", "deepseek-4v-pro")
+    monkeypatch.setenv("OLLAMA_ENDPOINT", "http://host.docker.internal:11434/api/chat")
+    monkeypatch.setenv("AI_GATEWAY_TIMEOUT_SECONDS", "10")
+    return AISettings.from_env()
 
 
 class FakeLlamaCompletions:
@@ -102,6 +110,49 @@ def test_llama_uses_official_structured_contract_and_retries(monkeypatch):
     assert sent["response_format"]["type"] == "json_schema"
     assert sent["response_format"]["json_schema"]["schema"]["type"] == "object"
     assert "llama-test-secret-value" not in repr(sent)
+
+
+def test_ollama_live_acceptance_verifies_structured_output_and_caches(monkeypatch):
+    settings = ollama_settings(monkeypatch)
+    calls = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        calls.append(request)
+        return httpx.Response(
+            200,
+            json={
+                "model": "deepseek-4v-pro",
+                "done": True,
+                "message": {"content": '{"accepted": true}'},
+                "prompt_eval_count": 6,
+                "eval_count": 2,
+            },
+        )
+
+    provider = OllamaProvider(
+        settings,
+        client=httpx.Client(transport=httpx.MockTransport(handler)),
+        clock=lambda: 100.0,
+    )
+    assert provider.live_acceptance() == (True, "Configured model passed a live structured-output acceptance check.")
+    assert provider.live_acceptance() == (True, "Configured model passed a live structured-output acceptance check.")
+    assert len(calls) == 1
+    payload = __import__("json").loads(calls[0].content)
+    assert payload["model"] == "deepseek-4v-pro"
+    assert payload["format"]["properties"]["accepted"]["enum"] == [True]
+
+
+def test_ollama_live_acceptance_fails_closed_without_upstream_detail(monkeypatch):
+    settings = ollama_settings(monkeypatch)
+    provider = OllamaProvider(
+        settings,
+        client=httpx.Client(transport=httpx.MockTransport(lambda _: httpx.Response(401, text="upstream-secret-detail"))),
+        clock=lambda: 100.0,
+    )
+    accepted, detail = provider.live_acceptance()
+    assert accepted is False
+    assert detail == "The configured model did not pass the live acceptance check."
+    assert "upstream-secret-detail" not in detail
 
 
 def test_llama_invalid_json_is_rejected_without_retry(monkeypatch):

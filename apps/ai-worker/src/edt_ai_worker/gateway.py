@@ -43,7 +43,7 @@ from .intelligence_models import (
 )
 from .memory import ControlledMemory, ValidationRecord
 from .models import StrictModel
-from .providers import AIProvider, ProviderRequest, ProviderResponse
+from .providers import AIProvider, OllamaProvider, ProviderRequest, ProviderResponse
 from .rag import KnowledgeChunk, KnowledgeIndex
 from .routing import ModelRouter
 from .safety import actor_hash, assert_no_secret, content_sha256, reject_injected_instruction
@@ -315,6 +315,19 @@ class AIGateway:
         )
 
     def status(self) -> AIStatus:
+        ollama = self.providers.get(ProviderName.OLLAMA)
+        ollama_live, ollama_detail = (
+            ollama.live_acceptance()
+            if isinstance(ollama, OllamaProvider)
+            else (False, "Provider configuration is not present.")
+        )
+        governed_capabilities = [agent.value for agent in AgentType] + [
+            "structured_json",
+            "tenant_scoped_retrieval",
+            "evidence_citation",
+            "proposal_only",
+            "review_required",
+        ]
         providers = [
             ProviderStatus(
                 provider=ProviderName.LLAMA,
@@ -326,7 +339,15 @@ class AIGateway:
                 configured=ProviderName.OPENAI in self.providers,
                 model=self.settings.openai_model,
             ),
-            ProviderStatus(provider=ProviderName.OLLAMA, configured=ProviderName.OLLAMA in self.providers, model=self.settings.ollama_model),
+            ProviderStatus(
+                provider=ProviderName.OLLAMA,
+                configured=ProviderName.OLLAMA in self.providers,
+                model=self.settings.ollama_model,
+                approved_models=[self.settings.ollama_model] if self.settings.ollama_model else [],
+                capabilities=governed_capabilities if ProviderName.OLLAMA in self.providers else [],
+                live_provider_verified=ollama_live,
+                detail=ollama_detail,
+            ),
             ProviderStatus(provider=ProviderName.ANTHROPIC, configured=ProviderName.ANTHROPIC in self.providers, model=self.settings.anthropic_model),
             ProviderStatus(provider=ProviderName.CUSTOM, configured=ProviderName.CUSTOM in self.providers, model=self.settings.custom_model),
         ]
@@ -335,7 +356,8 @@ class AIGateway:
             ProviderName(self.settings.reasoning_provider),
         }
         store_ready = self.store.health()
-        ready = store_ready and selected.issubset(self.providers)
+        selected_live = ProviderName.OLLAMA not in selected or ollama_live
+        ready = store_ready and selected.issubset(self.providers) and selected_live
         modes: list[Any] = ["lexical"]
         if self.knowledge.vector_ready:
             modes.append("vector")

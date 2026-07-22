@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import math
+import threading
 import time
 from abc import ABC, abstractmethod
 from collections.abc import Callable, Sequence
@@ -600,12 +601,60 @@ class OllamaProvider(AIProvider):
         self.client = client or httpx.Client(timeout=float(settings.timeout_seconds), follow_redirects=False, headers=headers)
         self.sleeper = kwargs.get("sleeper", time.sleep)
         self.clock = kwargs.get("clock", time.monotonic)
+        self._acceptance_lock = threading.Lock()
+        self._acceptance_result: tuple[float, bool, str] | None = None
 
-    def generate(self, request: ProviderRequest) -> ProviderResponse:
+    def live_acceptance(self) -> tuple[bool, str]:
+        """Verify the selected model can produce the structured output this gateway requires.
+
+        The status endpoint must not mistake a configured URL for a working model.  The
+        result is intentionally cached for a minute so refreshing an operations screen
+        cannot turn into an unbounded stream of model calls.
+        """
+
+        now = self.clock()
+        with self._acceptance_lock:
+            cached = self._acceptance_result
+            if cached is not None and cached[0] > now:
+                return cached[1], cached[2]
+
+            try:
+                response = self.generate(
+                    ProviderRequest(
+                        request_id="provider-live-acceptance",
+                        schema_name="provider_live_acceptance",
+                        system_prompt="Return only the requested JSON object. Do not include commentary.",
+                        user_prompt="Confirm that you can return governed structured output.",
+                        json_schema={
+                            "type": "object",
+                            "properties": {"accepted": {"type": "boolean", "enum": [True]}},
+                            "required": ["accepted"],
+                            "additionalProperties": False,
+                        },
+                        model=self.settings.ollama_model or "",
+                        temperature=0.0,
+                        max_output_tokens=24,
+                        actor_hash="provider-live-acceptance",
+                    ),
+                    timeout_seconds=min(3.0, float(self.settings.timeout_seconds)),
+                )
+                if response.parsed.get("accepted") is not True:
+                    raise DomainError("invalid_ai_provider_output", "The AI provider did not accept structured output.", status_code=502)
+                result = (True, "Configured model passed a live structured-output acceptance check.")
+            except DomainError:
+                # Provider error details can contain upstream configuration information;
+                # keep the readiness response safe to expose to browser users.
+                result = (False, "The configured model did not pass the live acceptance check.")
+            except Exception:
+                result = (False, "The configured model did not pass the live acceptance check.")
+            self._acceptance_result = (now + 60.0, *result)
+            return result
+
+    def generate(self, request: ProviderRequest, *, timeout_seconds: float | None = None) -> ProviderResponse:
         payload = {"model": request.model, "stream": False, "format": request.json_schema, "options": {"temperature": request.temperature, "num_predict": request.max_output_tokens}, "messages": [{"role": "system", "content": request.system_prompt}, {"role": "user", "content": request.user_prompt}]}
         started = self.clock()
         try:
-            response = self.client.post(self.settings.ollama_endpoint, json=payload)
+            response = self.client.post(self.settings.ollama_endpoint, json=payload, timeout=timeout_seconds)
         except (httpx.TimeoutException, httpx.TransportError) as exc:
             raise DomainError("ai_provider_unavailable", "The AI provider could not complete the request.", status_code=503) from exc
         if response.status_code >= 400:

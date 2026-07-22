@@ -433,7 +433,11 @@ class ProviderStatus(StrictModel):
     provider: ProviderName
     configured: bool
     model: str | None
-    live_provider_verified: Literal[False] = False
+    approved_models: list[str] = Field(default_factory=list)
+    capabilities: list[str] = Field(default_factory=list)
+    # This is an active, bounded provider handshake, not a configuration claim.
+    live_provider_verified: bool = False
+    detail: str | None = None
 
 
 class AIStatus(StrictModel):

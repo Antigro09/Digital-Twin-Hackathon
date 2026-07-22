@@ -70,6 +70,9 @@ import type {
   RemediationPreview,
   ScenarioDraft,
   SimulationComparison,
+  TwinGraph,
+  TwinNodeSummary,
+  TwinRelationship,
 } from "./types";
 import { ApiProblem } from "./types";
 
@@ -109,6 +112,8 @@ export class DemoDigitalTwinApi implements DigitalTwinApi {
   private eventApproval?: EventApproval;
   private aiSuggestions = clone(AI_DEMO_SUGGESTIONS);
   private aiActivity = clone(AI_DEMO_ACTIVITY);
+  private twinNodes: TwinNodeSummary[] = [];
+  private twinRelationships: TwinRelationship[] = [];
 
   private async delay(signal?: AbortSignal) {
     await sleep(90, signal);
@@ -142,6 +147,31 @@ export class DemoDigitalTwinApi implements DigitalTwinApi {
       ];
     }
     return clone(CONNECTOR_HEALTH);
+  }
+
+  async getTwinGraph(signal?: AbortSignal): Promise<TwinGraph> {
+    await this.delay(signal);
+    return { nodes: clone(this.twinNodes), relationships: clone(this.twinRelationships), nodeTypes: [
+      { type_id: "edt.core/Employee", display_name: "Employee", domain: "core", description: "A person in the organization" },
+      { type_id: "edt.core/Department", display_name: "Department", domain: "core", description: "An organizational department" },
+      { type_id: "edt.core/Project", display_name: "Project", domain: "core", description: "A company initiative" },
+    ], relationshipTypes: [
+      { type_id: "edt.core/WORKS_ON", display_name: "Works on", domain: "core", description: "Connects a person to work", allowed_source_types: [], allowed_target_types: [] },
+      { type_id: "edt.core/REPORTS_TO", display_name: "Reports to", domain: "core", description: "Connects a person to their manager", allowed_source_types: [], allowed_target_types: [] },
+      { type_id: "edt.core/RELATES_TO", display_name: "Relates to", domain: "core", description: "A general relationship", allowed_source_types: [], allowed_target_types: [] },
+    ], graphVersion: 1, dataWatermark: "demo graph" };
+  }
+
+  async createTwinNode(input: { typeId: string; label: string }, signal?: AbortSignal): Promise<TwinNodeSummary> {
+    await this.delay(signal);
+    const node: TwinNodeSummary = { node_id: `demo-node-${Date.now()}`, type_id: input.typeId, label: input.label, classification: "internal", state: "active", version: 1, updated_at: new Date().toISOString() };
+    this.twinNodes.push(node); return clone(node);
+  }
+
+  async createTwinRelationship(input: { typeId: string; sourceNodeId: string; targetNodeId: string }, signal?: AbortSignal): Promise<TwinRelationship> {
+    await this.delay(signal);
+    const relationship: TwinRelationship = { relationship_id: `demo-relationship-${Date.now()}`, type_id: input.typeId, source_node_id: input.sourceNodeId, target_node_id: input.targetNodeId, state: "active" };
+    this.twinRelationships.push(relationship); return clone(relationship);
   }
 
   async interpretEvent(input: string, intent: EventIntent, signal?: AbortSignal): Promise<EventInterpretation> {
@@ -1064,6 +1094,30 @@ export class FetchDigitalTwinApi implements DigitalTwinApi {
     graph.projectionAsOf = String(result.data_watermark?.observed_at ?? graph.projectionAsOf);
     graph.dataWatermark = `projection:${this.actor.activeMembershipId}:${String(result.data_watermark?.outbox_position ?? 0)}`;
     return graph;
+  }
+
+  async getTwinGraph(signal?: AbortSignal): Promise<TwinGraph> {
+    const [nodes, relationships, nodeTypes, relationshipTypes] = await Promise.all([
+      this.request<Wire>("/v1/twin/nodes?state=active&limit=100", { signal }),
+      this.request<Wire>("/v1/twin/relationships?state=active&limit=200", { signal }),
+      this.request<Wire>("/v1/twin/node-types", { signal }),
+      this.request<Wire>("/v1/twin/relationship-types", { signal }),
+    ]);
+    return {
+      nodes: (nodes.items as TwinNodeSummary[] ?? []), relationships: (relationships.items as TwinRelationship[] ?? []),
+      nodeTypes: (nodeTypes.items as TwinGraph["nodeTypes"] ?? []), relationshipTypes: (relationshipTypes.items as TwinGraph["relationshipTypes"] ?? []),
+      graphVersion: Number(nodes.graph_version ?? relationships.graph_version ?? 0), dataWatermark: String(nodes.data_watermark ?? "not reported"),
+    };
+  }
+
+  async createTwinNode(input: { typeId: string; label: string }, signal?: AbortSignal): Promise<TwinNodeSummary> {
+    const response = await this.request<Wire>("/v1/twin/nodes", { method: "POST", headers: this.mutation("twin-node"), body: JSON.stringify({ type_id: input.typeId, label: input.label }), signal });
+    return response.node as TwinNodeSummary;
+  }
+
+  async createTwinRelationship(input: { typeId: string; sourceNodeId: string; targetNodeId: string }, signal?: AbortSignal): Promise<TwinRelationship> {
+    const response = await this.request<Wire>("/v1/twin/relationships", { method: "POST", headers: this.mutation("twin-relationship"), body: JSON.stringify({ type_id: input.typeId, source_node_id: input.sourceNodeId, target_node_id: input.targetNodeId }), signal });
+    return response.relationship as TwinRelationship;
   }
 
   async askLaunchRisk(question: string, mode: AnswerMode, signal?: AbortSignal): Promise<CitedAnswer> {

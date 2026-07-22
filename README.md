@@ -23,7 +23,7 @@ Choose **Asset twin** in the application to inspect the synthetic pump. Its tele
 
 Choose **Event intelligence** to enter what happened or ask what if. Try `Sarah, the lead backend engineer, left the company today.`, `Our AWS database experienced a 3-hour outage yesterday.`, or `We might lose our largest customer because they are unhappy.` The workspace separates verified reality review from scenario-only claims, exposes entity matching and direct/downstream/unknown impacts, and keeps every applied effect inside the synthetic tenant projection. Event text cannot become instructions, authority, an HR action, an identity change, or another external write.
 
-Choose **AI Control Center** for the real model-backed intelligence layer: provider readiness and usage, seven bounded agents, permission-aware retrieval, document import, AI activity, evidence-bearing suggestions, and human review. AI output is always `PENDING_REVIEW`; approving a suggestion records validation but does not mutate the graph, simulation rules, events, or an external system.
+Choose **AI Control Center** for the real model-backed intelligence layer: provider readiness and usage, eight bounded agents including Marketing Analyst, permission-aware retrieval, document import, AI activity, evidence-bearing suggestions, and human review. AI output is always `PENDING_REVIEW`; approving a suggestion records validation but does not mutate the graph, simulation rules, events, or an external system.
 
 ### Configure the real Llama integration
 

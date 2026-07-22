@@ -859,11 +859,16 @@ export class DemoStoreService implements OnModuleInit {
       method: 'POST',
       headers: internalHeaders,
       body: JSON.stringify({ snapshot, scenario: this.publicScenario(scenario) }),
-      signal: AbortSignal.timeout(12_000),
+      signal: AbortSignal.timeout(this.simulationWorkerTimeout()),
     });
     const responseBody = await response.text();
     if (!response.ok) throw new Error(`simulation worker returned ${response.status}: ${responseBody}`);
     return JSON.parse(responseBody) as Record<string, unknown>;
+  }
+
+  private simulationWorkerTimeout(): number {
+    const configured = Number(process.env.SIMULATION_WORKER_TIMEOUT_MS ?? 60_000);
+    return Number.isInteger(configured) && configured >= 1_000 && configured <= 120_000 ? configured : 60_000;
   }
 
   private oracleSimulationResult(scenario: ScenarioRecord): Record<string, unknown> {

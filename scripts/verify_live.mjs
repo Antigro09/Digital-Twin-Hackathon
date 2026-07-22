@@ -106,7 +106,12 @@ async function main() {
   invariant(["ready", "degraded"].includes(aiStatus.value.status), "AI gateway returned an invalid readiness state");
   invariant(aiStatus.value.durable_store_ready === true, "AI gateway durable store is unavailable");
   invariant(aiStatus.value.model_outputs_mutate_state === false, "AI gateway allows model output to mutate state");
-  invariant(Array.isArray(aiStatus.value.agents) && aiStatus.value.agents.length === 7, "AI gateway did not expose all seven bounded agents");
+  invariant(
+    Array.isArray(aiStatus.value.agents)
+      && aiStatus.value.agents.length === 8
+      && aiStatus.value.agents.includes("marketing_analyst"),
+    "AI gateway did not expose all eight bounded agents, including Marketing Analyst",
+  );
   invariant(aiStatus.value.providers.some((provider) => provider.provider === "llama"), "AI gateway has no Llama provider route");
   invariant(typeof aiStatus.value.vector_configured === "boolean", "AI gateway omitted vector configuration state");
   invariant(aiStatus.value.vector_ready === aiStatus.value.retrieval_modes.includes("vector"), "AI vector readiness contradicts its retrieval modes");

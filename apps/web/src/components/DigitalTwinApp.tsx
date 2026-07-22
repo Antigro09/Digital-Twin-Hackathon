@@ -38,7 +38,7 @@ const navigation: Array<{ id: View; label: string; eyebrow: string; glyph: strin
   { id: "event", label: "Event intelligence", eyebrow: "Causal impact", glyph: "◎" },
   { id: "asset", label: "Asset twin", eyebrow: "Physical operations", glyph: "◉" },
   { id: "overview", label: "Control room", eyebrow: "Launch posture", glyph: "⌂" },
-  { id: "graph", label: "Evidence graph", eyebrow: "Bounded traversal", glyph: "⌘" },
+  { id: "graph", label: "Company graph", eyebrow: "Entities + relationships", glyph: "⌘" },
   { id: "copilot", label: "Cited analysis", eyebrow: "Grounded Q&A", glyph: "✦" },
   { id: "scenario", label: "Scenario lab", eyebrow: "Reproducible what-if", glyph: "∆" },
   { id: "action", label: "Action control", eyebrow: "Approval + rollback", glyph: "↗" },
@@ -49,7 +49,7 @@ const viewTitles: Record<View, string> = {
   event: "Event intelligence and causal impact",
   asset: "Interactive physical asset twin",
   overview: "Orion launch control room",
-  graph: "Evidence-backed graph",
+  graph: "Company relationship map",
   copilot: "Cited organizational analysis",
   scenario: "Scenario and simulation lab",
   action: "Governed Jira remediation",
@@ -116,6 +116,7 @@ export function DigitalTwinApp() {
   const canPropose = activeMembership?.capabilities.includes("action:propose") ?? false;
   const canReviewEvents = activeMembership?.capabilities.includes("event:review") ?? false;
   const canApplyEvents = activeMembership?.capabilities.includes("event:apply") ?? false;
+  const canManageGraph = activeMembership?.capabilities.includes("connector.admin") ?? false;
   const isAsterContext = activeMembership?.tenantAlias === "tnt_aster";
   const workspaceLabel = isAsterContext ? "Orion launch" : "Beacon workspace";
   const currentViewTitle = view === "overview" && !isAsterContext ? "Beacon operations control room" : viewTitles[view];
@@ -262,6 +263,7 @@ export function DigitalTwinApp() {
             canPropose,
             canReviewEvents,
             canApplyEvents,
+            canManageGraph,
             sourceMode: apiRef.current!.sourceMode,
             navigate,
             onAsk: async (question, mode) => withBusy("question", (api) => api.askLaunchRisk(question, mode), setAnswer),
@@ -300,6 +302,7 @@ type RenderViewProps = {
   canPropose: boolean;
   canReviewEvents: boolean;
   canApplyEvents: boolean;
+  canManageGraph: boolean;
   sourceMode: DigitalTwinApi["sourceMode"];
   navigate: (view: View) => void;
   onAsk: (question: string, mode: AnswerMode) => Promise<void>;
@@ -322,7 +325,7 @@ function renderView(props: RenderViewProps) {
     case "event": return <EventIntelligence api={props.api} canReview={props.canReviewEvents} canApply={props.canApplyEvents} sourceMode={props.sourceMode} />;
     case "overview": return <Overview graph={props.graph} answer={props.answer} connectors={props.connectors} onNavigate={props.navigate} />;
     case "asset": return <AssetTwin api={props.api} />;
-    case "graph": return <GraphExplorer graph={props.graph} />;
+    case "graph": return <GraphExplorer api={props.api} canManage={props.canManageGraph} />;
     case "copilot": return <CopilotPanel answer={props.answer} busy={props.busy === "question"} onAsk={props.onAsk} />;
     case "scenario": return props.canSimulate ? <ScenarioWorkspace scenario={props.scenario} simulation={props.simulation} busy={props.busy} onCompile={props.onCompile} onConfirm={props.onConfirm} onSimulate={props.onSimulate} /> : <StatePanel type="denied" title="Scenario capability is not delegated" description="The active Beacon Works membership is read-only. Tenant switching never expands authority." />;
     case "action": return props.canPropose ? <ActionWorkspace preview={props.preview} approval={props.approval} receipt={props.receipt} compensation={props.compensation} busy={props.busy} onPreview={props.onPreview} onRequestApproval={props.onRequestApproval} onApprove={props.onApprove} onExecute={props.onExecute} onReplay={props.onReplay} onPreviewCompensation={props.onPreviewCompensation} onApproveCompensation={props.onApproveCompensation} onCompensate={props.onCompensate} /> : <StatePanel type="denied" title="External action is not authorized" description="The active membership cannot propose or execute Jira changes. No mutation controls or hidden payload values are exposed." />;

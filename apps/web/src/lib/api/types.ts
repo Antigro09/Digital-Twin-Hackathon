@@ -68,6 +68,24 @@ export type GraphResult = {
   dataWatermark: string;
 };
 
+export type TwinNodeType = { type_id: string; display_name: string; domain: string; description: string; active?: boolean };
+export type TwinRelationshipType = {
+  type_id: string; display_name: string; domain: string; description: string;
+  allowed_source_types: string[]; allowed_target_types: string[];
+};
+export type TwinNodeSummary = {
+  node_id: string; type_id: string; label: string; owner_id?: string; confidence_score?: number;
+  classification: string; state: "active" | "archived"; version: number; updated_at: string;
+};
+export type TwinRelationship = {
+  relationship_id: string; type_id: string; source_node_id: string; target_node_id: string;
+  state: "active" | "archived"; strength?: number; confidence?: number; updated_at?: string;
+};
+export type TwinGraph = {
+  nodes: TwinNodeSummary[]; relationships: TwinRelationship[]; nodeTypes: TwinNodeType[];
+  relationshipTypes: TwinRelationshipType[]; graphVersion: number; dataWatermark: string;
+};
+
 export type Citation = {
   number: number;
   claim: string;
@@ -829,6 +847,9 @@ export interface DigitalTwinApi {
   selectMembership(membershipId: string, signal?: AbortSignal): Promise<ActorContext>;
   getConnectorHealth(signal?: AbortSignal): Promise<ConnectorHealth[]>;
   traverseLaunchGraph(signal?: AbortSignal): Promise<GraphResult>;
+  getTwinGraph(signal?: AbortSignal): Promise<TwinGraph>;
+  createTwinNode(input: { typeId: string; label: string }, signal?: AbortSignal): Promise<TwinNodeSummary>;
+  createTwinRelationship(input: { typeId: string; sourceNodeId: string; targetNodeId: string }, signal?: AbortSignal): Promise<TwinRelationship>;
   askLaunchRisk(question: string, mode: AnswerMode, signal?: AbortSignal): Promise<CitedAnswer>;
   createScenario(deltaWorkdays: number, signal?: AbortSignal): Promise<ScenarioDraft>;
   confirmScenario(scenarioId: string, digest: string, etag: string, signal?: AbortSignal): Promise<ScenarioDraft>;

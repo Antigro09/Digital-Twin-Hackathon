@@ -355,6 +355,35 @@
   .graph-connector::after { content: ""; position: absolute; right: 0; top: -4px; width: 7px; height: 7px; border-top: 1px solid #84968d; border-right: 1px solid #84968d; transform: rotate(45deg); }
   .graph-connector span { position: absolute; width: 100%; top: -17px; color: #77877f; font-size: 7px; text-align: center; }
   .graph-inspector { position: sticky; top: 94px; }
+  .company-graph-layout { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(290px, .72fr); align-items: start; gap: 18px; }
+  .company-graph-panel { overflow: hidden; }
+  .company-graph-header { display: flex; justify-content: space-between; align-items: start; gap: 18px; padding: 23px 24px 16px; }
+  .graph-actions { display: flex; flex-wrap: wrap; justify-content: end; gap: 7px; }
+  .graph-security-note, .graph-error { margin: 0 24px 14px; padding: 9px 11px; border-left: 3px solid var(--teal); background: var(--teal-soft); color: #355d53; font-size: 10px; }
+  .graph-error { border-left-color: #b95546; background: #f9e9e5; color: #7b3027; }
+  .company-graph-canvas { overflow: auto; min-height: 580px; background: #f5f6f2; border-top: 1px solid var(--line); }
+  .company-graph-canvas svg { display: block; width: 100%; min-width: 740px; height: auto; }
+  .company-edge { stroke: #78877f; stroke-width: 1.4; fill: none; }
+  marker path { fill: #78877f; }
+  .company-edge-label { fill: #64736b; font-size: 10px; text-anchor: middle; paint-order: stroke; stroke: #f5f6f2; stroke-width: 4px; stroke-linejoin: round; }
+  .company-node { cursor: pointer; outline: none; }
+  .company-node rect { fill: #fffefa; stroke: #8c9a91; stroke-width: 1.2; }
+  .company-node:hover rect, .company-node:focus rect, .company-node .company-node-selected { fill: #eef6f1; stroke: var(--teal); stroke-width: 2.3; }
+  .company-node text { fill: var(--ink); font-size: 12px; font-weight: 760; pointer-events: none; }
+  .company-node .company-node-type { fill: #5e7067; font-size: 9px; font-weight: 700; text-transform: uppercase; }
+  .node-relationship-list { list-style: none; padding: 0; margin: 10px 0 0; display: grid; gap: 8px; }
+  .node-relationship-list li { display: grid; gap: 2px; padding: 8px; border-left: 2px solid #a6bbb0; background: var(--paper-muted); }
+  .node-relationship-list strong { font-size: 9px; color: var(--teal); text-transform: uppercase; }
+  .node-relationship-list span { font-size: 10px; color: var(--ink-soft); }
+  .graph-dialog-backdrop { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; padding: 20px; background: rgb(24 33 29 / 42%); }
+  .graph-dialog { width: min(440px, 100%); padding: 20px; border: 1px solid #9aa69f; border-radius: 8px; background: #fffefa; box-shadow: 0 20px 55px rgb(20 30 25 / 28%); }
+  .graph-dialog header { display: flex; justify-content: space-between; align-items: start; gap: 10px; margin-bottom: 17px; }
+  .graph-dialog header button { border: 0; background: transparent; color: var(--ink-soft); font-size: 24px; line-height: 1; cursor: pointer; }
+  .graph-form { display: grid; gap: 13px; }
+  .graph-form label { display: grid; gap: 6px; color: var(--ink-soft); font-size: 10px; font-weight: 750; }
+  .graph-form input, .graph-form select { width: 100%; padding: 9px 10px; border-radius: 5px; }
+  .graph-form p { color: var(--ink-faint); font-size: 9px; line-height: 1.45; }
+  .graph-form > div { display: flex; justify-content: end; gap: 8px; margin-top: 4px; }
   .graph-inspector > .panel { padding: 20px; }
   .inspector-title { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 17px; }
   .graph-inspector h2 { margin: 4px 0 12px; }

@@ -123,8 +123,9 @@ services:
       - "${NEO4J_BOLT_PORT:-7687}:7687"
     healthcheck:
       test: ["CMD-SHELL", "cypher-shell -u neo4j -p \"$${NEO4J_AUTH#*/}\" 'RETURN 1' >/dev/null 2>&1"]
-      interval: 10s
-      timeout: 5s
+      interval: 15s
+      timeout: 20s
+      start_period: 60s
       retries: 20
     restart: unless-stopped
     networks: [edge, data]
@@ -177,6 +178,12 @@ services:
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       OPENAI_MODEL: ${OPENAI_MODEL:-}
       OPENAI_ENDPOINT: ${OPENAI_ENDPOINT:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      ANTHROPIC_MODEL: ${ANTHROPIC_MODEL:-}
+      ANTHROPIC_ENDPOINT: ${ANTHROPIC_ENDPOINT:-}
+      CUSTOM_AI_API_KEY: ${CUSTOM_AI_API_KEY:-}
+      CUSTOM_AI_MODEL: ${CUSTOM_AI_MODEL:-}
+      CUSTOM_AI_ENDPOINT: ${CUSTOM_AI_ENDPOINT:-}
       AI_EMBEDDING_API_KEY: ${AI_EMBEDDING_API_KEY:-}
       AI_EMBEDDING_MODEL: ${AI_EMBEDDING_MODEL:-}
       AI_EMBEDDING_ENDPOINT: ${AI_EMBEDDING_ENDPOINT:-}
@@ -195,6 +202,10 @@ services:
       AI_LLAMA_OUTPUT_USD_PER_MILLION: ${AI_LLAMA_OUTPUT_USD_PER_MILLION:-}
       AI_OPENAI_INPUT_USD_PER_MILLION: ${AI_OPENAI_INPUT_USD_PER_MILLION:-}
       AI_OPENAI_OUTPUT_USD_PER_MILLION: ${AI_OPENAI_OUTPUT_USD_PER_MILLION:-}
+      AI_ANTHROPIC_INPUT_USD_PER_MILLION: ${AI_ANTHROPIC_INPUT_USD_PER_MILLION:-}
+      AI_ANTHROPIC_OUTPUT_USD_PER_MILLION: ${AI_ANTHROPIC_OUTPUT_USD_PER_MILLION:-}
+      AI_CUSTOM_INPUT_USD_PER_MILLION: ${AI_CUSTOM_INPUT_USD_PER_MILLION:-}
+      AI_CUSTOM_OUTPUT_USD_PER_MILLION: ${AI_CUSTOM_OUTPUT_USD_PER_MILLION:-}
     depends_on:
       postgres-app-db-init:
         condition: service_completed_successfully
@@ -225,6 +236,7 @@ services:
       EDT_FROZEN_CLOCK: "true"
       EDT_ALLOW_ORACLE_FALLBACK: "false"
       AI_WORKER_URL: http://ai-worker:8080
+      SIMULATION_WORKER_TIMEOUT_MS: ${SIMULATION_WORKER_TIMEOUT_MS:-60000}
       WEB_ORIGIN: http://localhost:${EDT_WEB_PORT:-3000}
     depends_on:
       postgres-app-db-init:

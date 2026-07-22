@@ -326,6 +326,7 @@ class AIGateway:
                 configured=ProviderName.OPENAI in self.providers,
                 model=self.settings.openai_model,
             ),
+            ProviderStatus(provider=ProviderName.OLLAMA, configured=ProviderName.OLLAMA in self.providers, model=self.settings.ollama_model),
             ProviderStatus(provider=ProviderName.ANTHROPIC, configured=ProviderName.ANTHROPIC in self.providers, model=self.settings.anthropic_model),
             ProviderStatus(provider=ProviderName.CUSTOM, configured=ProviderName.CUSTOM in self.providers, model=self.settings.custom_model),
         ]
@@ -648,6 +649,7 @@ class AIGateway:
     def _pricing(self, provider: ProviderName) -> ProviderPricing:
         return {
             ProviderName.LLAMA: self.settings.llama_pricing,
+            ProviderName.OLLAMA: self.settings.ollama_pricing,
             ProviderName.OPENAI: self.settings.openai_pricing,
             ProviderName.ANTHROPIC: self.settings.anthropic_pricing,
             ProviderName.CUSTOM: self.settings.custom_pricing,

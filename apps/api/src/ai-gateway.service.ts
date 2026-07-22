@@ -355,7 +355,7 @@ export class AiGatewayService {
     if (!Array.isArray(record.providers) || record.providers.length > 10) throw new Error('providers');
     for (const item of record.providers) {
       const provider = this.responseRecord(item);
-      this.enumValue(provider.provider, 'provider', ['llama', 'openai', 'anthropic', 'custom'] as const);
+      this.enumValue(provider.provider, 'provider', ['llama', 'ollama', 'openai', 'anthropic', 'custom'] as const);
       if (typeof provider.configured !== 'boolean') throw new Error('configured');
       if (provider.model !== null && provider.model !== undefined) this.requiredString(provider.model, 'model');
       if (provider.live_provider_verified !== false) throw new Error('live provider verification');
@@ -388,7 +388,7 @@ export class AiGatewayService {
       if (activity.agent_type !== null && activity.agent_type !== undefined) this.enumValue(activity.agent_type, 'agent_type', AGENT_TYPES);
       this.enumValue(activity.kind, 'kind', ['agent_run', 'document_import', 'retrieval', 'suggestion_review', 'learning_outcome'] as const);
       this.enumValue(activity.state, 'state', ['running', 'succeeded', 'failed'] as const);
-      if (activity.provider !== null && activity.provider !== undefined) this.enumValue(activity.provider, 'provider', ['llama', 'openai', 'anthropic', 'custom'] as const);
+      if (activity.provider !== null && activity.provider !== undefined) this.enumValue(activity.provider, 'provider', ['llama', 'ollama', 'openai', 'anthropic', 'custom'] as const);
       if (activity.model !== null && activity.model !== undefined) this.requiredString(activity.model, 'model');
       this.enumValue(activity.cost_status, 'cost_status', ['priced', 'unpriced', 'not_applicable'] as const);
       if (!Array.isArray(activity.evidence_ids)) throw new Error('evidence_ids');
@@ -875,7 +875,7 @@ export class AiGatewayService {
       this.requiredString(evidence.source_locator, 'source_locator');
     }
     this.responseRecord(suggestion.output);
-    this.enumValue(suggestion.provider, 'provider', ['llama', 'openai', 'anthropic', 'custom'] as const);
+    this.enumValue(suggestion.provider, 'provider', ['llama', 'ollama', 'openai', 'anthropic', 'custom'] as const);
     this.requiredString(suggestion.model, 'model');
     const usage = this.responseRecord(suggestion.usage);
     this.nonNegativeInteger(usage.input_tokens, 'input_tokens');

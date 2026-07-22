@@ -40,6 +40,18 @@ LLAMA_MODEL=your-exact-account-model-id
 LLAMA_ENDPOINT=https://api.llama.com/v1/
 ```
 
+### Configure Ollama
+
+Ollama is a separate native provider, not a Llama API-key alias. For a local Ollama service, set a pulled model and leave the key blank. Supply `OLLAMA_API_KEY` only when your hosted or proxied Ollama endpoint requires bearer authentication.
+
+```env
+AI_PROVIDER_DEFAULT=ollama
+AI_REASONING_PROVIDER=ollama
+OLLAMA_MODEL=llama3.2
+OLLAMA_ENDPOINT=http://host.docker.internal:11434/api/chat
+# OLLAMA_API_KEY=only-for-an-authenticated-proxy-or-hosted-service
+```
+
 Rebuild and restart with `npm run demo`, then check **AI Control Center**. Provider credentials stay in the AI worker and are never sent to the browser or public API.
 
 Vector retrieval is independently configured because the hosted Llama SDK does not expose an embeddings resource. To enable real semantic embeddings, configure an approved OpenAI-compatible endpoint/model; otherwise imports remain available for lexical retrieval and the UI honestly reports vector retrieval unavailable:

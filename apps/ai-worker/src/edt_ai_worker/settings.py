@@ -79,6 +79,9 @@ class AISettings:
     llama_model: str | None
     llama_reasoning_model: str | None
     llama_endpoint: str
+    ollama_api_key: str | None
+    ollama_model: str | None
+    ollama_endpoint: str
     openai_api_key: str | None
     openai_model: str | None
     openai_endpoint: str
@@ -108,6 +111,7 @@ class AISettings:
     store_backend_required: bool
     shared_secret: str | None
     llama_pricing: ProviderPricing
+    ollama_pricing: ProviderPricing
     openai_pricing: ProviderPricing
     anthropic_pricing: ProviderPricing
     custom_pricing: ProviderPricing
@@ -116,11 +120,11 @@ class AISettings:
     def from_env(cls) -> "AISettings":
         default_provider = os.getenv("AI_PROVIDER_DEFAULT", "llama").strip().casefold()
         reasoning_provider = os.getenv("AI_REASONING_PROVIDER", default_provider).strip().casefold()
-        supported_providers = {"llama", "openai", "anthropic", "custom"}
+        supported_providers = {"llama", "ollama", "openai", "anthropic", "custom"}
         if default_provider not in supported_providers or reasoning_provider not in supported_providers:
             raise DomainError(
                 "invalid_ai_configuration",
-                "AI provider selectors must be llama, openai, anthropic, or custom.",
+                "AI provider selectors must be llama, ollama, openai, anthropic, or custom.",
                 status_code=500,
             )
 
@@ -136,6 +140,8 @@ class AISettings:
         llama_key = os.getenv("LLAMA_API_KEY", "").strip() or None
         llama_model = os.getenv("LLAMA_MODEL", "").strip() or None
         llama_reasoning_model = os.getenv("LLAMA_REASONING_MODEL", "").strip() or llama_model
+        ollama_key = os.getenv("OLLAMA_API_KEY", "").strip() or None
+        ollama_model = os.getenv("OLLAMA_MODEL", "").strip() or None
         openai_key = os.getenv("OPENAI_API_KEY", "").strip() or None
         openai_model = os.getenv("OPENAI_MODEL", "").strip() or None
         anthropic_key = os.getenv("ANTHROPIC_API_KEY", "").strip() or None
@@ -156,6 +162,8 @@ class AISettings:
             raise DomainError(
                 "invalid_ai_configuration", "OPENAI_MODEL is required with OPENAI_API_KEY.", status_code=500
             )
+        if ollama_key and not ollama_model:
+            raise DomainError("invalid_ai_configuration", "OLLAMA_MODEL is required with OLLAMA_API_KEY.", status_code=500)
         if anthropic_key and not anthropic_model:
             raise DomainError(
                 "invalid_ai_configuration", "ANTHROPIC_MODEL is required with ANTHROPIC_API_KEY.", status_code=500
@@ -182,6 +190,9 @@ class AISettings:
                 os.getenv("OPENAI_ENDPOINT", "").strip()
                 or "https://api.openai.com/v1/responses",
             ),
+            ollama_api_key=ollama_key,
+            ollama_model=ollama_model,
+            ollama_endpoint=_endpoint("OLLAMA_ENDPOINT", os.getenv("OLLAMA_ENDPOINT", "").strip() or "http://host.docker.internal:11434/api/chat"),
             anthropic_api_key=anthropic_key,
             anthropic_model=anthropic_model,
             anthropic_endpoint=_endpoint(
@@ -236,6 +247,7 @@ class AISettings:
                 _decimal("AI_OPENAI_INPUT_USD_PER_MILLION"),
                 _decimal("AI_OPENAI_OUTPUT_USD_PER_MILLION"),
             ),
+            ollama_pricing=ProviderPricing(_decimal("AI_OLLAMA_INPUT_USD_PER_MILLION"), _decimal("AI_OLLAMA_OUTPUT_USD_PER_MILLION")),
             anthropic_pricing=ProviderPricing(
                 _decimal("AI_ANTHROPIC_INPUT_USD_PER_MILLION"),
                 _decimal("AI_ANTHROPIC_OUTPUT_USD_PER_MILLION"),
@@ -251,6 +263,7 @@ class AISettings:
             value
             for value in (
                 self.llama_api_key,
+                self.ollama_api_key,
                 self.openai_api_key,
                 self.anthropic_api_key,
                 self.custom_api_key,

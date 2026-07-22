@@ -35,6 +35,8 @@ class ModelRouter:
             )
         if provider_name == ProviderName.LLAMA:
             model = self.settings.llama_reasoning_model if spec.high_reasoning else self.settings.llama_model
+        elif provider_name == ProviderName.OLLAMA:
+            model = self.settings.ollama_model
         elif provider_name == ProviderName.OPENAI:
             model = self.settings.openai_model
         elif provider_name == ProviderName.ANTHROPIC:

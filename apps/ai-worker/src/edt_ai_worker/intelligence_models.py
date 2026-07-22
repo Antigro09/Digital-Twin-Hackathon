@@ -35,6 +35,7 @@ class Classification(str, Enum):
 
 class ProviderName(str, Enum):
     LLAMA = "llama"
+    OLLAMA = "ollama"
     OPENAI = "openai"
     ANTHROPIC = "anthropic"
     CUSTOM = "custom"

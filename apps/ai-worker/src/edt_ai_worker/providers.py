@@ -585,6 +585,40 @@ class AnthropicMessagesProvider(AIProvider):
             raise DomainError("invalid_ai_provider_output", "The AI provider returned malformed output.", status_code=502) from exc
 
 
+class OllamaProvider(AIProvider):
+    """Native Ollama `/api/chat` adapter with optional bearer-key support."""
+
+    name = ProviderName.OLLAMA
+
+    def __init__(self, settings: AISettings, *, client: httpx.Client | None = None, **kwargs: Any) -> None:
+        if not settings.ollama_model:
+            raise DomainError("ai_provider_not_configured", "The requested AI provider is not configured.", status_code=503)
+        self.settings = settings
+        headers = {"Content-Type": "application/json"}
+        if settings.ollama_api_key:
+            headers["Authorization"] = f"Bearer {settings.ollama_api_key}"
+        self.client = client or httpx.Client(timeout=float(settings.timeout_seconds), follow_redirects=False, headers=headers)
+        self.sleeper = kwargs.get("sleeper", time.sleep)
+        self.clock = kwargs.get("clock", time.monotonic)
+
+    def generate(self, request: ProviderRequest) -> ProviderResponse:
+        payload = {"model": request.model, "stream": False, "format": request.json_schema, "options": {"temperature": request.temperature, "num_predict": request.max_output_tokens}, "messages": [{"role": "system", "content": request.system_prompt}, {"role": "user", "content": request.user_prompt}]}
+        started = self.clock()
+        try:
+            response = self.client.post(self.settings.ollama_endpoint, json=payload)
+        except (httpx.TimeoutException, httpx.TransportError) as exc:
+            raise DomainError("ai_provider_unavailable", "The AI provider could not complete the request.", status_code=503) from exc
+        if response.status_code >= 400:
+            raise DomainError("ai_provider_request_failed", "The AI provider could not complete the request.", status_code=502)
+        try:
+            body = response.json(); message = body["message"]; content = message["content"]
+            if body.get("done") is not True or not isinstance(content, str): raise ValueError("incomplete")
+            prompt = _token_count(body["prompt_eval_count"], field="prompt_eval_count"); completion = _token_count(body["eval_count"], field="eval_count")
+            return ProviderResponse(self.name, str(body.get("model") or request.model), _parse_json_object(content), TokenUsage(input_tokens=prompt, output_tokens=completion, total_tokens=prompt + completion), str(body.get("created_at") or "ollama"), max(0, int((self.clock() - started) * 1000)))
+        except (KeyError, TypeError, ValueError) as exc:
+            raise DomainError("invalid_ai_provider_output", "The AI provider returned malformed output.", status_code=502) from exc
+
+
 class CustomEndpointProvider(OpenAIResponsesProvider):
     """Governed OpenAI Responses-compatible custom endpoint adapter."""
 

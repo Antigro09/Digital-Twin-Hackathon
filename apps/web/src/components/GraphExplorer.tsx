@@ -33,6 +33,7 @@ export function GraphExplorer({ api, canManage }: { api: DigitalTwinApi; canMana
     catch (cause) { setError(cause instanceof Error ? cause.message : "Could not add node."); } finally { setBusy(false); }
   };
   const createRelationship = async (form: FormData) => {
+    if (!graph) return;
     const nodeFor = (value: string) => graph.nodes.find((node) => nodeDisplay(node) === value)?.node_id;
     const typeFor = (value: string) => graph.relationshipTypes.find((type) => relationshipDisplay(type) === value)?.type_id;
     const sourceNodeId = nodeFor(String(form.get("source"))); const targetNodeId = nodeFor(String(form.get("target"))); const typeId = typeFor(String(form.get("typeId")));
